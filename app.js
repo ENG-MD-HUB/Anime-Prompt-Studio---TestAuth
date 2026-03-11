@@ -884,21 +884,23 @@ function attachEvents(){
 
   /* NSFW */
   document.getElementById('nsfwBtn').addEventListener('click',()=>{
+    // ── يشترط تسجيل الدخول ──
+    if(!window._currentUser){
+      toast('🔒 Sign in to unlock NSFW content','warn');
+      return;
+    }
     if(S.nsfw){
-      // Already ON — just toggle off
       S.nsfw = false;
       document.getElementById('nsfwBtn').classList.remove('on');
       toggleNSFW(false);
       rebuild();
     } else {
-      // Turning ON — check if already confirmed
       if(sessionStorage.getItem('aps_age_confirmed') === '1'){
         S.nsfw = true;
         document.getElementById('nsfwBtn').classList.add('on');
         toggleNSFW(true);
         rebuild();
       } else {
-        // Show age gate
         document.getElementById('agOverlay').classList.add('open');
       }
     }
@@ -935,22 +937,30 @@ function attachEvents(){
 
   /* Save favourite */
   document.getElementById('saveFavBtn').addEventListener('click',()=>{
+    // ── يشترط تسجيل الدخول ──
+    if(!window._currentUser){
+      toast('🔒 Sign in to save favourites','warn');
+      return;
+    }
     const pos=buildPosText();
     if(!pos||pos==='') return toast('Nothing to save yet!','warn');
-    openModal('Save Favourite','Give this prompt a name','',name=>{
+    openModal('Save Favourite','Give this prompt a name','', async name=>{
       if(!name.trim()) return;
       const fav = {id:Date.now(),name:name.trim(),pos,neg:buildNegText(),date:new Date().toLocaleDateString()};
       S.favourites.unshift(fav);
       if(S.favourites.length>50)S.favourites.pop();
-      localStorage.setItem('aps6Favs',JSON.stringify(S.favourites));
-      renderFavList();
-      toast('Saved: '+name.trim()+' ⭐');
-      // ── Auto-sync to Firestore ──
-      const u = window._currentUser;
-      if(u && window._fbFavs){
-        window._fbFavs.save(u.uid, fav)
-          .then(() => toast('☁️ Synced to cloud'))
-          .catch(e => console.warn('Firestore save error:', e));
+      // ── Sync to Firestore FIRST, then update local ──
+      try {
+        await window._fbFavs.save(window._currentUser.uid, fav);
+        localStorage.setItem('aps6Favs',JSON.stringify(S.favourites));
+        renderFavList();
+        toast('⭐ Saved & synced: '+name.trim());
+      } catch(e){
+        // Firestore failed — still save locally
+        localStorage.setItem('aps6Favs',JSON.stringify(S.favourites));
+        renderFavList();
+        toast('⭐ Saved locally (sync failed)','warn');
+        console.warn('Firestore save error:', e);
       }
     });
   });
