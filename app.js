@@ -1629,122 +1629,97 @@ function renderFavList(){
       if(e.target.classList.contains('fav-item-del'))return;
 
       if(f.state){
-        // ── 1. صفّر كل شيء أولاً ──
-        document.getElementById('resetBtn')?.click();
+        // ── 1. صفّر UI وS بصمت ──
+        resetAll(true);
 
-        // ── 2. استعد الـ state ──
+        // ── 2. ضع الـ state مباشرة في S ──
         const favs = S.favourites;
         Object.assign(S, JSON.parse(JSON.stringify(f.state)));
         S.favourites = favs;
 
-        // ── 3. NSFW ──
-        if(S.nsfw){
-          // تأكد age gate مؤكد
-          sessionStorage.setItem('aps_age_confirmed','1');
-          toggleNSFW(true);
-          document.getElementById('nsfwBtn').classList.add('on');
-        } else {
-          toggleNSFW(false);
-          document.getElementById('nsfwBtn').classList.remove('on');
-        }
-
-        // ── 4. اضغط كل زر برمجياً عبر data-val ──
-        function clickVal(gid, val){
-          if(!val) return;
-          const g = document.getElementById(gid); if(!g) return;
-          const sv = String(val).toLowerCase();
-          g.querySelectorAll('.ob[data-val]').forEach(b=>{
-            if(b.getAttribute('data-val').toLowerCase() === sv) b.click();
-          });
-        }
-        function clickMulti(gid, arr){
-          if(!arr||!arr.length) return;
-          const g = document.getElementById(gid); if(!g) return;
-          arr.forEach(val=>{
-            const sv = String(val).toLowerCase();
-            g.querySelectorAll('.ob[data-val]').forEach(b=>{
-              if(b.getAttribute('data-val').toLowerCase() === sv) b.click();
-            });
-          });
-        }
-        function clickColor(gid, colorId){
-          if(!colorId) return;
-          const g = document.getElementById(gid); if(!g) return;
-          g.querySelectorAll('.cb').forEach(b=>{
-            if((b.getAttribute('data-val')||'').toLowerCase() === colorId.toLowerCase()) b.click();
-          });
-        }
+        // ── 3. ارسم الأزرار من S بدون click() ──
 
         // Single-select
-        clickVal('charCountGrid', S.charCount);
-        clickVal('ageGrid',       S.age);
-        clickVal('bodyGrid',      S.body);
-        clickVal('hairstyleGrid', S.hairstyle);
-        clickVal('eyeShapeGrid',  S.eyeShape);
-        clickVal('clothingGrid',  S.clothing);
-        clickVal('clothingTopGrid',    S.clothingTop);
-        clickVal('clothingBottomGrid', S.clothingBottom);
-        clickVal('nsfwTopGrid',    S.nsfwTop);
-        clickVal('nsfwBottomGrid', S.nsfwBottom);
-        clickVal('sockLengthGrid', S.sockLength);
-        clickVal('shoesGrid',      S.shoes);
-        clickVal('expressionGrid', S.expression);
-        clickVal('envGrid',        S.environment);
-        clickVal('styleGrid',      S.style);
-        clickVal('eraGrid',        S.era);
-        clickVal('animeStudioGrid',S.animeStudio);
-        clickVal('strokeGrid',     S.stroke);
-        clickVal('shadowGrid',     S.shadow);
-        clickVal('glowGrid',       S.glow);
-        clickVal('smoothGrid',     S.smooth);
-        clickVal('angleGrid',      S.angle);
-        clickVal('shotGrid',       S.shot);
-        clickVal('lookGrid',       S.look);
-        clickVal('lensGrid',       S.lens);
-        clickVal('lensEffectGrid', S.lensEffect);
-        clickVal('colorGradeGrid', S.colorGrade);
+        const SM={
+          charCountGrid:'charCount', ageGrid:'age', bodyGrid:'body',
+          hairstyleGrid:'hairstyle', eyeShapeGrid:'eyeShape',
+          clothingGrid:'clothing', clothingTopGrid:'clothingTop', clothingBottomGrid:'clothingBottom',
+          nsfwTopGrid:'nsfwTop', nsfwBottomGrid:'nsfwBottom',
+          sockLengthGrid:'sockLength', shoesGrid:'shoes', expressionGrid:'expression',
+          envGrid:'environment', styleGrid:'style', eraGrid:'era', animeStudioGrid:'animeStudio',
+          strokeGrid:'stroke', shadowGrid:'shadow', glowGrid:'glow', smoothGrid:'smooth',
+          angleGrid:'angle', shotGrid:'shot', lookGrid:'look', lensGrid:'lens',
+          lensEffectGrid:'lensEffect', colorGradeGrid:'colorGrade'
+        };
+        Object.entries(SM).forEach(([gid,sk])=>{
+          if(!S[sk]) return;
+          const g=document.getElementById(gid); if(!g) return;
+          const sv=String(S[sk]).toLowerCase();
+          g.querySelectorAll('.ob').forEach(b=>{
+            const dv=(b.getAttribute('data-val')||'').toLowerCase();
+            if(dv && dv===sv) b.classList.add('on');
+          });
+        });
 
         // Multi-select
-        clickMulti('clothingAccGrid',       S.clothingAcc);
-        clickMulti('clothingConditionGrid', S.clothingCondition);
-        clickMulti('faceAccGrid',           S.faceAcc);
-        clickMulti('poseGrid',              S.poses);
-        clickMulti('effectsGrid',           S.effects);
-        clickMulti('liquidsGrid',           S.liquids);
-        clickMulti('weaponGrid',            S.weapons);
-        clickMulti('propsGrid',             S.props);
-        clickMulti('electronicsGrid',       S.electronics);
-        clickMulti('otherItemsGrid',        S.otherItems);
-        clickMulti('qualityGrid',           S.quality);
-        clickMulti('lightGrid',             S.lights);
-        clickMulti('negativeGrid',          S.negatives);
-        clickMulti('negBodyGrid',           S.negBody);
-        clickMulti('negQualityGrid',        S.negQuality);
-        clickMulti('bodyPartsGrid',         S.bodyParts);
-        clickMulti('nsfwBodyGrid',          S.nsfwBody);
-        clickMulti('nsfwClothingGrid',      S.nsfwClothing);
-        clickMulti('nsfwPoseGrid',          S.nsfwPose);
-        clickMulti('nsfwFluidGrid',         S.nsfwFluid);
-        clickMulti('nsfwEnvGrid',           S.nsfwEnv);
-        clickMulti('nsfwIndicatorGrid',     S.nsfwIndicator);
-        clickMulti('nsfwShotGrid',          S.nsfwShot);
+        const MM={
+          clothingAccGrid:'clothingAcc', clothingConditionGrid:'clothingCondition',
+          faceAccGrid:'faceAcc', poseGrid:'poses', effectsGrid:'effects',
+          liquidsGrid:'liquids', weaponGrid:'weapons', propsGrid:'props',
+          electronicsGrid:'electronics', otherItemsGrid:'otherItems',
+          qualityGrid:'quality', lightGrid:'lights', negativeGrid:'negatives',
+          negBodyGrid:'negBody', negQualityGrid:'negQuality', bodyPartsGrid:'bodyParts',
+          nsfwBodyGrid:'nsfwBody', nsfwClothingGrid:'nsfwClothing', nsfwPoseGrid:'nsfwPose',
+          nsfwFluidGrid:'nsfwFluid', nsfwEnvGrid:'nsfwEnv',
+          nsfwIndicatorGrid:'nsfwIndicator', nsfwShotGrid:'nsfwShot'
+        };
+        Object.entries(MM).forEach(([gid,sk])=>{
+          if(!S[sk]||!S[sk].length) return;
+          const g=document.getElementById(gid); if(!g) return;
+          const vals=S[sk].map(v=>String(v).toLowerCase());
+          g.querySelectorAll('.ob').forEach(b=>{
+            const dv=(b.getAttribute('data-val')||'').toLowerCase();
+            if(dv && vals.includes(dv)) b.classList.add('on');
+          });
+        });
 
-        // Colors (hair, eye)
-        clickColor('hairColorGrid',  S.hairColor1);
-        clickColor('hairColor2Grid', S.hairColor2);
-        clickColor('eyeColorGrid',   S.eyeColor);
+        // Hair / Eye colors
+        [{gid:'hairColorGrid',sk:'hairColor1'},{gid:'hairColor2Grid',sk:'hairColor2'},{gid:'eyeColorGrid',sk:'eyeColor'}]
+        .forEach(({gid,sk})=>{
+          if(!S[sk]) return;
+          const g=document.getElementById(gid); if(!g) return;
+          g.querySelectorAll('.cb').forEach(b=>{
+            const on=(b.getAttribute('data-val')||'').toLowerCase()===S[sk].toLowerCase();
+            b.classList.toggle('on',on);
+            b.style.borderColor=on?'rgba(255,255,255,.8)':'transparent';
+          });
+        });
 
         // Skin
-        if(S.skin){
-          document.querySelectorAll('.sb').forEach(b=>{
-            if(b.getAttribute('data-val')===S.skin) b.click();
-          });
+        document.querySelectorAll('.sb').forEach(b=>{
+          const bv=b.getAttribute('data-val');
+          const on=bv===S.skin;
+          b.classList.toggle('on',on);
+          b.style.borderColor=on?'white':(SKINS.find(s=>s.val===bv)?.bg||'transparent');
+        });
+
+        // Color dots
+        ['clothingColor','clothingTopColor','clothingBottomColor',
+         'nsfwTopColor','nsfwBottomColor','nsfwClothingColor',
+         'sockColor','shoeColor'].forEach(k=>_updateColorDot(k));
+
+        // NSFW
+        if(S.nsfw){
+          sessionStorage.setItem('aps_age_confirmed','1');
+          document.getElementById('nsfwBtn').classList.add('on');
+          toggleNSFW(true);
         }
 
+        // ── 4. أعد بناء الـ prompt ──
         rebuild();
 
       } else {
-        // fallback: مفضلة قديمة بدون state — نص فقط
+        // fallback: مفضلة قديمة بدون state
         const pe=document.getElementById('promptText');
         const ne=document.getElementById('negativeText');
         pe.className='ptxt'; pe.textContent=f.pos;
