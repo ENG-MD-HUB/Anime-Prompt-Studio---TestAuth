@@ -25,7 +25,7 @@ const S={
   nsfw:false,
   weights:{},
   extraPos:[],extraNeg:[],
-  favourites: JSON.parse(localStorage.getItem('aps6Favs')||'[]'),
+  favourites: [],
 
 };
 
@@ -3497,10 +3497,15 @@ Rules:
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
       } else {
+        // ── Signed out: reset everything ──
         loginBtn.innerHTML = '<i class="fab fa-google"></i><span>Sign In</span>';
         loginBtn.style.padding = '';
         authMenu.style.display = 'none';
         _menuOpen = false;
+        // Always clear favourites when signed out
+        S.favourites = [];
+        localStorage.removeItem('aps6Favs');
+        renderFavList();
       }
     });
 
