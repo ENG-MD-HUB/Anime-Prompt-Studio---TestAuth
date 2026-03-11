@@ -1719,12 +1719,8 @@ function renderFavList(){
         rebuild();
 
       } else {
-        // fallback: مفضلة قديمة بدون state
-        const pe=document.getElementById('promptText');
-        const ne=document.getElementById('negativeText');
-        pe.className='ptxt'; pe.textContent=f.pos;
-        if(f.neg){ne.className='ptxt neg';ne.textContent=f.neg;}
-        document.getElementById('posWC').textContent=f.pos.split(',').length+' tags';
+        // المفضلة القديمة بدون state — أبلغ المستخدم
+        toast('⚠️ Old save — please delete and re-save to restore buttons','warn');
       }
 
       document.getElementById('favDropdown').classList.remove('open');
@@ -3673,10 +3669,21 @@ Rules:
   async function loadFavsFromCloud(uid){
     try {
       const cloud = await window._fbFavs.load(uid);
-      S.favourites = cloud;
+      // احذف تلقائياً المفضلة القديمة بدون state
+      const valid = [];
+      for(const fav of cloud){
+        if(!fav.state && fav._docId){
+          await window._fbFavs.del(uid, fav._docId).catch(()=>{});
+        } else {
+          valid.push(fav);
+        }
+      }
+      S.favourites = valid;
       localStorage.setItem('aps6Favs', JSON.stringify(S.favourites));
       renderFavList();
-      if(cloud.length) toast(`☁️ Loaded ${cloud.length} favourites`);
+      const deleted = cloud.length - valid.length;
+      if(deleted > 0) toast(`☁️ Loaded ${valid.length} favourites (${deleted} old removed)`,'warn');
+      else if(valid.length) toast(`☁️ Loaded ${valid.length} favourites`);
     } catch(e){
       console.warn('loadFavsFromCloud error:', e);
     }
