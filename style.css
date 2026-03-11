@@ -1386,7 +1386,11 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
   backdrop-filter:blur(14px);
   pointer-events:all;
 }
+.cp-overlay.open .cp-modal{
+  pointer-events:all;
+}
 .cp-modal{
+  pointer-events:none;
   background:var(--surf);
   border:1px solid var(--brd);
   border-radius:24px 24px 0 0;
