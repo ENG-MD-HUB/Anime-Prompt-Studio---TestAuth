@@ -944,7 +944,8 @@ function attachEvents(){
     if(!pos||pos==='') return toast('Nothing to save yet!','warn');
     openModal('Save Favourite','Give this prompt a name','', async name=>{
       if(!name.trim()) return;
-      const fav = {id:Date.now(),name:name.trim(),pos,neg:buildNegText(),date:new Date().toLocaleDateString()};
+      const { favourites, ...stateSnap } = S;
+      const fav = {id:Date.now(),name:name.trim(),pos,neg:buildNegText(),date:new Date().toLocaleDateString(), state: JSON.parse(JSON.stringify(stateSnap))};
       S.favourites.unshift(fav);
       if(S.favourites.length>50)S.favourites.pop();
       // ── Sync to Firestore FIRST, then update local ──
@@ -1622,14 +1623,29 @@ function renderFavList(){
     `;
     item.addEventListener('click',e=>{
       if(e.target.classList.contains('fav-item-del'))return;
-      // Load into prompt display
-      const pe=document.getElementById('promptText');
-      const ne=document.getElementById('negativeText');
-      pe.className='ptxt'; pe.textContent=f.pos;
-      if(f.neg){ne.className='ptxt neg';ne.textContent=f.neg;}
-      document.getElementById('posWC').textContent=f.pos.split(',').length+' tags';
+
+      if(f.state){
+        // ── استعادة الـ state كاملاً وتفعيل الأزرار ──
+        const favs = S.favourites; // احتفظ بالمفضلة
+        Object.assign(S, JSON.parse(JSON.stringify(f.state)));
+        S.favourites = favs;
+        // NSFW: تفعيل/إلغاء القسم
+        toggleNSFW(S.nsfw);
+        // تفعيل جميع الأزرار
+        reflectUI();
+        // إعادة بناء الـ prompt
+        rebuild();
+      } else {
+        // fallback: نص فقط (مفضلة قديمة بدون state)
+        const pe=document.getElementById('promptText');
+        const ne=document.getElementById('negativeText');
+        pe.className='ptxt'; pe.textContent=f.pos;
+        if(f.neg){ne.className='ptxt neg';ne.textContent=f.neg;}
+        document.getElementById('posWC').textContent=f.pos.split(',').length+' tags';
+      }
+
       document.getElementById('favDropdown').classList.remove('open');
-      toast('Loaded: '+f.name+' 📋');
+      toast('✅ Loaded: '+f.name);
     });
     item.querySelector('.fav-item-del').addEventListener('click',(e)=>{
       e.stopPropagation();
