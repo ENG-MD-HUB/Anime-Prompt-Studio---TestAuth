@@ -939,17 +939,29 @@ function attachEvents(){
     if(!pos||pos==='') return toast('Nothing to save yet!','warn');
     openModal('Save Favourite','Give this prompt a name','',name=>{
       if(!name.trim()) return;
-      S.favourites.unshift({id:Date.now(),name:name.trim(),pos,neg:buildNegText(),date:new Date().toLocaleDateString()});
+      const fav = {id:Date.now(),name:name.trim(),pos,neg:buildNegText(),date:new Date().toLocaleDateString()};
+      S.favourites.unshift(fav);
       if(S.favourites.length>50)S.favourites.pop();
       localStorage.setItem('aps6Favs',JSON.stringify(S.favourites));
       renderFavList();
       toast('Saved: '+name.trim()+' ⭐');
+      // ── Auto-sync to Firestore ──
+      const u = window._currentUser;
+      if(u && window._fbFavs){
+        window._fbFavs.save(u.uid, fav)
+          .then(() => toast('☁️ Synced to cloud'))
+          .catch(e => console.warn('Firestore save error:', e));
+      }
     });
   });
 
 
   document.getElementById('clearFavsBtn').addEventListener('click',()=>{
-    S.favourites=[];localStorage.setItem('aps6Favs','[]');renderFavList();toast('Favourites cleared');
+    S.favourites=[];localStorage.removeItem('aps6Favs');renderFavList();toast('Favourites cleared');
+    const u = window._currentUser;
+    if(u && window._fbFavs){
+      window._fbFavs.clear(u.uid).catch(console.warn);
+    }
   });
 
   /* Copy */
@@ -3502,7 +3514,8 @@ Rules:
         loginBtn.style.padding = '';
         authMenu.style.display = 'none';
         _menuOpen = false;
-        // Always clear favourites when signed out
+        // Full reset — clears all selections + favourites
+        resetAll(true);
         S.favourites = [];
         localStorage.removeItem('aps6Favs');
         renderFavList();
@@ -3588,38 +3601,7 @@ Rules:
     }
   }
 
-  // ── Patch saveFavBtn to also save to cloud ──
-  // We hook after the original click handler runs
-  const origSaveFav = document.getElementById('saveFavBtn');
-  if(origSaveFav){
-    origSaveFav.addEventListener('click', () => {
-      // slight delay to let the original handler save first
-      setTimeout(() => {
-        const uid = window._fbAuth?._uid || null;
-        // Get uid from onAuth state (we use a shared getter)
-        const u = window._currentUser;
-        if(u && window._fbFavs && S.favourites.length){
-          const latest = S.favourites[0];
-          window._fbFavs.save(u.uid, latest).catch(console.warn);
-        }
-      }, 300);
-    });
-  }
-
-  // ── Patch clearFavsBtn to also clear cloud ──
-  const origClearFav = document.getElementById('clearFavsBtn');
-  if(origClearFav){
-    origClearFav.addEventListener('click', () => {
-      setTimeout(() => {
-        const u = window._currentUser;
-        if(u && window._fbFavs){
-          window._fbFavs.clear(u.uid).catch(console.warn);
-        }
-      }, 100);
-    });
-  }
-
-  // Expose current user for the patches above
+  // Expose current user globally
   if(window._fbAuth){
     window._fbAuth.onAuth(user => { window._currentUser = user || null; });
   }
