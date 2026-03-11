@@ -19,7 +19,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 
 /* ══ HEADER ══ */
-.hdr{position:sticky;top:0;z-index:300;background:rgba(7,9,15,.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--brd);padding:0 1.4rem;height:56px;display:flex;align-items:center;gap:.8rem;}
+.hdr{position:sticky;top:0;z-index:600;background:rgba(7,9,15,.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--brd);padding:0 1.4rem;height:56px;display:flex;align-items:center;gap:.8rem;}
 .logo{display:flex;align-items:center;gap:.6rem;font-size:1.05rem;font-weight:800;white-space:nowrap;flex-shrink:0;}
 .logo-ico{width:28px;height:28px;background:linear-gradient(135deg,var(--p),var(--ac));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 0 16px var(--glow);}
 .logo-txt{background:linear-gradient(135deg,var(--pl),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
@@ -89,7 +89,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* ══ THEME TRAY ══ */
 .tw{position:relative;}
-.ttray{display:none;position:absolute;top:40px;right:0;background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:.85rem;z-index:400;width:300px;box-shadow:0 16px 48px rgba(0,0,0,.6);}
+.ttray{display:none;position:absolute;top:40px;right:0;background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:.85rem;z-index:700;width:300px;box-shadow:0 16px 48px rgba(0,0,0,.6);}
 .ttray.open{display:block;}
 .ttray-lbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:.65rem;}
 .tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;}
@@ -827,7 +827,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .fav-dropdown{
   display:none;position:absolute;bottom:calc(100% + 8px);right:0;
   background:var(--surf);border:1px solid var(--brd);border-radius:14px;
-  padding:.9rem;z-index:500;width:420px;
+  padding:.9rem;z-index:700;width:420px;
   box-shadow:0 -12px 40px rgba(0,0,0,.55);
 }
 .fav-dropdown.open{display:block;}
@@ -1650,7 +1650,7 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
   border-radius:14px;
   box-shadow:0 16px 48px rgba(0,0,0,.5);
   padding:.6rem;
-  z-index:500;
+  z-index:700;
   animation:authMenuIn .2s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes authMenuIn{
