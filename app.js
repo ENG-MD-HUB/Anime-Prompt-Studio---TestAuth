@@ -3488,7 +3488,6 @@ Rules:
     const loginBtn   = document.getElementById('loginBtn');
     const authMenu   = document.getElementById('authMenu');
     const logoutBtn  = document.getElementById('logoutBtn');
-    const syncBtn    = document.getElementById('syncFavsBtn');
     const authAvatar = document.getElementById('authAvatar');
     const authName   = document.getElementById('authName');
     const authEmail  = document.getElementById('authEmail');
@@ -3496,10 +3495,13 @@ Rules:
     let _uid = null;
     let _menuOpen = false;
 
+    let _firstAuthCall = true; // ignore first null call on page load
+
     // ── Auth state listener ──
     window._fbAuth.onAuth(user => {
       _uid = user ? user.uid : null;
       if(user){
+        _firstAuthCall = false;
         // Show avatar button instead of login
         loginBtn.innerHTML = `<img src="${user.photoURL||''}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.6);" onerror="this.style.display='none'"><span>${user.displayName?.split(' ')[0]||'User'}</span>`;
         loginBtn.style.padding = '.28rem .65rem';
@@ -3509,16 +3511,8 @@ Rules:
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
       } else {
-        // ── Signed out: reset everything ──
-        loginBtn.innerHTML = '<i class="fab fa-google"></i><span>Sign In</span>';
-        loginBtn.style.padding = '';
-        authMenu.style.display = 'none';
-        _menuOpen = false;
-        // Full reset — clears all selections + favourites
-        resetAll(true);
-        S.favourites = [];
-        localStorage.removeItem('aps6Favs');
-        renderFavList();
+        // Skip — page reload on logout handles cleanup
+        if(_firstAuthCall){ _firstAuthCall = false; return; }
       }
     });
 
@@ -3549,55 +3543,26 @@ Rules:
 
     // ── Logout ──
     logoutBtn.addEventListener('click', async () => {
+      authMenu.style.display = 'none';
+      _menuOpen = false;
       await window._fbAuth.signOut();
-      authMenu.style.display = 'none';
-      _menuOpen = false;
-      // Clear favourites from UI and localStorage on sign out
-      S.favourites = [];
       localStorage.removeItem('aps6Favs');
-      renderFavList();
-      toast('👋 Signed out — favourites cleared locally');
+      // Full page reload — clears all state and cache
+      window.location.reload();
     });
 
-    // ── Manual sync button ──
-    syncBtn.addEventListener('click', async () => {
-      if(!_uid){ toast('⚠️ Sign in first'); return; }
-      authMenu.style.display = 'none';
-      _menuOpen = false;
-      await uploadLocalFavsToCloud(_uid);
-    });
-  }
+  } // end setupAuth
 
-  // ── Load favourites from Firestore → merge with local ──
+  // ── Load favourites from Firestore → replace local ──
   async function loadFavsFromCloud(uid){
     try {
       const cloud = await window._fbFavs.load(uid);
-      if(!cloud.length) return;
-      // Merge: cloud takes priority, avoid duplicates by id
-      const localIds = new Set(S.favourites.map(f => String(f.id)));
-      const newOnes  = cloud.filter(f => !localIds.has(String(f.id)));
-      S.favourites = [...newOnes, ...S.favourites].slice(0, 100);
+      S.favourites = cloud;
       localStorage.setItem('aps6Favs', JSON.stringify(S.favourites));
       renderFavList();
-      if(newOnes.length) toast(`☁️ Loaded ${newOnes.length} favourites from cloud`);
+      if(cloud.length) toast(`☁️ Loaded ${cloud.length} favourites`);
     } catch(e){
       console.warn('loadFavsFromCloud error:', e);
-    }
-  }
-
-  // ── Upload all local favs to cloud ──
-  async function uploadLocalFavsToCloud(uid){
-    if(!S.favourites.length){ toast('⭐ No favourites to sync'); return; }
-    toast('⏳ Syncing...');
-    try {
-      // Clear cloud then re-upload all local
-      await window._fbFavs.clear(uid);
-      for(const fav of S.favourites){
-        await window._fbFavs.save(uid, fav);
-      }
-      toast(`✅ Synced ${S.favourites.length} favourites to cloud`);
-    } catch(e){
-      toast('❌ Sync failed: ' + e.message);
     }
   }
 
