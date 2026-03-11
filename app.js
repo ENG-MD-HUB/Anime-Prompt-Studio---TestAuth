@@ -3534,7 +3534,11 @@ Rules:
       await window._fbAuth.signOut();
       authMenu.style.display = 'none';
       _menuOpen = false;
-      toast('👋 Signed out');
+      // Clear favourites from UI and localStorage on sign out
+      S.favourites = [];
+      localStorage.removeItem('aps6Favs');
+      renderFavList();
+      toast('👋 Signed out — favourites cleared locally');
     });
 
     // ── Manual sync button ──
