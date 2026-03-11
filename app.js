@@ -225,6 +225,7 @@ function makeSingle(gid,lbl,val,k,nsfw=false){
     const b=document.createElement('button');
     b.className='ob'+(nsfw?' rb':'')+(S[k]===v?' on':'');
     b.setAttribute('data-en', l);
+    b.setAttribute('data-val', v);
     b.innerHTML=`<span>${l}</span>`;
     b.addEventListener('click',()=>{
       if(S[k]===v){S[k]=null;b.classList.remove('on');}
@@ -252,6 +253,7 @@ function makeMulti(gid,lbl,arr,nsfw=false,inlineHide=false){
     const b=document.createElement('button');
     b.className='ob'+(nsfw?' rb':'')+(inlineHide?' nsfw-item':'')+(S[arr].includes(v)?' on':'');
     b.setAttribute('data-en', l);
+    b.setAttribute('data-val', v);
     b.innerHTML=`<span>${l}</span>`;
     b.addEventListener('click',()=>{
       b.classList.toggle('on');
@@ -1693,9 +1695,8 @@ function reflectUI(){
     const g=document.getElementById(gid);if(!g)return;
     const sv=String(S[k]).toLowerCase();
     g.querySelectorAll('.ob').forEach(b=>{
-      const sp=b.querySelector('span');
-      const txt=sp?sp.textContent.toLowerCase():'';
-      if(txt===sv) b.classList.add('on');
+      const bv=(b.getAttribute('data-val')||b.querySelector('span')?.textContent||'').toLowerCase();
+      if(bv===sv) b.classList.add('on');
     });
   });
   // Multi-select
@@ -1714,9 +1715,8 @@ function reflectUI(){
   Object.entries(multiMap).forEach(([gid,k])=>{
     const g=document.getElementById(gid);if(!g)return;
     g.querySelectorAll('.ob').forEach(b=>{
-      const sp=b.querySelector('span');
-      const txt=sp?sp.textContent.toLowerCase():'';
-      if(S[k]&&S[k].map(v=>String(v).toLowerCase()).includes(txt)) b.classList.add('on');
+      const bv=(b.getAttribute('data-val')||b.querySelector('span')?.textContent||'').toLowerCase();
+      if(S[k]&&S[k].map(v=>String(v).toLowerCase()).includes(bv)) b.classList.add('on');
     });
   });
   // Color pickers — now using .cb buttons (renderColors)
