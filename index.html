@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✦ Anime Prompt Studio — AI Image Prompt Builder</title>
+
+<!-- SEO -->
+<meta name="description" content="Free browser-based anime prompt builder for AI image generation. Build detailed prompts with full character control — hair, eyes, outfit, lighting, camera, mood and more.">
+<meta name="keywords" content="anime prompt, AI image generator, stable diffusion prompt, anime art, prompt builder, NovelAI, ComfyUI, A1111">
+<meta name="author" content="MD.AI SYSTEMS">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph (Facebook, Discord, WhatsApp) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="✦ Anime Prompt Studio — AI Image Prompt Builder">
+<meta property="og:description" content="Free browser-based tool to craft detailed anime prompts for AI image generators. No account needed. Runs entirely in your browser.">
+<meta property="og:image" content="https://og-image-placeholder.png">
+<meta property="og:url" content="https://your-username.github.io/anime-prompt-studio">
+<meta property="og:site_name" content="Anime Prompt Studio">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="✦ Anime Prompt Studio">
+<meta name="twitter:description" content="Free anime prompt builder for AI image generation. Full character control, 5 themes, favourites system and more.">
+<meta name="twitter:image" content="https://og-image-placeholder.png">
+
+<!-- Favicon (SVG inline — no external file needed) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366f1'/><text x='16' y='23' font-size='18' text-anchor='middle' fill='white'>✦</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366f1'/><text x='16' y='23' font-size='18' text-anchor='middle' fill='white'>✦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Cairo:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-ico">✦</div>
+    <span class="logo-txt">Anime Prompt Studio©</span>
+  </div>
+  <div class="hdr-mid">
+    <button class="btn-h" id="randomBtn"><i class="fas fa-shuffle"></i> <span data-i18n="random">Random</span></button>
+    <button class="btn-h" id="nsfwBtn"><i class="fas fa-fire"></i> <span data-i18n="nsfw">NSFW</span></button>
+  </div>
+  <div class="hdr-right">
+    <div class="dvd"></div>
+    <!-- Language Switcher -->
+    <div class="tw" id="langWrap">
+      <button class="btn-ico" id="langBtn" title="Language" style="width:auto;padding:0 .6rem;font-size:.72rem;font-weight:800;letter-spacing:.04em;"><span id="langFlag">EN</span></button>
+      <div class="ttray" id="langTray" style="width:130px;">
+        <div class="ttray-lbl" data-i18n="language">Language</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;">
+          <button class="lang-opt on" data-lang="en">🇺🇸 English</button>
+          <button class="lang-opt" data-lang="ar" style="font-family:'Cairo',sans-serif;">🇸🇦 العربية</button>
+          <button class="lang-opt" data-lang="ja">🇯🇵 日本語</button>
+        </div>
+      </div>
+    </div>
+    <div class="dvd"></div>
+    <div class="tw">
+      <button class="btn-ico" id="themeBtn" title="Themes"><i class="fas fa-palette"></i></button>
+      <div class="ttray" id="ttray">
+        <div class="ttray-lbl" data-i18n="color_themes">Color Themes</div>
+        <div class="tgrid">
+          <div class="tdot on" style="background:linear-gradient(135deg,#6366f1,#f472b6)" data-t=""><span>✦ Indigo</span></div>
+          <div class="tdot" style="background:linear-gradient(135deg,#0ea5e9,#a78bfa)" data-t="aurora"><span>Aurora</span></div>
+          <div class="tdot" style="background:linear-gradient(135deg,#db2777,#fda4af)" data-t="sakura"><span>Sakura</span></div>
+          <div class="tdot" style="background:linear-gradient(135deg,#15803d,#34d399)" data-t="forest"><span>Forest</span></div>
+          <div class="tdot" style="background:linear-gradient(135deg,#ca8a04,#fde68a)" data-t="gold"><span>Gold</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-ico" id="lightBtn" title="Light Mode"><i class="fas fa-circle-half-stroke"></i></button>
+    <div class="tw">
+      <button class="btn-ico btn-info" id="infoMenuBtn" title="About · Features · Tips"><i class="fas fa-circle-info"></i></button>
+      <div class="ttray info-tray" id="infoTray">
+        <div class="ttray-lbl" data-i18n="help_info">Help & Info</div>
+        <button class="info-tray-item" id="infoAbout"><i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="about">About</span></button>
+        <button class="info-tray-item" id="infoFeatures"><i class="fas fa-star"></i> <span data-i18n="features">Features</span></button>
+        <button class="info-tray-item" id="infoTips"><i class="fas fa-lightbulb"></i> <span data-i18n="tips">Tips & Tricks</span></button>
+      </div>
+    </div>
+    <div class="dvd"></div>
+    <!-- Auth Button -->
+    <div class="auth-wrap" id="authWrap">
+      <button class="btn-login" id="loginBtn" title="Sign in with Google">
+        <i class="fab fa-google"></i>
+        <span>Sign In</span>
+      </button>
+      <div class="auth-menu" id="authMenu" style="display:none;">
+        <div class="auth-avatar-wrap">
+          <img class="auth-avatar" id="authAvatar" src="" alt="">
+          <div class="auth-info">
+            <span class="auth-name" id="authName"></span>
+            <span class="auth-email" id="authEmail"></span>
+          </div>
+        </div>
+        <div class="auth-divider"></div>
+        <button class="auth-menu-item" id="syncFavsBtn"><i class="fas fa-cloud-arrow-up"></i> Sync Favourites</button>
+        <button class="auth-menu-item danger" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      </div>
+    </div>
+  </div><!-- /hdr-right -->
+</div><!-- /hdr -->
+
+<div class="layout">
+<!-- ═══ LEFT PANEL ═══ -->
+<div class="lp" id="leftPanel">
+  <!-- Tab group labels -->
+  <div class="tabs">
+    <button class="tab on" data-c="style"><i class="fas fa-paintbrush"></i> <span data-i18n="tab_style">Style</span></button>
+    <button class="tab" data-c="character"><i class="fas fa-user"></i> <span data-i18n="tab_character">Character</span></button>
+    <button class="tab" data-c="appearance"><i class="fas fa-eye"></i> <span data-i18n="tab_look">Look</span></button>
+    <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
+    <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
+    <button class="tab" data-c="tools"><i class="fas fa-sword"></i> <span data-i18n="tab_tools">Tools</span></button>
+    <button class="tab" data-c="scene"><i class="fas fa-mountain-sun"></i> <span data-i18n="tab_scene">Scene</span></button>
+    <button class="tab" data-c="camera"><i class="fas fa-camera"></i> <span data-i18n="tab_camera">Camera</span></button>
+    <button class="tab" data-c="quality"><i class="fas fa-sparkles"></i> <span data-i18n="tab_quality">Quality</span></button>
+    <button class="tab" data-c="negative"><i class="fas fa-ban"></i> <span data-i18n="tab_avoid">Avoid</span></button>
+  </div>
+
+  <!-- ── STYLE (NEW FIRST TAB) ── -->
+  <div class="cat on" id="cat-style">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-palette"></i></div><span class="sec-title" data-i18n="sec_color_grading">Color Grading</span></div>
+      <div class="og c3" id="colorGradeGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-film"></i></div><span class="sec-title" data-i18n="sec_anime_studio">Anime Studio / Director Style</span><button class="sec-clr" data-k="animeStudio"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="animeStudioGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-paintbrush"></i></div><span class="sec-title" data-i18n="sec_art_style">Art Style</span><button class="sec-clr" data-k="style"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="styleGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-hourglass-half"></i></div><span class="sec-title" data-i18n="sec_era">Era</span><button class="sec-clr" data-k="era"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="eraGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-pen-nib"></i></div><span class="sec-title" data-i18n="sec_line_style">Line Style</span><button class="sec-clr" data-k="stroke"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="strokeGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-cloud-sun"></i></div><span class="sec-title" data-i18n="sec_shadows">Shadows</span><button class="sec-clr" data-k="shadow"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="shadowGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-circle-dot"></i></div><span class="sec-title" data-i18n="sec_glow">Glow & Bloom</span><button class="sec-clr" data-k="glow"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="glowGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-hand-dots"></i></div><span class="sec-title" data-i18n="sec_skin_smooth">Skin Smoothness</span><button class="sec-clr" data-k="smooth"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="smoothGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── QUALITY ── -->
+  <div class="cat" id="cat-quality">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-sparkles"></i></div><span class="sec-title" data-i18n="sec_quality_tags">Quality Tags</span></div>
+      <div class="og c3" id="qualityGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-lightbulb"></i></div><span class="sec-title" data-i18n="sec_lighting">Lighting</span></div>
+      <div class="og c3" id="lightGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── CHARACTER ── -->
+  <div class="cat" id="cat-character">
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-users"></i></div>
+        <span class="sec-title" data-i18n="sec_characters">Characters in Scene</span>
+        <button class="sec-clr" id="charCardsClrBtn"><span data-i18n="clear">Clear</span></button>
+      </div>
+      <div class="char-cards-row" id="charCardsRow"></div>
+      <div class="char-warn" id="charWarn">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>Using 2+ characters may confuse the model — results can be inconsistent. Works best with 1 character.</span>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-cake-candles"></i></div><span class="sec-title" data-i18n="sec_age">Age Group</span><button class="sec-clr" data-k="age"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="ageGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-user-circle"></i></div><span class="sec-title" data-i18n="sec_skin_tone">Skin Tone</span><button class="sec-clr" data-k="skin"><span data-i18n="clear">Clear</span></button></div>
+      <div class="skin-grid" id="skinGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-dumbbell"></i></div><span class="sec-title" data-i18n="sec_body">Body Type</span><button class="sec-clr" data-k="body"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="bodyGrid"></div>
+      <div class="og c3" id="nsfwBodyGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── APPEARANCE ── -->
+  <div class="cat" id="cat-appearance">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" data-k="hairstyle"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="hairstyleGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-palette"></i></div><span class="sec-title" data-i18n="sec_hair_color1">Hair Color (Primary)</span><button class="sec-clr" data-k="hairColor1"><span data-i18n="clear">Clear</span></button></div>
+      <div class="cg" id="hairColorGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-arrow-trend-up"></i></div><span class="sec-title" data-i18n="sec_hair_color2">Hair Ombré (2nd Color)</span><button class="sec-clr" data-k="hairColor2"><span data-i18n="clear">Clear</span></button></div>
+      <div class="cg" id="hairColor2Grid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-star"></i></div><span class="sec-title" data-i18n="sec_eye_shape">Eye Shape</span><button class="sec-clr" data-k="eyeShape"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="eyeShapeGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-eye"></i></div><span class="sec-title" data-i18n="sec_eye_color">Eye Color</span><button class="sec-clr" data-k="eyeColor"><span data-i18n="clear">Clear</span></button></div>
+      <div class="cg" id="eyeColorGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── OUTFIT ── -->
+  <div class="cat" id="cat-outfit">
+
+    <!-- Outfit — unified section -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-vest"></i></div>
+        <span class="sec-title" data-i18n="sec_clothing">Full Outfit</span>
+        <button class="sec-clr" data-k="clothing"><span data-i18n="clear">Clear</span></button>
+      </div>
+      <div class="og c3" id="clothingGrid"></div>
+      <div class="og c3 nsfw-section" id="nsfwClothingGrid"></div>
+    </div>
+
+    <!-- Tops & Bottoms -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-shirt"></i></div>
+        <span class="sec-title">Tops &amp; Bottoms</span>
+        <button class="sec-clr" id="clrTopBottom"><span data-i18n="clear">Clear</span></button>
+      </div>
+      <div class="outfit-split">
+        <div class="outfit-half">
+          <div class="outfit-sub-label">Tops</div>
+          <div class="og" id="clothingTopGrid"></div>
+          <div class="og nsfw-section" id="nsfwTopGrid"></div>
+        </div>
+        <div class="outfit-half">
+          <div class="outfit-sub-label">Bottoms</div>
+          <div class="og" id="clothingBottomGrid"></div>
+          <div class="og nsfw-section" id="nsfwBottomGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clothing Condition (new subsection) -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-droplet"></i></div>
+        <span class="sec-title">Clothing Condition</span>
+        <button class="sec-clr" data-arr="clothingCondition"><span data-i18n="clear">Clear</span></button>
+      </div>
+      <div class="og c4" id="clothingConditionGrid"></div>
+    </div>
+
+    <!-- Clothing Accessories -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-ring"></i></div>
+        <span class="sec-title" data-i18n="sec_clothing_acc">Accessories</span>
+      </div>
+      <div class="og c3" id="clothingAccGrid"></div>
+    </div>
+
+    <!-- Socks, Shoes (merged) -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-socks"></i></div>
+        <span class="sec-title">Socks &amp; Shoes</span>
+      </div>
+      <div class="outfit-split" style="gap:.75rem">
+        <div class="outfit-half">
+          <div class="outfit-sub-label">Sock Length <button class="sec-clr" data-k="sockLength" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div>
+          <div class="og" id="sockLengthGrid"></div>
+        </div>
+        <div class="outfit-half">
+          <div class="outfit-sub-label">Footwear <button class="sec-clr" data-k="shoes" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div>
+          <div class="og" id="shoesGrid"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Face Accessories -->
+    <div class="sec">
+      <div class="sec-hd">
+        <div class="sec-ico"><i class="fas fa-glasses"></i></div>
+        <span class="sec-title" data-i18n="sec_face_acc">Face Accessories</span>
+      </div>
+      <div class="og c3" id="faceAccGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- ── MOOD ── -->
+  <div class="cat" id="cat-mood">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-face-smile"></i></div><span class="sec-title" data-i18n="sec_expression">Expression</span><button class="sec-clr" data-k="expression"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="expressionGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-walking"></i></div><span class="sec-title" data-i18n="sec_pose">Pose & Action</span><span class="sec-max">max 2</span></div>
+      <div class="og c3" id="poseGrid"></div>
+      <div class="og c3" id="nsfwPoseGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title" data-i18n="sec_effects">Special Effects</span></div>
+      <div class="og c3" id="effectsGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title" data-i18n="sec_liquids">Liquids & Materials</span></div>
+      <div class="og c3" id="liquidsGrid"></div>
+      <div class="og c3" id="nsfwFluidGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── TOOLS ── -->
+  <div class="cat" id="cat-tools">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-sword"></i></div><span class="sec-title" data-i18n="sec_weapons">Weapons</span><span class="sec-max">max 2</span></div>
+      <div class="og c3" id="weaponGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-toolbox"></i></div><span class="sec-title" data-i18n="sec_props">Props & Objects</span><span class="sec-max">max 3</span></div>
+      <div class="og c3" id="propsGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-mobile-screen"></i></div><span class="sec-title" data-i18n="sec_electronics">Electronics</span><span class="sec-max">max 2</span></div>
+      <div class="og c3" id="electronicsGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico" style="background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--pl);"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title">AI Prompt Optimizer</span></div>
+      <p style="font-size:.76rem;color:var(--tx2);margin-bottom:.75rem;line-height:1.5;">اكتب أي وصف بالعربي أو الإنجليزي وسيتحول إلى برومبت احترافي لموديلات الأنمي.</p>
+      <textarea id="optimizerInput" placeholder="e.g. anime girl with red hair sitting in a garden at sunset... أو: بنت أنمي بشعر أحمر جالسة في حديقة وقت الغروب" style="
+        width:100%;min-height:90px;resize:vertical;
+        background:var(--surf2);border:1.5px solid var(--brd);border-radius:10px;
+        color:var(--tx);font-family:inherit;font-size:.82rem;padding:.65rem .75rem;
+        line-height:1.55;outline:none;transition:border-color .2s;
+      " onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--brd)'"></textarea>
+      <div style="display:flex;gap:.5rem;margin-top:.55rem;align-items:center;flex-wrap:wrap;">
+        <button id="optimizerBtn" style="
+          display:flex;align-items:center;gap:.45rem;
+          background:linear-gradient(135deg,var(--p),var(--pl));
+          color:#fff;border:none;border-radius:9px;padding:.52rem 1.1rem;
+          font-size:.82rem;font-weight:600;cursor:pointer;
+          transition:opacity .2s,transform .15s;
+        " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <i class="fas fa-wand-magic-sparkles"></i> Optimize Prompt / تحسين
+        </button>
+        <button id="optimizerInsertBtn" style="
+          display:none;align-items:center;gap:.4rem;
+          background:rgba(16,185,129,.12);color:#10b981;
+          border:1.5px solid rgba(16,185,129,.3);border-radius:9px;
+          padding:.5rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;
+          transition:opacity .2s;
+        ">
+          <i class="fas fa-plus"></i> إضافة للبرومبت
+        </button>
+        <span id="optimizerStatus" style="font-size:.76rem;color:var(--tx3);"></span>
+      </div>
+      <div id="optimizerOutput" style="
+        display:none;margin-top:.75rem;
+        background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.2);
+        border-radius:10px;padding:.75rem;
+        font-size:.8rem;line-height:1.6;color:var(--tx);
+        font-family:'DM Mono',monospace;
+        white-space:pre-wrap;word-break:break-word;
+      "></div>
+    </div>
+  </div>
+
+  <!-- ── SCENE ── -->
+  <div class="cat" id="cat-scene">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-mountain-sun"></i></div><span class="sec-title" data-i18n="sec_environment">Environment</span><button class="sec-clr" data-k="environment"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="envGrid"></div>
+      <div class="og c3" id="nsfwEnvGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── CAMERA ── -->
+  <div class="cat" id="cat-camera">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-camera-rotate"></i></div><span class="sec-title" data-i18n="sec_camera_angle">Camera Angle</span><button class="sec-clr" data-k="angle"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="angleGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-expand"></i></div><span class="sec-title" data-i18n="sec_shot_range">Shot Range</span><button class="sec-clr" data-k="shot"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og" id="shotGrid"></div>
+      <div class="og c3" id="nsfwShotGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-eye"></i></div><span class="sec-title" data-i18n="sec_looking">Looking Direction</span><button class="sec-clr" data-k="look"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="lookGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-camera"></i></div><span class="sec-title" data-i18n="sec_lens_type">Lens Type</span><button class="sec-clr" data-k="lens"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="lensGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-filter"></i></div><span class="sec-title" data-i18n="sec_lens_effect">Lens Effect</span><button class="sec-clr" data-k="lensEffect"><span data-i18n="clear">Clear</span></button></div>
+      <div class="og c3" id="lensEffectGrid"></div>
+    </div>
+    <div class="sec nsfw-only-sec">
+      <div class="sec-hd"><div class="sec-ico" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:#f87171;"><i class="fas fa-crosshairs"></i></div><span class="sec-title" data-i18n="sec_body_parts">Body Parts Focus</span></div>
+      <p style="font-size:.74rem;color:var(--tx3);margin-bottom:.55rem;" data-i18n="body_parts_note">Focus camera on specific body parts — NSFW mode only.</p>
+      <div class="og c3" id="bodyPartsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── NEGATIVE ── -->
+  <div class="cat" id="cat-negative">
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico" style="color:#f87171;border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08);"><i class="fas fa-ban"></i></div><span class="sec-title" style="color:#f87171;" data-i18n="what_to_avoid">What To Avoid</span></div>
+      <p style="font-size:.76rem;color:var(--tx3);margin-bottom:.7rem;" data-i18n="avoid_desc">Select anything you want excluded from the final image.</p>
+      <div class="neg-group-lbl"><i class="fas fa-person"></i>&nbsp;<span data-i18n="neg_body_anatomy">Body & Anatomy</span></div>
+      <div class="og c3" id="negBodyGrid"></div>
+      <div style="margin-top:1.8rem;"></div>
+      <div class="neg-group-lbl"><i class="fas fa-image"></i>&nbsp;<span data-i18n="neg_image_quality">Image Quality</span></div>
+      <div class="og c3" id="negQualityGrid"></div>
+    </div>
+  </div>
+
+</div><!-- /lp -->
+
+<!-- ═══ RESIZER ═══ -->
+<div class="layout-resizer" id="layoutResizer">
+  <div class="resizer-handle"></div>
+</div>
+
+<!-- ═══ RIGHT PANEL ═══ -->
+<div class="rp">
+
+  <!-- Character Blueprint -->
+  <div class="blueprint">
+    <canvas class="bp-radar" id="bpRadar"></canvas>
+    <div class="blueprint-ttl" data-i18n="blueprint_ttl">Character Blueprint</div>
+    <div id="bpGrid"></div>
+  </div>
+
+  <!-- Prompt Strength Meter -->
+  <div class="psm" id="psmBox">
+    <div class="psm-top">
+      <span class="psm-label" data-i18n="prompt_strength">Prompt Strength</span>
+      <span class="psm-score" id="psmScore">—</span>
+      <span class="psm-grade" id="psmGrade"></span>
+    </div>
+    <div class="psm-bar-track">
+      <div class="psm-bar-fill" id="psmFill"></div>
+    </div>
+    <div class="psm-issues" id="psmIssues"></div>
+  </div>
+
+  <!-- Prompts -->
+  <div class="pw">
+    <div>
+      <div class="pb-lbl"><div class="pdot"></div> <span data-i18n="positive_prompt">Positive Prompt</span> <span class="wc" id="posWC"></span></div>
+      <div class="ptxt empty" id="promptText">Start selecting options on the left…</div>
+      <div class="tag-box inline-tag-box" id="posTagBox"><input class="tag-input" id="posTagInput" placeholder="＋ Extra Positive Tags — Enter or Tab"></div>
+    </div>
+    <div style="border-top:1px solid var(--brd2);padding-top:.7rem;margin-top:.4rem;">
+      <div class="pb-lbl"><div class="pdot neg"></div> <span data-i18n="negative_prompt">Negative Prompt</span> <span class="wc" id="negWC"></span></div>
+      <div class="ptxt neg empty" id="negativeText">Select avoids above, or use the tag box below…</div>
+      <div class="tag-box neg-box inline-tag-box" id="negTagBox"><input class="tag-input" id="negTagInput" placeholder="＋ Extra Negative Tags — Enter or Tab"></div>
+    </div>
+  </div>
+
+  <div class="acts">
+    <button class="btn-cp" id="copyBtn"><i class="fas fa-copy"></i> <span data-i18n="copy_full">Copy Full Prompt</span></button>
+    <div class="brow">
+      <button class="bs b-pos" id="copyPosBtn"><i class="fas fa-arrow-up"></i> <span data-i18n="copy_pos">Positive</span></button>
+      <button class="bs b-neg" id="copyNegBtn"><i class="fas fa-arrow-down"></i> <span data-i18n="copy_neg">Negative</span></button>
+    </div>
+    <div class="brow">
+      <button class="bs b-fav" id="saveFavBtn"><i class="fas fa-star"></i> <span data-i18n="save_fav">Save Favourite</span></button>
+      <div class="fav-wrap">
+        <button class="bs b-fav" id="favOpenBtn" style="white-space:nowrap;"><i class="fas fa-folder-open"></i> <span data-i18n="saved">Saved</span> ▾</button>
+        <div class="fav-dropdown" id="favDropdown">
+          <div class="fav-hd">
+            <span class="fav-ttl" data-i18n="saved_library">Saved Library</span>
+            <button class="sec-clr" id="clearFavsBtn"><span data-i18n="clear_all">Clear All</span></button>
+          </div>
+          <div class="fav-list" id="favList"><div class="fav-empty" data-i18n="fav_empty">No saved favourites yet</div></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-rst" id="resetBtn"><i class="fas fa-rotate-left"></i> <span data-i18n="reset_all">Reset All</span></button>
+  </div>
+</div><!-- /rp -->
+</div><!-- /layout -->
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-logo" data-i18n="footer_copy">Anime Prompt Studio © 2026. All rights reserved.</span>
+    <span class="footer-ver">v1.0.0</span>
+  </div>
+</footer>
+
+<!-- ── ABOUT MODAL ── -->
+<div class="info-overlay" id="aboutOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="aboutClose"><i class="fas fa-xmark"></i></button>
+    <div class="info-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+    <div class="info-title" data-i18n="about">About</div>
+    <div class="info-body">
+      <p data-i18n="about_p1">Anime Prompt Studio is a free, browser-based tool designed to help artists and enthusiasts craft detailed, high-quality prompts for AI image generation.</p>
+      <p data-i18n="about_p2">Built with a focus on anime and illustration styles, it gives you full control over character appearance, outfit, mood, scene, lighting, camera, and more — all in one place.</p>
+      <p data-i18n="about_p3">No account required. No data collected. Everything runs locally in your browser.</p>
+      <div class="info-sig" data-i18n="about_sig">— Made with ✦ by MD.AI SYSTEMS</div>
+      <div style="margin-top:.5rem;display:inline-flex;align-items:center;gap:.4rem;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.2);border-radius:100px;padding:.22rem .7rem;font-size:.65rem;font-family:'DM Mono',monospace;color:var(--pl);font-weight:700;">v1.0.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURES MODAL ── -->
+<div class="info-overlay" id="featuresOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="featuresClose"><i class="fas fa-xmark"></i></button>
+    <div class="info-icon"><i class="fas fa-star"></i></div>
+    <div class="info-title" data-i18n="features">Features</div>
+    <div class="info-body">
+      <div class="feat-grid">
+        <div class="feat-item"><i class="fas fa-palette"></i><div><strong data-i18n="feat_themes_t">13 Color Themes</strong><span data-i18n="feat_themes_d">Fully themed UI that adapts to your style</span></div></div>
+        <div class="feat-item"><i class="fas fa-person"></i><div><strong data-i18n="feat_char_t">Full Character Builder</strong><span data-i18n="feat_char_d">Hair, eyes, skin, body, outfit and more</span></div></div>
+        <div class="feat-item"><i class="fas fa-shirt"></i><div><strong data-i18n="feat_cloth_t">50+ Clothing Options</strong><span data-i18n="feat_cloth_d">Organized by category — tops, bottoms, full outfits</span></div></div>
+        <div class="feat-item"><i class="fas fa-film"></i><div><strong data-i18n="feat_studio_t">Anime Studio Styles</strong><span data-i18n="feat_studio_d">Ghibli, Ufotable, MAPPA, Makoto Shinkai and more</span></div></div>
+        <div class="feat-item"><i class="fas fa-droplet"></i><div><strong data-i18n="feat_color_t">Color Grading</strong><span data-i18n="feat_color_d">16 palette options from pastel to cyberpunk</span></div></div>
+        <div class="feat-item"><i class="fas fa-camera"></i><div><strong data-i18n="feat_cam_t">Camera Controls</strong><span data-i18n="feat_cam_d">Shot range, angle, lens type and focus effects</span></div></div>
+        <div class="feat-item"><i class="fas fa-bolt"></i><div><strong data-i18n="feat_meter_t">Prompt Strength Meter</strong><span data-i18n="feat_meter_d">Detects conflicts, overloads and missing elements</span></div></div>
+        <div class="feat-item"><i class="fas fa-weight-hanging"></i><div><strong data-i18n="feat_weight_t">Tag Weight Slider</strong><span data-i18n="feat_weight_d">Click any tag to boost or reduce its influence</span></div></div>
+        <div class="feat-item"><i class="fas fa-heart"></i><div><strong data-i18n="feat_favs_t">Favourites System</strong><span data-i18n="feat_favs_d">Save and reload your best prompt combinations</span></div></div>
+        <div class="feat-item"><i class="fas fa-magnifying-glass-chart"></i><div><strong data-i18n="feat_img_t">Image Analyzer</strong><span data-i18n="feat_img_d">Extract and reverse-engineer prompts from images</span></div></div>
+        <div class="feat-item"><i class="fas fa-shuffle"></i><div><strong data-i18n="feat_rand_t">Randomizer</strong><span data-i18n="feat_rand_d">Generate a full random character in one click</span></div></div>
+        <div class="feat-item"><i class="fas fa-fire"></i><div><strong data-i18n="feat_nsfw_t">NSFW Mode</strong><span data-i18n="feat_nsfw_d">Age-gated adult content section</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIPS MODAL ── -->
+<div class="info-overlay" id="tipsOverlay">
+  <div class="info-modal info-modal-wide">
+    <button class="info-close" id="tipsClose"><i class="fas fa-xmark"></i></button>
+    <div class="info-icon"><i class="fas fa-lightbulb"></i></div>
+    <div class="info-title" data-i18n="tips">Tips & Tricks</div>
+    <div class="info-body">
+      <div class="tip-list">
+        <div class="tip-item">
+          <div class="tip-num">01</div>
+          <div><strong data-i18n="tip1_t">Start with Style</strong><p data-i18n="tip1_d">Always pick an Art Style or Anime Studio first — it's the single most impactful tag for the final look.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">02</div>
+          <div><strong data-i18n="tip2_t">Use the Strength Meter</strong><p data-i18n="tip2_d">Watch the Prompt Strength score. Conflicts (red) hurt quality the most — fix those before adding more tags.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">03</div>
+          <div><strong data-i18n="tip3_t">Lighting is Everything</strong><p data-i18n="tip3_d">Add at least one lighting type. Rim Light + one ambient source gives dramatic, professional-looking results.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">04</div>
+          <div><strong data-i18n="tip4_t">Tag Weight Slider</strong><p data-i18n="tip4_d">Click any tag in the prompt box to open the weight slider. Boost key elements like style or lighting above 1.3 for more impact.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">05</div>
+          <div><strong data-i18n="tip5_t">Quality Tags Matter</strong><p data-i18n="tip5_d">Always include 3–4 quality tags: Masterpiece, Best Quality, Ultra Detailed. These are expected by most anime models.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">06</div>
+          <div><strong data-i18n="tip6_t">Less is More</strong><p data-i18n="tip6_d">3–4 lighting types or 5+ effects will confuse the model. Keep each category focused — the Overload warning will alert you.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">07</div>
+          <div><strong data-i18n="tip7_t">Save Your Favourites</strong><p data-i18n="tip7_d">Found a great combination? Hit the ♡ button to save it. You can load it any time from the Favourites menu.</p></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">08</div>
+          <div><strong data-i18n="tip8_t">Use Extra Tags</strong><p data-i18n="tip8_d">The Extra Positive Tags field is perfect for model-specific tokens or very niche details not covered by the builder.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GENDER MODAL ═══ -->
+<div class="gender-overlay" id="genderOverlay">
+  <div class="gender-modal">
+    <button class="gender-modal-close" id="genderModalClose"><i class="fas fa-xmark"></i></button>
+    <div class="gender-modal-title">Select Gender</div>
+    <div class="gender-modal-sub" id="genderModalSub">Character 1</div>
+    <div class="gender-opts">
+
+      <!-- Female -->
+      <button class="gender-opt-btn opt-female" data-gender="female">
+        <div class="gender-opt-sil"><i class="fa-solid fa-person-dress"></i></div>
+        <div class="gender-opt-info">
+          <span class="gender-opt-name">Female</span>
+          <span class="gender-opt-tag">1girl</span>
+        </div>
+      </button>
+
+      <!-- Male -->
+      <button class="gender-opt-btn opt-male" data-gender="male">
+        <div class="gender-opt-sil"><i class="fa-solid fa-person"></i></div>
+        <div class="gender-opt-info">
+          <span class="gender-opt-name">Male</span>
+          <span class="gender-opt-tag">1boy</span>
+        </div>
+      </button>
+
+      <!-- Futanari -->
+      <button class="gender-opt-btn opt-futa" data-gender="futa">
+        <div class="gender-opt-sil"><i class="fa-solid fa-person-half-dress"></i></div>
+        <div class="gender-opt-info">
+          <span class="gender-opt-name">Futanari</span>
+          <span class="gender-opt-tag">androgynous, futanari</span>
+        </div>
+      </button>
+
+      <button class="gender-modal-reset" id="genderModalReset">
+        <i class="fas fa-rotate-left"></i> Remove this character
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for naming -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-ttl" id="modalTitle">Save Favourite</div>
+    <div class="modal-sub" id="modalSub">Give this prompt a name so you can find it later.</div>
+    <input class="modal-inp" id="modalInput" type="text" placeholder="e.g. Gothic Lolita Rainy Night">
+    <div class="modal-row">
+      <button class="modal-cancel" id="modalCancel">Cancel</button>
+      <button class="modal-ok" id="modalOk">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check"></i><span id="toastMsg">Done!</span></div>
+<div class="conflict-notif" id="conflictNotif">
+  <div class="conflict-notif-icon">⚠️</div>
+  <div class="conflict-notif-body">
+    <div class="conflict-notif-title" id="conflictNotifTitle">Conflict</div>
+    <div class="conflict-notif-detail" id="conflictNotifDetail"></div>
+    <div class="conflict-notif-hint" id="conflictNotifHint">Hover to pause</div>
+  </div>
+</div>
+
+
+
+<!--
+════════════════════════════════════════
+  HOW TO ADD NEW ITEMS — QUICK GUIDE
+════════════════════════════════════════
+
+  ► ADD ITEM TO EXISTING LIST:
+    Find const D={... and add to the lbl array.
+    Example: add 'Sword Whip' to weapons:
+      weapons:{lbl:['Sword (Western)','Katana', ... ,'Sword Whip'], ...
+
+  ► ADD NEW SFW MULTI-SELECT SECTION:
+    1. HTML: <div class="og c3" id="myGrid"></div>
+    2. D:    myArr:{lbl:['A','B','C'], arr:'myArr'}
+    3. S:    myArr:[],
+    4. init(): makeMulti('myGrid', D.myArr.lbl, 'myArr');
+    5. buildPosText(): if(S.myArr.length) p.push(S.myArr.join(', '));
+
+  ► ADD NEW NSFW ITEM (red, hidden until NSFW on):
+    Same as above but pass true: makeMulti('myGrid', D.myArr.lbl, 'myArr', true);
+    Items will auto-hide/show with NSFW button.
+
+  ► ADD NEW SINGLE-SELECT SECTION:
+    1. HTML: <div class="og c3" id="myGrid"></div>
+    2. D:    myKey:{lbl:['A','B','C'], k:'myKey'}
+    3. S:    myKey:null,
+    4. init(): makeSingle('myGrid', D.myKey.lbl, null, 'myKey');
+    5. buildPosText(): if(S.myKey) p.push(S.myKey);
+════════════════════════════════════════
+-->
+
+<!-- ═══ WELCOME MODAL ═══ -->
+<div class="wlc-overlay" id="wlcOverlay">
+  <div class="wlc-modal">
+
+    <!-- Header glow bar -->
+    <div class="wlc-bar"></div>
+
+    <!-- Logo area -->
+    <div class="wlc-top">
+      <div class="wlc-logo-ico">✦</div>
+      <div class="wlc-badge">v1.0.0</div>
+    </div>
+
+    <div class="wlc-title">Anime Prompt Studio</div>
+    <div class="wlc-sub" data-i18n="wlc_sub">Your ultimate AI image prompt builder — free, fast, no account needed.</div>
+
+    <div class="wlc-divider"></div>
+
+    <!-- Features grid -->
+    <div class="wlc-features">
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-person"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat1_t">Full Character Builder</strong><span data-i18n="wlc_feat1_d">Hair, eyes, skin, body, outfit & more</span></div>
+      </div>
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-palette"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat2_t">5 Color Themes</strong><span data-i18n="wlc_feat2_d">Fully themed UI that adapts to your style</span></div>
+      </div>
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-bolt"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat3_t">Prompt Strength Meter</strong><span data-i18n="wlc_feat3_d">Detects conflicts & missing elements</span></div>
+      </div>
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-heart"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat4_t">Favourites System</strong><span data-i18n="wlc_feat4_d">Save & reload your best combinations</span></div>
+      </div>
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-shuffle"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat5_t">One-Click Randomizer</strong><span data-i18n="wlc_feat5_d">Generate a full character instantly</span></div>
+      </div>
+      <div class="wlc-feat">
+        <div class="wlc-feat-ico"><i class="fas fa-weight-hanging"></i></div>
+        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat6_t">Tag Weight Slider</strong><span data-i18n="wlc_feat6_d">Fine-tune every tag's influence</span></div>
+      </div>
+    </div>
+
+    <div class="wlc-divider"></div>
+
+    <!-- About project -->
+    <div class="wlc-about">
+      <div class="wlc-about-ico"><i class="fas fa-wand-magic-sparkles"></i></div>
+      <div class="wlc-about-body">
+        <strong data-i18n="wlc_about_title">About this project</strong>
+        <p data-i18n="wlc_about_body">Anime Prompt Studio is a passion project built by <span class="wlc-brand">MD.AI SYSTEMS</span> — a team focused on making AI tools accessible and enjoyable for everyone. This tool runs entirely in your browser, stores nothing on any server, and is completely free.</p>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <button class="wlc-btn" id="wlcStart">
+      <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="start_building">Start Building</span>
+    </button>
+    <div class="wlc-no-show" style="padding:.8rem 1.8rem 1.4rem;text-align:center;font-size:.65rem;color:var(--tx3);">
+      <i class="fas fa-shield-halved" style="margin-right:.3rem;"></i><span data-i18n="wlc_footer">No account needed · No data collected · Runs in your browser</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ AGE GATE MODAL ═══ -->
+<div class="ag-overlay" id="agOverlay">
+  <div class="ag-modal">
+    <div class="ag-warning-icon">
+      <i class="fas fa-triangle-exclamation"></i>
+    </div>
+    <div class="ag-title" data-i18n="ag_title">Adults Only — 18+</div>
+    <div class="ag-title-en" data-i18n="ag_subtitle">NSFW Content Warning</div>
+    <div class="ag-divider"></div>
+    <div class="ag-body">
+      <p data-i18n="ag_body1">This section contains mature content intended for adults only.</p>
+      <p data-i18n="ag_body2">By proceeding, you confirm the following:</p>
+    </div>
+    <div class="ag-checks">
+      <div class="ag-check"><i class="fas fa-circle-check"></i> <span data-i18n="ag_check1">I am 18 years of age or older</span></div>
+      <div class="ag-check"><i class="fas fa-circle-check"></i> <span data-i18n="ag_check2">I take full responsibility for my use of this content</span></div>
+      <div class="ag-check"><i class="fas fa-circle-check"></i> <span data-i18n="ag_check3">Accessing this content is legal in my country or region</span></div>
+      <div class="ag-check"><i class="fas fa-circle-check"></i> <span data-i18n="ag_check4">I will not use generated prompts to create illegal content</span></div>
+    </div>
+    <div class="ag-disclaimer">
+      <i class="fas fa-shield-halved"></i>
+      <span data-i18n="ag_disclaimer">The creator of this tool bears <strong>no responsibility</strong> for any misuse, harmful content generation, or violation of third-party platform terms. This tool generates text prompts only. You are solely responsible for how you use them.</span>
+    </div>
+    <div class="ag-actions">
+      <button class="ag-btn-confirm" id="agCancel">
+        <i class="fas fa-xmark"></i> <span data-i18n="ag_no">No, I am Under 18</span>
+      </button>
+      <button class="ag-btn-cancel" id="agConfirm">
+        <i class="fas fa-check"></i> <span data-i18n="ag_yes">Yes, I am 18 or Older</span>
+      </button>
+    </div>
+    <div class="ag-footer">
+      <span data-i18n="ag_footer">⚠️ For artistic prompt generation purposes only</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COLOR PICKER MODAL ══ -->
+<div id="cpOverlay" class="cp-overlay">
+  <div class="cp-modal" id="cpModal">
+    <div class="cp-header">
+      <div class="cp-header-left">
+        <span class="cp-icon" id="cpIcon">🎨</span>
+        <div>
+          <div class="cp-title" id="cpTitle">Pick a Color</div>
+          <div class="cp-subtitle" id="cpSubtitle">Select a color for your item</div>
+        </div>
+      </div>
+      <button class="cp-close" id="cpClose"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="cp-preview" id="cpPreview">
+      <div class="cp-preview-swatch" id="cpSwatch"></div>
+      <div class="cp-preview-info">
+        <span class="cp-preview-name" id="cpSelectedName">No color selected</span>
+        <span class="cp-preview-hint">Tap a color to select</span>
+      </div>
+      <button class="cp-clear-btn" id="cpClearBtn"><i class="fas fa-rotate-left"></i> Clear</button>
+    </div>
+    <div class="cp-scroll" id="cpGrid"></div>
+    <div class="cp-footer">
+      <button class="cp-done" id="cpDone"><i class="fas fa-check"></i> Done</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getAnalytics }                           from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp }
+                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAU0hfv8sM6PlFqeJgHh7upYSkMEm2ilpc",
+    authDomain:        "anime-prompt-studio-main.firebaseapp.com",
+    projectId:         "anime-prompt-studio-main",
+    storageBucket:     "anime-prompt-studio-main.firebasestorage.app",
+    messagingSenderId: "617164431718",
+    appId:             "1:617164431718:web:3dcb036700a52ec83ba8a7",
+    measurementId:     "G-X01T4B2E1B"
+  };
+
+  const app       = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth      = getAuth(app);
+  const db        = getFirestore(app);
+  const provider  = new GoogleAuthProvider();
+
+  // ── Expose to window so app.js can call them ──
+  window._fbAuth = {
+    signIn:  () => signInWithPopup(auth, provider),
+    signOut: () => signOut(auth),
+    onAuth:  (cb) => onAuthStateChanged(auth, cb),
+  };
+
+  window._fbFavs = {
+    // Save single favourite to Firestore
+    save: async (uid, fav) => {
+      const ref = collection(db, 'users', uid, 'favourites');
+      await addDoc(ref, { ...fav, createdAt: serverTimestamp() });
+    },
+    // Load all favourites ordered by newest first
+    load: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'favourites');
+      const q    = query(ref, orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+    },
+    // Delete single favourite by Firestore doc id
+    del: async (uid, docId) => {
+      await deleteDoc(doc(db, 'users', uid, 'favourites', docId));
+    },
+    // Delete all favourites
+    clear: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'favourites');
+      const snap = await getDocs(ref);
+      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    },
+  };
+</script>
+<script src="app.js"></script>
+</body>
+</html>
