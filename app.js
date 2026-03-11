@@ -1691,8 +1691,11 @@ function reflectUI(){
   Object.entries(singleMap).forEach(([gid,k])=>{
     if(!S[k])return;
     const g=document.getElementById(gid);if(!g)return;
+    const sv=String(S[k]).toLowerCase();
     g.querySelectorAll('.ob').forEach(b=>{
-      if(b.querySelector('span')&&b.querySelector('span').textContent.toLowerCase()===S[k]) b.classList.add('on');
+      const sp=b.querySelector('span');
+      const txt=sp?sp.textContent.toLowerCase():'';
+      if(txt===sv) b.classList.add('on');
     });
   });
   // Multi-select
@@ -1702,6 +1705,7 @@ function reflectUI(){
     effectsGrid:'effects', liquidsGrid:'liquids', weaponGrid:'weapons',
     propsGrid:'props', electronicsGrid:'electronics', otherItemsGrid:'otherItems',
     qualityGrid:'quality', lightGrid:'lights', negativeGrid:'negatives',
+    negBodyGrid:'negBody', negQualityGrid:'negQuality',
     nsfwBodyGrid:'nsfwBody',
     nsfwClothingGrid:'nsfwClothing', nsfwPoseGrid:'nsfwPose',
     nsfwFluidGrid:'nsfwFluid', nsfwEnvGrid:'nsfwEnv', nsfwIndicatorGrid:'nsfwIndicator',
@@ -1710,8 +1714,9 @@ function reflectUI(){
   Object.entries(multiMap).forEach(([gid,k])=>{
     const g=document.getElementById(gid);if(!g)return;
     g.querySelectorAll('.ob').forEach(b=>{
-      const txt=b.querySelector('span')&&b.querySelector('span').textContent.toLowerCase();
-      if(S[k]&&S[k].includes(txt)) b.classList.add('on');
+      const sp=b.querySelector('span');
+      const txt=sp?sp.textContent.toLowerCase():'';
+      if(S[k]&&S[k].map(v=>String(v).toLowerCase()).includes(txt)) b.classList.add('on');
     });
   });
   // Color pickers — now using .cb buttons (renderColors)
