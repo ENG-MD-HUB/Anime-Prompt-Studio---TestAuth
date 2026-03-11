@@ -884,9 +884,8 @@ function attachEvents(){
 
   /* NSFW */
   document.getElementById('nsfwBtn').addEventListener('click',()=>{
-    // ── يشترط تسجيل الدخول ──
     if(!window._currentUser){
-      toast('🔒 Sign in to unlock NSFW content','warn');
+      toast('🔒 Sign in to unlock NSFW','warn');
       return;
     }
     if(S.nsfw){
@@ -937,7 +936,6 @@ function attachEvents(){
 
   /* Save favourite */
   document.getElementById('saveFavBtn').addEventListener('click',()=>{
-    // ── يشترط تسجيل الدخول ──
     if(!window._currentUser){
       toast('🔒 Sign in to save favourites','warn');
       return;
@@ -2286,12 +2284,19 @@ function resetAll(silent=false){
 /* ═══════════════════════════════════
    TOAST
 ═══════════════════════════════════ */
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  document.getElementById('toastMsg').textContent=msg;
-  t.className='toast'+(type?' '+type:'');
+function toast(msg, type=''){
+  const t   = document.getElementById('toast');
+  const ico = t.querySelector('i');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast' + (type ? ' '+type : '');
+  if(ico){
+    ico.className = type==='warn' ? 'fas fa-triangle-exclamation'
+                  : type==='err'  ? 'fas fa-circle-xmark'
+                  : 'fas fa-circle-check';
+  }
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  clearTimeout(t._toastTimer);
+  t._toastTimer = setTimeout(()=>t.classList.remove('show'), 4000);
 }
 // i18n labels for conflict notification
 const _arNames={
@@ -3504,12 +3509,12 @@ Rules:
 
     let _uid = null;
     let _menuOpen = false;
-
-    let _firstAuthCall = true; // ignore first null call on page load
+    let _firstAuthCall = true;
 
     // ── Auth state listener ──
     window._fbAuth.onAuth(user => {
       _uid = user ? user.uid : null;
+      window._currentUser = user || null; // always up to date
       if(user){
         _firstAuthCall = false;
         // Show avatar button instead of login
@@ -3576,8 +3581,5 @@ Rules:
     }
   }
 
-  // Expose current user globally
-  if(window._fbAuth){
-    window._fbAuth.onAuth(user => { window._currentUser = user || null; });
-  }
+  // _currentUser is set inside the main onAuth handler above
 })();
