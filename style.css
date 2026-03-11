@@ -910,13 +910,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   border:1px solid rgba(234,179,8,.6);
   box-shadow:0 6px 28px rgba(0,0,0,.5), 0 0 0 1px rgba(234,179,8,.1);
   min-width:230px;max-width:310px;
-  pointer-events:all;
+  pointer-events:none;
   cursor:default;
   opacity:0;
   transform:translateX(20px);
   transition:opacity .26s ease, transform .26s cubic-bezier(.34,1.4,.64,1);
 }
-.conflict-notif.show{opacity:1;transform:translateX(0);}
+.conflict-notif.show{opacity:1;transform:translateX(0);pointer-events:all;}
 .conflict-notif:hover{
   border-color:rgba(234,179,8,.9);
   box-shadow:0 8px 32px rgba(0,0,0,.55), 0 0 0 1px rgba(234,179,8,.2);
