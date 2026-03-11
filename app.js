@@ -2541,7 +2541,6 @@ function _ar(name){
   }
 
   btn.addEventListener('click', closeWelcome);
-  overlay.addEventListener('click', e=>{ if(e.target===overlay) closeWelcome(); });
 
   // Show every time
   overlay.classList.add('open');
