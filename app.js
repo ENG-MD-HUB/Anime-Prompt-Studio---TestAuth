@@ -275,6 +275,7 @@ function renderColors(gid,arr,sk,toggleable=false){
     const muted=col.m+'cc'; b.style.cssText=`background:${muted};color:${fg};border-color:${isOn?'rgba(255,255,255,.8)':'transparent'};`;
     b.title=col.n;
     b.setAttribute('data-en', col.n);
+    b.setAttribute('data-val', col.id);
     b.innerHTML=`<span>${col.n}</span>`;
     b.addEventListener('click',()=>{
       if(toggleable&&S[sk]===col.id){
@@ -569,6 +570,7 @@ function renderSkins(){
     b.style.cssText=`background:${s.bg};color:${s.fg};border-color:${S.skin===s.val?'white':s.bg}`;
     b.innerHTML=`<span>${s.lbl}</span>`;
     b.setAttribute('data-en', s.lbl);
+    b.setAttribute('data-val', s.val);
     b.addEventListener('click',()=>{
       if(S.skin===s.val){S.skin=null;b.classList.remove('on');b.style.borderColor=s.bg;}
       else{
@@ -1627,18 +1629,122 @@ function renderFavList(){
       if(e.target.classList.contains('fav-item-del'))return;
 
       if(f.state){
-        // ── استعادة الـ state كاملاً وتفعيل الأزرار ──
-        const favs = S.favourites; // احتفظ بالمفضلة
+        // ── 1. صفّر كل شيء أولاً ──
+        document.getElementById('resetBtn')?.click();
+
+        // ── 2. استعد الـ state ──
+        const favs = S.favourites;
         Object.assign(S, JSON.parse(JSON.stringify(f.state)));
         S.favourites = favs;
-        // NSFW: تفعيل/إلغاء القسم
-        toggleNSFW(S.nsfw);
-        // تفعيل جميع الأزرار
-        reflectUI();
-        // إعادة بناء الـ prompt
+
+        // ── 3. NSFW ──
+        if(S.nsfw){
+          // تأكد age gate مؤكد
+          sessionStorage.setItem('aps_age_confirmed','1');
+          toggleNSFW(true);
+          document.getElementById('nsfwBtn').classList.add('on');
+        } else {
+          toggleNSFW(false);
+          document.getElementById('nsfwBtn').classList.remove('on');
+        }
+
+        // ── 4. اضغط كل زر برمجياً عبر data-val ──
+        function clickVal(gid, val){
+          if(!val) return;
+          const g = document.getElementById(gid); if(!g) return;
+          const sv = String(val).toLowerCase();
+          g.querySelectorAll('.ob[data-val]').forEach(b=>{
+            if(b.getAttribute('data-val').toLowerCase() === sv) b.click();
+          });
+        }
+        function clickMulti(gid, arr){
+          if(!arr||!arr.length) return;
+          const g = document.getElementById(gid); if(!g) return;
+          arr.forEach(val=>{
+            const sv = String(val).toLowerCase();
+            g.querySelectorAll('.ob[data-val]').forEach(b=>{
+              if(b.getAttribute('data-val').toLowerCase() === sv) b.click();
+            });
+          });
+        }
+        function clickColor(gid, colorId){
+          if(!colorId) return;
+          const g = document.getElementById(gid); if(!g) return;
+          g.querySelectorAll('.cb').forEach(b=>{
+            if((b.getAttribute('data-val')||'').toLowerCase() === colorId.toLowerCase()) b.click();
+          });
+        }
+
+        // Single-select
+        clickVal('charCountGrid', S.charCount);
+        clickVal('ageGrid',       S.age);
+        clickVal('bodyGrid',      S.body);
+        clickVal('hairstyleGrid', S.hairstyle);
+        clickVal('eyeShapeGrid',  S.eyeShape);
+        clickVal('clothingGrid',  S.clothing);
+        clickVal('clothingTopGrid',    S.clothingTop);
+        clickVal('clothingBottomGrid', S.clothingBottom);
+        clickVal('nsfwTopGrid',    S.nsfwTop);
+        clickVal('nsfwBottomGrid', S.nsfwBottom);
+        clickVal('sockLengthGrid', S.sockLength);
+        clickVal('shoesGrid',      S.shoes);
+        clickVal('expressionGrid', S.expression);
+        clickVal('envGrid',        S.environment);
+        clickVal('styleGrid',      S.style);
+        clickVal('eraGrid',        S.era);
+        clickVal('animeStudioGrid',S.animeStudio);
+        clickVal('strokeGrid',     S.stroke);
+        clickVal('shadowGrid',     S.shadow);
+        clickVal('glowGrid',       S.glow);
+        clickVal('smoothGrid',     S.smooth);
+        clickVal('angleGrid',      S.angle);
+        clickVal('shotGrid',       S.shot);
+        clickVal('lookGrid',       S.look);
+        clickVal('lensGrid',       S.lens);
+        clickVal('lensEffectGrid', S.lensEffect);
+        clickVal('colorGradeGrid', S.colorGrade);
+
+        // Multi-select
+        clickMulti('clothingAccGrid',       S.clothingAcc);
+        clickMulti('clothingConditionGrid', S.clothingCondition);
+        clickMulti('faceAccGrid',           S.faceAcc);
+        clickMulti('poseGrid',              S.poses);
+        clickMulti('effectsGrid',           S.effects);
+        clickMulti('liquidsGrid',           S.liquids);
+        clickMulti('weaponGrid',            S.weapons);
+        clickMulti('propsGrid',             S.props);
+        clickMulti('electronicsGrid',       S.electronics);
+        clickMulti('otherItemsGrid',        S.otherItems);
+        clickMulti('qualityGrid',           S.quality);
+        clickMulti('lightGrid',             S.lights);
+        clickMulti('negativeGrid',          S.negatives);
+        clickMulti('negBodyGrid',           S.negBody);
+        clickMulti('negQualityGrid',        S.negQuality);
+        clickMulti('bodyPartsGrid',         S.bodyParts);
+        clickMulti('nsfwBodyGrid',          S.nsfwBody);
+        clickMulti('nsfwClothingGrid',      S.nsfwClothing);
+        clickMulti('nsfwPoseGrid',          S.nsfwPose);
+        clickMulti('nsfwFluidGrid',         S.nsfwFluid);
+        clickMulti('nsfwEnvGrid',           S.nsfwEnv);
+        clickMulti('nsfwIndicatorGrid',     S.nsfwIndicator);
+        clickMulti('nsfwShotGrid',          S.nsfwShot);
+
+        // Colors (hair, eye)
+        clickColor('hairColorGrid',  S.hairColor1);
+        clickColor('hairColor2Grid', S.hairColor2);
+        clickColor('eyeColorGrid',   S.eyeColor);
+
+        // Skin
+        if(S.skin){
+          document.querySelectorAll('.sb').forEach(b=>{
+            if(b.getAttribute('data-val')===S.skin) b.click();
+          });
+        }
+
         rebuild();
+
       } else {
-        // fallback: نص فقط (مفضلة قديمة بدون state)
+        // fallback: مفضلة قديمة بدون state — نص فقط
         const pe=document.getElementById('promptText');
         const ne=document.getElementById('negativeText');
         pe.className='ptxt'; pe.textContent=f.pos;
