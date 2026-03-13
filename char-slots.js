@@ -76,16 +76,35 @@ function csSwitchTo(idx){
   if(typeof refreshGenderGrids==='function') refreshGenderGrids();
   csUpdateSaveBar(0); csUpdateSaveBar(1);
   /* intentionally NO rebuild() — switching edit target never changes prompt */
+  if(typeof renderCharCards==='function') renderCharCards();
 }
 
 function csReflectButtons(){
   var singles = {
     ageGrid:'age', bodyGrid:'body', hairstyleGrid:'hairstyle',
-    eyeShapeGrid:'eyeShape', clothingGrid:'clothing',
+    eyeShapeGrid:'eyeShape', eyeColorGrid:'eyeColor',
+    clothingGrid:'clothing',
     clothingTopGrid:'clothingTop', clothingBottomGrid:'clothingBottom',
     nsfwTopGrid:'nsfwTop', nsfwBottomGrid:'nsfwBottom',
     sockLengthGrid:'sockLength', shoesGrid:'shoes', expressionGrid:'expression'
   };
+  /* skin grid uses .sb buttons — reflect separately */
+  (function(){
+    var sv = S.skin;
+    var sg = document.getElementById('skinGrid');
+    if(sg) sg.querySelectorAll('.sb').forEach(function(btn){
+      var matches = btn.getAttribute('data-val') === sv;
+      btn.classList.toggle('on', matches);
+    });
+    /* hair color grids */
+    ['hairColorGrid','hairColor2Grid'].forEach(function(gid){
+      var hv = gid==='hairColorGrid' ? S.hairColor1 : S.hairColor2;
+      var hg = document.getElementById(gid);
+      if(hg) hg.querySelectorAll('.cb,.ob').forEach(function(btn){
+        btn.classList.toggle('on', btn.getAttribute('data-val')===hv);
+      });
+    });
+  })();
   Object.keys(singles).forEach(function(gid){
     var k = singles[gid];
     var g = document.getElementById(gid); if(!g) return;
@@ -287,7 +306,7 @@ buildPosText = function(){
 
   if(activeChars.length === 1){
     var sc = activeChars[0];
-    var slot = charSlots[sc.i] || S;
+    var slot = charSlots[sc.i] || csEmptySlot();
     var p = [];
     if(quality) p.push(quality);
     csBuildCharText(slot, GENDER_TAG[sc.g]||'1girl').forEach(function(x){p.push(x);});

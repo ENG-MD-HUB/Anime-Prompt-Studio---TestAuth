@@ -875,6 +875,7 @@ function _attachCardEvents(card, i){
       e.stopPropagation();
       if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
       charSlots[i]._name = e.target.value;
+      if(i === (typeof activeChar!=='undefined' ? activeChar : 0)) S._name = e.target.value;
     });
     nameIn.addEventListener('blur', function(e){
       if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
@@ -893,6 +894,7 @@ function _attachCardEvents(card, i){
       e.stopPropagation();
       if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
       charSlots[i]._age = e.target.value;
+      if(i === (typeof activeChar!=='undefined' ? activeChar : 0)) S._age = e.target.value;
       var lbl = document.getElementById('idcAgeLbl'+i);
       if(lbl) lbl.textContent = e.target.value ? '→ '+_ageLabel(e.target.value) : '';
     });
@@ -903,6 +905,22 @@ function _attachCardEvents(card, i){
       if(i === (typeof activeChar!=='undefined' ? activeChar : 0)){
         var al = _ageLabel(e.target.value);
         S.age = al || null;
+        /* Auto-select matching Age Group button */
+        if(al){
+          var ageG = document.getElementById('ageGrid');
+          if(ageG){
+            var matched = false;
+            ageG.querySelectorAll('.ob').forEach(function(btn){
+              var bv = btn.getAttribute('data-val');
+              if(bv === al){
+                ageG.querySelectorAll('.ob').forEach(function(x){ x.classList.remove('on'); });
+                btn.classList.add('on');
+                S.age = bv;
+                matched = true;
+              }
+            });
+          }
+        }
       }
       rebuild();
     });
@@ -999,10 +1017,27 @@ function renderCharCards(){
     if(gender !== wasGender){ _rebuildSlot(i); return; }
 
     /* Case 3: same gender, just update dynamic parts without touching inputs */
-    // Flush active slot before reading (mirror may be stale for non-active char)
-    if(typeof csSave==='function' && i===activeChar) csSave(activeChar);
-    // Re-read slot after flush
-    var freshSlot = (typeof charSlots!=='undefined') ? charSlots[i] : null;
+    // For active char: read directly from S (always current)
+    // For inactive char: flush+read from slot
+    var freshSlot;
+    if(i === (typeof activeChar!=='undefined' ? activeChar : 0)){
+      // Build a synthetic slot from current S values — always accurate
+      freshSlot = {
+        hairColor1:S.hairColor1, hairColor2:S.hairColor2, hairstyle:S.hairstyle,
+        eyeColor:S.eyeColor, eyeShape:S.eyeShape, skin:S.skin, body:S.body,
+        clothing:S.clothing, clothingColor:S.clothingColor,
+        clothingTop:S.clothingTop, clothingTopColor:S.clothingTopColor,
+        clothingBottom:S.clothingBottom, clothingBottomColor:S.clothingBottomColor,
+        clothingAcc:S.clothingAcc||[], sockLength:S.sockLength, sockColor:S.sockColor,
+        shoes:S.shoes, shoeColor:S.shoeColor, faceAcc:S.faceAcc||[],
+        expression:S.expression, poses:S.poses||[], effects:S.effects||[],
+        weapons:S.weapons||[], props:S.props||[], electronics:S.electronics||[],
+        _name:S._name, _age:S._age
+      };
+    } else {
+      /* inactive char — read slot directly, NEVER write S into it */
+      freshSlot = (typeof charSlots!=='undefined') ? charSlots[i] : null;
+    }
     // Tags
     var tagsEl = document.getElementById('idcTags'+i);
     if(tagsEl){
