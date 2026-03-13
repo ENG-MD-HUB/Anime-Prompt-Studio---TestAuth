@@ -1283,6 +1283,8 @@ function attachEvents(){
     const isChar = ms==='char';
     document.getElementById('charTabs').style.display  = isChar ? ''      : 'none';
     document.getElementById('sceneTabs').style.display = isChar ? 'none'  : '';
+    const cardsEl = document.querySelector('.char-cards-sticky');
+    if(cardsEl) cardsEl.style.display = isChar ? '' : 'none';
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
     document.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
     // Activate specific tab or first tab of panel

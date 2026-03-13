@@ -106,7 +106,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   top:0;
   z-index:80;
   background:var(--bg);
-  padding:.35rem 0 .35rem;
+  padding:.35rem 0 .2rem;
   margin:0 -1.4rem .5rem;
   padding-left:1.4rem;
   padding-right:1.4rem;
@@ -116,8 +116,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .char-cards-sticky{
   margin-top:.5rem;
 }
-
-/* ── Sticky Editing Character bar (kept for outfit/mood/tools) ── */
 
 .lp::-webkit-scrollbar{width:3px;}
 .lp::-webkit-scrollbar-thumb{background:var(--p);border-radius:10px;}
