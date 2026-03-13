@@ -177,10 +177,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
    EDITING CHARACTER — STICKY BAR
 ═══════════════════════════════════════ */
 .cs-wrap{
+  overflow:hidden;
+}
+.cs-wrap:has(.cs-tab){
   background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(244,114,182,.03));
   border:1.5px solid rgba(99,102,241,.2);
   border-radius:14px;
-  overflow:hidden;
 }
 .cs-wrap-header{
   display:flex;align-items:center;justify-content:space-between;

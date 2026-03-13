@@ -180,13 +180,27 @@ var CS_TAB_IDS  = ['csTabsOutfit','csTabsMood','csTabsTools'];
 function csRenderTabs(){
   var active = S.characters.filter(Boolean);
   var show   = active.length >= 2;
+
+  /* Always update card badges first */
+  if(typeof renderCharCards==='function') renderCharCards();
+
+  /* Hide all wraps upfront — re-show only if tabs were actually built */
   CS_WRAP_IDS.forEach(function(id){
     var el = document.getElementById(id);
-    if(el) el.style.display = show ? '' : 'none';
+    if(el) el.style.display = 'none';
   });
-  /* Patch card UI without destroying inputs */
-  if(typeof renderCharCards==='function') renderCharCards();
-  if(!show) return;
+
+  if(!show){
+    /* Clear any stale tabs so they don't reappear later */
+    CS_TAB_IDS.forEach(function(cid){
+      var el = document.getElementById(cid);
+      if(el) el.innerHTML = '';
+    });
+    return;
+  }
+
+  var wrapMap = {csTabsOutfit:'csWrapOutfit',csTabsMood:'csWrapMood',csTabsTools:'csWrapTools'};
+
   CS_TAB_IDS.forEach(function(cid){
     var container = document.getElementById(cid); if(!container) return;
     container.innerHTML = '';
@@ -198,7 +212,6 @@ function csRenderTabs(){
       var icon      = CS_GICON[gender]||'🧑';
       var label     = gender.charAt(0).toUpperCase()+gender.slice(1);
       var savedName = csGetCharName(i);
-
       var tab = document.createElement('div');
       tab.className = 'cs-tab'+(isEditing?' cs-active':'');
       tab.style.setProperty('--cs-color', color);
@@ -216,6 +229,9 @@ function csRenderTabs(){
       tab.addEventListener('click', function(){ csSwitchTo(i); });
       container.appendChild(tab);
     });
+    /* Show this wrap only if it now has tabs */
+    var parentWrap = document.getElementById(wrapMap[cid]);
+    if(parentWrap && container.children.length > 0) parentWrap.style.display = '';
   });
 }
 
@@ -481,25 +497,22 @@ function csBuildSaveBar(charIdx){
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
 function csLibSave(charIdx){
-  /* Try IDC card name input first, then legacy csNameInput */
+  /* Read name: from slot (always synced via mirror/blur), then from card input as fallback */
   var name = '';
-  var row = document.getElementById('charCardsRow');
-  if(row){
-    var card = row.querySelector('[data-card-idx="'+charIdx+'"]');
-    if(card){
-      var cin = card.querySelector('.c-name-input');
-      if(cin) name = cin.value.trim();
+  /* 1. Try slot._name (updated on every input event via mirror) */
+  if(charIdx === activeChar && S._name) name = S._name.trim();
+  if(!name && charSlots[charIdx] && charSlots[charIdx]._name) name = charSlots[charIdx]._name.trim();
+  /* 2. Fallback: read directly from IDC card input */
+  if(!name){
+    var row = document.getElementById('charCardsRow');
+    if(row){
+      var card = row.querySelector('[data-card-idx="'+charIdx+'"]');
+      if(card){ var cin = card.querySelector('.c-name-input'); if(cin) name = cin.value.trim(); }
     }
   }
-  if(!name){
-    var nameInput = document.getElementById('csNameInput'+charIdx);
-    name = (nameInput ? nameInput.value.trim() : '');
-  }
   if(!name){ csToast('Enter a character name first','warn'); return; }
-  // Reject duplicate names
   var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
   if(duplicate){ csToast('Name "'+name+'" already exists in library','warn'); return; }
-  // Write name into slot directly (works even if charIdx !== activeChar)
   if(!charSlots[charIdx]) charSlots[charIdx] = csEmptySlot();
   charSlots[charIdx]._name = name;
   if(charIdx === activeChar) S._name = name;

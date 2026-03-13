@@ -1298,8 +1298,6 @@ function attachEvents(){
   document.querySelectorAll('.ms-btn').forEach(b=>b.addEventListener('click',()=>{
     switchMainSection(b.dataset.ms);
   }));
-  /* ensure Characters section is active on load */
-  switchMainSection('char', 'character');
 
   /* tabs — works with grouped tab structure */
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
@@ -1469,6 +1467,9 @@ function attachEvents(){
 
   /* Random / Built-in Presets */
   document.getElementById('randomBtn').addEventListener('click',randomize);
+
+  /* Default to Characters section on load */
+  switchMainSection('char', 'character');
 }
 
 function setupTagInput(inputId,boxId,type){
