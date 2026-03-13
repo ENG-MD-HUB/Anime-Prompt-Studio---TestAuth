@@ -210,7 +210,7 @@ function csRenderTabs(){
             '<span class="cs-num">'+(savedName?label:'Char '+(i+1))+'</span>'+
           '</div>'+
           (isEditing?'<span class="cs-editing"><i class="fas fa-pen"></i> Editing</span>':
-                     '<span class="cs-switch-hint"><i class="fas fa-arrow-right-arrow-left"></i></span>')+
+                     '<span class="cs-switch-hint"><i class="fas fa-exchange-alt"></i></span>')+
         '</div>'+
         '<div class="cs-summary '+(summary?'':'cs-empty')+'">'+(summary||'No details yet')+'</div>';
       tab.addEventListener('click', function(){ csSwitchTo(i); });
@@ -481,12 +481,28 @@ function csBuildSaveBar(charIdx){
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
 function csLibSave(charIdx){
-  var nameInput = document.getElementById('csNameInput'+charIdx);
-  var name = (nameInput ? nameInput.value.trim() : '');
-  if(!name){ csToast('Enter a character name','warn'); return; }
+  /* Try IDC card name input first, then legacy csNameInput */
+  var name = '';
+  var row = document.getElementById('charCardsRow');
+  if(row){
+    var card = row.querySelector('[data-card-idx="'+charIdx+'"]');
+    if(card){
+      var cin = card.querySelector('.c-name-input');
+      if(cin) name = cin.value.trim();
+    }
+  }
+  if(!name){
+    var nameInput = document.getElementById('csNameInput'+charIdx);
+    name = (nameInput ? nameInput.value.trim() : '');
+  }
+  if(!name){ csToast('Enter a character name first','warn'); return; }
   // Reject duplicate names
   var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
   if(duplicate){ csToast('Name "'+name+'" already exists in library','warn'); return; }
+  // Write name into slot directly (works even if charIdx !== activeChar)
+  if(!charSlots[charIdx]) charSlots[charIdx] = csEmptySlot();
+  charSlots[charIdx]._name = name;
+  if(charIdx === activeChar) S._name = name;
   csSave(charIdx);
   var entry = {
     id: Date.now(),

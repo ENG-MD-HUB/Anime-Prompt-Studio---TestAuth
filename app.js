@@ -1298,6 +1298,8 @@ function attachEvents(){
   document.querySelectorAll('.ms-btn').forEach(b=>b.addEventListener('click',()=>{
     switchMainSection(b.dataset.ms);
   }));
+  /* ensure Characters section is active on load */
+  switchMainSection('char', 'character');
 
   /* tabs — works with grouped tab structure */
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{

@@ -127,16 +127,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   background:var(--bg);
   padding:.5rem 0 .4rem;
   margin:0 0 .5rem;
+  overflow:hidden;
 }
-.cs-sticky-wrap::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(244,114,182,.04));
-  border-bottom:1px solid rgba(99,102,241,.18);
-  border-radius:0 0 14px 14px;
-  pointer-events:none;
-}
+.cs-sticky-wrap[style*="display: none"]{padding:0;margin:0;}
+/* cs-sticky-wrap::before removed — was causing ghost border at top of outfit/mood/tools */
 .lp::-webkit-scrollbar{width:3px;}
 .lp::-webkit-scrollbar-thumb{background:var(--p);border-radius:10px;}
 
