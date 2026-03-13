@@ -174,65 +174,11 @@ function csGetCharName(idx){
   return saved ? saved.name : null;
 }
 
-var CS_WRAP_IDS = ['csWrapOutfit','csWrapMood','csWrapTools'];
-var CS_TAB_IDS  = ['csTabsOutfit','csTabsMood','csTabsTools'];
+/* CS_WRAP_IDS / CS_TAB_IDS removed — sticky-wrap system deleted */
 
 function csRenderTabs(){
-  var active = S.characters.filter(Boolean);
-  var show   = active.length >= 2;
-
-  /* Always update card badges first */
+  /* Update IDC card badges (EDITING/STANDBY, mini chips, tags) */
   if(typeof renderCharCards==='function') renderCharCards();
-
-  /* Hide all wraps upfront — re-show only if tabs were actually built */
-  CS_WRAP_IDS.forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.style.display = 'none';
-  });
-
-  if(!show){
-    /* Clear any stale tabs so they don't reappear later */
-    CS_TAB_IDS.forEach(function(cid){
-      var el = document.getElementById(cid);
-      if(el) el.innerHTML = '';
-    });
-    return;
-  }
-
-  var wrapMap = {csTabsOutfit:'csWrapOutfit',csTabsMood:'csWrapMood',csTabsTools:'csWrapTools'};
-
-  CS_TAB_IDS.forEach(function(cid){
-    var container = document.getElementById(cid); if(!container) return;
-    container.innerHTML = '';
-    S.characters.forEach(function(gender,i){
-      if(!gender) return;
-      var isEditing = (i===activeChar);
-      var summary   = csSummary(i);
-      var color     = CS_GCOLOR[gender]||'#a78bfa';
-      var icon      = CS_GICON[gender]||'🧑';
-      var label     = gender.charAt(0).toUpperCase()+gender.slice(1);
-      var savedName = csGetCharName(i);
-      var tab = document.createElement('div');
-      tab.className = 'cs-tab'+(isEditing?' cs-active':'');
-      tab.style.setProperty('--cs-color', color);
-      tab.innerHTML =
-        '<div class="cs-tab-top">'+
-          '<span class="cs-icon">'+icon+'</span>'+
-          '<div class="cs-tab-info">'+
-            '<span class="cs-lbl">'+(savedName||label+' '+(i+1))+'</span>'+
-            '<span class="cs-num">'+(savedName?label:'Char '+(i+1))+'</span>'+
-          '</div>'+
-          (isEditing?'<span class="cs-editing"><i class="fas fa-pen"></i> Editing</span>':
-                     '<span class="cs-switch-hint"><i class="fas fa-exchange-alt"></i></span>')+
-        '</div>'+
-        '<div class="cs-summary '+(summary?'':'cs-empty')+'">'+(summary||'No details yet')+'</div>';
-      tab.addEventListener('click', function(){ csSwitchTo(i); });
-      container.appendChild(tab);
-    });
-    /* Show this wrap only if it now has tabs */
-    var parentWrap = document.getElementById(wrapMap[cid]);
-    if(parentWrap && container.children.length > 0) parentWrap.style.display = '';
-  });
 }
 
 /* ── Build prompt tokens for one slot ── */
