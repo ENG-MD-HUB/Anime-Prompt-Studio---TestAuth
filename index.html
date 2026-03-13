@@ -890,6 +890,29 @@
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     },
   };
+
+  // ── Character Library — same pattern as _fbFavs ──
+  window._fbChars = {
+    save: async (uid, entry) => {
+      const ref = collection(db, 'users', uid, 'characters');
+      const docRef = await addDoc(ref, { ...entry, createdAt: serverTimestamp() });
+      return docRef.id;
+    },
+    load: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'characters');
+      const q    = query(ref, orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+    },
+    del: async (uid, docId) => {
+      await deleteDoc(doc(db, 'users', uid, 'characters', docId));
+    },
+    clear: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'characters');
+      const snap = await getDocs(ref);
+      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    },
+  };
 </script>
 <script src="app.js"></script>
 <script src="char-slots.js"></script>

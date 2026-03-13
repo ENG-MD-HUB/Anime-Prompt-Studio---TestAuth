@@ -29,7 +29,7 @@ var CHAR_KEYS = [
 
 var GENDER_TAG = { female:'1girl', male:'1boy' };
 var CS_GCOLOR  = { female:'#f472b6', male:'#60a5fa' };
-var CS_GICON   = { female:'👩', male:'👨' };
+var CS_GICON   = { female:'Female', male:'Male' };
 
 var charSlots  = [null, null];
 var activeChar = 0;
@@ -442,13 +442,15 @@ function csBuildSaveBar(charIdx){
 /* ══ CHARACTER LIBRARY ══ */
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
-function csLibSave(charIdx){
-  /* Read name: from slot (always synced via mirror/blur), then from card input as fallback */
+async function csLibSave(charIdx){
+  if(!window._currentUser){
+    csToast('🔒 Sign in to save characters','warn');
+    return;
+  }
+  /* Read name */
   var name = '';
-  /* 1. Try slot._name (updated on every input event via mirror) */
   if(charIdx === activeChar && S._name) name = S._name.trim();
   if(!name && charSlots[charIdx] && charSlots[charIdx]._name) name = charSlots[charIdx]._name.trim();
-  /* 2. Fallback: read directly from IDC card input */
   if(!name){
     var row = document.getElementById('charCardsRow');
     if(row){
@@ -471,8 +473,19 @@ function csLibSave(charIdx){
     date: new Date().toLocaleDateString()
   };
   csLibrary.unshift(entry);
-  localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-  csToast('✓ Saved "'+name+'" to library','ok');
+  /* ── Sync to Firestore FIRST, then update local ── */
+  try {
+    var docId = await window._fbChars.save(window._currentUser.uid, entry);
+    entry._docId = docId;
+    csLibrary[0]._docId = docId;
+    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+    csToast('✓ Saved & synced "'+name+'"','ok');
+  } catch(e){
+    /* Firestore failed — still save locally */
+    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+    csToast('✓ Saved locally (sync failed)','ok');
+    console.warn('Firestore char save error:', e);
+  }
   csRenderTabs();
   csRenderLibrary();
 }
@@ -490,8 +503,14 @@ function csLibLoad(entry, charIdx){
 }
 
 function csLibDelete(id){
+  var entry = csLibrary.find(function(c){ return c.id===id; });
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+  /* Delete from Firestore if logged in */
+  var u = window._currentUser;
+  if(u && entry && entry._docId && window._fbChars){
+    window._fbChars.del(u.uid, entry._docId).catch(console.warn);
+  }
   csRenderLibrary();
   csToast('Deleted','ok');
 }
@@ -518,6 +537,7 @@ function csRenderLibrary(){
     var item = document.createElement('div');
     item.className = 'cs-lib-item';
     item.style.setProperty('--cs-color', color);
+    item.style.cursor = 'pointer';
     item.innerHTML =
       '<div class="cs-lib-icon">'+icon+'</div>'+
       '<div class="cs-lib-info">'+
@@ -526,13 +546,13 @@ function csRenderLibrary(){
         (summary?'<div class="cs-lib-summary">'+summary+'</div>':'')+
       '</div>'+
       '<div class="cs-lib-actions">'+
-        '<button class="cs-lib-load-btn" title="Load to active character"><i class="fas fa-arrow-down"></i> Load</button>'+
-        (S.characters&&S.characters[_csLibTargetChar===0?1:0]?'<button class="cs-lib-load2-btn" title="Load to other character"><i class="fas fa-arrow-down"></i> Other</button>':'')+
         '<button class="cs-lib-del-btn" title="Delete"><i class="fas fa-trash"></i></button>'+
       '</div>';
-    item.querySelector('.cs-lib-load-btn').addEventListener('click', function(e){ e.stopPropagation(); csLibLoad(entry, _csLibTargetChar); document.getElementById('csLibOverlay').classList.remove('open'); });
-    var l2btn = item.querySelector('.cs-lib-load2-btn');
-    if(l2btn) l2btn.addEventListener('click', function(e){ e.stopPropagation(); csLibLoad(entry, _csLibTargetChar===0?1:0); document.getElementById('csLibOverlay').classList.remove('open'); });
+    item.addEventListener('click', function(e){
+      if(e.target.closest('.cs-lib-del-btn')) return;
+      csLibLoad(entry, _csLibTargetChar);
+      document.getElementById('csLibOverlay').classList.remove('open');
+    });
     item.querySelector('.cs-lib-del-btn').addEventListener('click', function(e){ e.stopPropagation(); csLibDelete(entry.id); });
     list.appendChild(item);
   });

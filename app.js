@@ -4071,6 +4071,8 @@ Rules:
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
+        // Load character library from Firestore
+        loadCharsFromCloud(_uid);
       } else {
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
@@ -4108,6 +4110,7 @@ Rules:
       _menuOpen = false;
       await window._fbAuth.signOut();
       localStorage.removeItem('aps6Favs');
+      localStorage.removeItem('aps_charLib');
       // Full page reload — clears all state and cache
       window.location.reload();
     });
@@ -4115,8 +4118,7 @@ Rules:
   } // end setupAuth
 
   // ── Load favourites from Firestore → replace local ──
-  async function loadFavsFromCloud(uid){
-    try {
+  async function loadFavsFromCloud(uid){    try {
       const cloud = await window._fbFavs.load(uid);
       // احذف تلقائياً المفضلة القديمة بدون state
       const valid = [];
@@ -4139,4 +4141,21 @@ Rules:
   }
 
   // _currentUser is set inside the main onAuth handler above
+
+  // ── Load character library from Firestore → replace local ──
+  async function loadCharsFromCloud(uid){
+    if(!window._fbChars) return;
+    try {
+      const cloud = await window._fbChars.load(uid);
+      if(typeof csLibrary !== 'undefined'){
+        csLibrary.length = 0;
+        cloud.forEach(function(c){ csLibrary.push(c); });
+      }
+      localStorage.setItem('aps_charLib', JSON.stringify(cloud));
+      if(typeof csRenderLibrary === 'function') csRenderLibrary();
+      if(cloud.length) toast('☁️ Loaded '+cloud.length+' character'+(cloud.length>1?'s':''));
+    } catch(e){
+      console.warn('loadCharsFromCloud error:', e);
+    }
+  }
 })();

@@ -218,10 +218,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   display:flex;align-items:flex-start;gap:.7rem;
   padding:.65rem .8rem;border-radius:12px;
   border:1.5px solid var(--brd2);background:var(--surf2);
-  transition:border-color .2s;cursor:default;
+  transition:border-color .2s,background .2s;cursor:pointer;
 }
-.cs-lib-item:hover{border-color:var(--cs-color,var(--brd));}
-.cs-lib-icon{font-size:1.4rem;flex-shrink:0;line-height:1;margin-top:.1rem;}
+.cs-lib-item:hover{border-color:var(--cs-color,var(--brd));background:var(--surf3,var(--surf2));}
+.cs-lib-icon{font-size:.65rem;font-weight:800;flex-shrink:0;line-height:1;margin-top:.1rem;padding:.22rem .45rem;border-radius:6px;background:rgba(255,255,255,.07);color:var(--cs-color,var(--tx2));border:1px solid var(--cs-color,var(--brd));letter-spacing:.03em;white-space:nowrap;}
 .cs-lib-info{flex:1;min-width:0;}
 .cs-lib-name{font-size:.82rem;font-weight:700;color:var(--tx);}
 .cs-lib-meta{font-size:.65rem;color:var(--tx3);margin-top:.1rem;}
