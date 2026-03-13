@@ -626,58 +626,6 @@ document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('csLibClose').addEventListener('click', function(){ overlay.classList.remove('open'); });
   }
 
-  [
-    {catId:'cat-outfit',    wrapId:'csWrapOutfit',    tabsId:'csTabsOutfit'   },
-    {catId:'cat-mood',      wrapId:'csWrapMood',      tabsId:'csTabsMood'     },
-    {catId:'cat-tools',     wrapId:'csWrapTools',     tabsId:'csTabsTools'    }
-  ].forEach(function(cfg){
-    var cat=document.getElementById(cfg.catId);
-    if(!cat||document.getElementById(cfg.wrapId)) return;
-
-    // Sticky wrapper
-    var stickyWrap = document.createElement('div');
-    stickyWrap.className = 'cs-sticky-wrap';
-    stickyWrap.style.display = 'none';
-    stickyWrap.id = cfg.wrapId;
-
-    var wrap=document.createElement('div');
-    wrap.className='cs-wrap';
-
-    // Header row: only for cat-character (outfit) — mood/tools get no header
-    if(cfg.catId==='cat-character'){
-      var header = document.createElement('div');
-      header.className = 'cs-wrap-header';
-      header.innerHTML =
-        '<div class="cs-wrap-label"><i class="fas fa-pen-to-square"></i><span>Editing Character</span></div>'+
-        '<button class="cs-lib-open-btn" id="csLibOpenBtn"><i class="fas fa-address-book"></i> Library</button>';
-      wrap.appendChild(header);
-    }
-
-    // Tabs row
-    var tabsDiv = document.createElement('div');
-    tabsDiv.className='cs-tabs'; tabsDiv.id=cfg.tabsId;
-    wrap.appendChild(tabsDiv);
-
-    // Save row — only in Character cat
-    if(cfg.catId==='cat-character'){
-      var saveRow = document.createElement('div');
-      saveRow.className = 'cs-save-row';
-      // Char 0 save
-      saveRow.appendChild(csBuildSaveBar(0));
-      saveRow.appendChild(csBuildSaveBar(1));
-      wrap.appendChild(saveRow);
-    }
-
-    stickyWrap.appendChild(wrap);
-    cat.insertBefore(stickyWrap, cat.firstChild);
-
-    // Bind library button
-    var libBtn = document.getElementById('csLibOpenBtn');
-    if(libBtn) libBtn.addEventListener('click', csOpenLibrary);
-  });
-
-  /* styles now in style.css */
-
   csRenderTabs();
 });
 
