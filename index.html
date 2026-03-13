@@ -107,19 +107,43 @@
 <div class="layout">
 <!-- ═══ LEFT PANEL ═══ -->
 <div class="lp" id="leftPanel">
-  <!-- Tab group labels -->
-  <div class="tabs">
-    <button class="tab on" data-c="style"><i class="fas fa-paintbrush"></i> <span data-i18n="tab_style">Style</span></button>
-    <button class="tab" data-c="character"><i class="fas fa-user"></i> <span data-i18n="tab_character">Character</span></button>
-    <button class="tab" data-c="appearance"><i class="fas fa-eye"></i> <span data-i18n="tab_look">Look</span></button>
-    <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
-    <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
-    <button class="tab" data-c="tools"><i class="fas fa-sword"></i> <span data-i18n="tab_tools">Tools</span></button>
-    <button class="tab" data-c="scene"><i class="fas fa-mountain-sun"></i> <span data-i18n="tab_scene">Scene</span></button>
-    <button class="tab" data-c="camera"><i class="fas fa-camera"></i> <span data-i18n="tab_camera">Camera</span></button>
-    <button class="tab" data-c="quality"><i class="fas fa-sparkles"></i> <span data-i18n="tab_quality">Quality</span></button>
-    <button class="tab" data-c="negative"><i class="fas fa-ban"></i> <span data-i18n="tab_avoid">Avoid</span></button>
-  </div>
+  <!-- ══ MAIN SECTION TOGGLE ══ -->
+  <div class="char-sticky-zone" id="charStickyZone">
+    <div class="main-sections">
+      <button class="ms-btn ms-active" data-ms="char">
+        <i class="fas fa-user"></i> <span data-i18n="ms_characters">Characters</span>
+      </button>
+      <button class="ms-btn" data-ms="scene">
+        <i class="fas fa-mountain-sun"></i> <span data-i18n="ms_scene">Scene</span>
+      </button>
+    </div>
+
+    <!-- ══ CHARACTER TABS ══ -->
+    <div class="tabs ms-panel ms-char-panel" id="charTabs">
+      <button class="tab on" data-c="character"><i class="fas fa-user"></i> <span data-i18n="tab_character">Character</span></button>
+      <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
+      <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
+      <button class="tab" data-c="tools"><i class="fas fa-sword"></i> <span data-i18n="tab_tools">Tools</span></button>
+    </div>
+
+    <!-- ══ SCENE TABS ══ -->
+    <div class="tabs ms-panel ms-scene-panel" id="sceneTabs" style="display:none">
+      <button class="tab on" data-c="style"><i class="fas fa-paintbrush"></i> <span data-i18n="tab_style">Style</span></button>
+      <button class="tab" data-c="scene"><i class="fas fa-mountain-sun"></i> <span data-i18n="tab_scene">Scene</span></button>
+      <button class="tab" data-c="camera"><i class="fas fa-camera"></i> <span data-i18n="tab_camera">Camera</span></button>
+      <button class="tab" data-c="quality"><i class="fas fa-sparkles"></i> <span data-i18n="tab_quality">Quality</span></button>
+      <button class="tab" data-c="negative"><i class="fas fa-ban"></i> <span data-i18n="tab_avoid">Avoid</span></button>
+    </div>
+
+    <!-- ══ CHARACTER CARDS (sticky with tabs) ══ -->
+    <div class="char-cards-sticky ms-panel ms-char-panel">
+      <div class="char-cards-row" id="charCardsRow"></div>
+      <div class="char-warn" id="charWarn">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>Using 2+ characters may confuse the model — results can be inconsistent.</span>
+      </div>
+    </div>
+  </div><!-- /char-sticky-zone -->
 
   <!-- ── STYLE (NEW FIRST TAB) ── -->
   <div class="cat on" id="cat-style">
@@ -177,11 +201,6 @@
         <span class="sec-title" data-i18n="sec_characters">Characters in Scene</span>
         <button class="sec-clr" id="charCardsClrBtn"><span data-i18n="clear">Clear</span></button>
       </div>
-      <div class="char-cards-row" id="charCardsRow"></div>
-      <div class="char-warn" id="charWarn">
-        <i class="fas fa-triangle-exclamation"></i>
-        <span>Using 2+ characters may confuse the model — results can be inconsistent. Works best with 1 character.</span>
-      </div>
     </div>
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-cake-candles"></i></div><span class="sec-title" data-i18n="sec_age">Age Group</span><button class="sec-clr" data-k="age"><span data-i18n="clear">Clear</span></button></div>
@@ -196,10 +215,8 @@
       <div class="og c3" id="bodyGrid"></div>
       <div class="og c3" id="nsfwBodyGrid"></div>
     </div>
-  </div>
 
-  <!-- ── APPEARANCE ── -->
-  <div class="cat" id="cat-appearance">
+    <!-- ── LOOK (merged into Character) ── -->
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" data-k="hairstyle"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="hairstyleGrid"></div>
@@ -623,15 +640,6 @@
         </div>
       </button>
 
-      <!-- Futanari -->
-      <button class="gender-opt-btn opt-futa" data-gender="futa">
-        <div class="gender-opt-sil"><i class="fa-solid fa-person-half-dress"></i></div>
-        <div class="gender-opt-info">
-          <span class="gender-opt-name">Futanari</span>
-          <span class="gender-opt-tag">androgynous, futanari</span>
-        </div>
-      </button>
-
       <button class="gender-modal-reset" id="genderModalReset">
         <i class="fas fa-rotate-left"></i> Remove this character
       </button>
@@ -884,5 +892,6 @@
   };
 </script>
 <script src="app.js"></script>
+<script src="char-slots.js"></script>
 </body>
 </html>

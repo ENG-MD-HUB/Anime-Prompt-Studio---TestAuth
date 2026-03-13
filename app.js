@@ -2,19 +2,20 @@
    STATE
 ═══════════════════════════════════ */
 const S={
-  characters:[null,null,null],
+  characters:[null,null],
   charCount:null,age:null,skin:null,body:null,
   hairColor1:null,hairColor2:null,hairstyle:null,
   eyeColor:null,eyeShape:null,
   clothing:null,clothingColor:null,
   clothingTop:null,clothingTopColor:null,
   clothingBottom:null,clothingBottomColor:null,
-  clothingAcc:[],clothingCondition:[],bodyParts:[],
-  sockColor:null,sockLength:null,shoes:null,shoeColor:null,faceAcc:[],
+  clothingAcc:[],clothingAccColor:null,clothingCondition:[],bodyParts:[],
+  sockColor:null,sockLength:null,shoes:null,shoeColor:null,faceAcc:[],faceAccColor:null,
   nsfwTop:null,nsfwTopColor:null,
   nsfwBottom:null,nsfwBottomColor:null,
   nsfwClothing:null,nsfwClothingColor:null,
   expression:null,poses:[],effects:[],liquids:[],
+  /* weapons/props/electronics/otherItems moved to per-char slots */
   weapons:[],props:[],electronics:[],otherItems:[],
   environment:null,style:null,era:null,animeStudio:null,colorGrade:null,
   stroke:null,shadow:null,quality:[],lights:[],glow:null,smooth:null,
@@ -28,6 +29,20 @@ const S={
   favourites: [],
 
 };
+
+/* ═══════════════════════════════════
+   AUTH HELPERS
+═══════════════════════════════════ */
+function isLoggedIn(){ return !!(window._currentUser); }
+
+function showLoginPrompt(){
+  const loginBtn = document.getElementById('loginBtn');
+  if(loginBtn){
+    loginBtn.classList.add('login-pulse');
+    setTimeout(()=>loginBtn.classList.remove('login-pulse'),1500);
+  }
+  toast('🔒 Sign in to save characters to your library');
+}
 
 /* ═══════════════════════════════════
    COLOR DATA
@@ -116,17 +131,33 @@ const D={
   age:{lbl:['Toddler (0–3)','Child (4–8)','Preteen (9–12)','Teen (13–17)','Young Adult (18–25)','Adult (26–35)','Middle-Aged (36–50)','Elderly (51+)'],val:['toddler','child','preteen','teen','young adult','adult','middle-aged','elderly'],k:'age'},
   gender:{lbl:['Feminine','Masculine','Androgynous'],val:['feminine','masculine','androgynous'],k:'gender'},
   body:{lbl:['Petite','Slim','Athletic','Toned','Curvy','Hourglass','Muscular','Chubby','Tall','Short'],val:['petite body','slim body','athletic body','toned body','curvy body','hourglass figure','muscular body','chubby body','tall figure','short figure'],k:'body'},
-  hairstyle:{lbl:['Long Straight','Long Wavy','Long Curly','Twin Tails','High Ponytail','Side Ponytail','Braid','Double Braid','Bun','Messy Bun','Short Bob','Pixie Cut','Hime Cut','Fluffy'],k:'hairstyle'},
+  hairstyle:{
+    female:['Long Straight','Long Wavy','Long Curly','Twin Tails','High Ponytail','Low Ponytail','Side Ponytail','Braid','Double Braid','Fishtail Braid','Bun','Messy Bun','Top Knot','Half-Up Half-Down','Side Swept','Hime Cut','Blunt Bob','Short Bob','Pixie Cut','Wispy Bangs','Fluffy','Crimped','Ringlets'],
+    male:  ['Short Straight','Short Spiky','Swept Back','Undercut','Side Part','Slicked Back','Crew Cut','Buzz Cut','Mohawk','Fauxhawk','Shaggy','Tousled','Long Flowing','Man Bun','Top Knot','Ponytail','Braid','Dreadlocks','Afro','Bald','Stubble','Undercut Fade','Textured Crop'],
+    shared:['Short Straight','Long Straight','Long Wavy','Braid','Bun','Top Knot','Ponytail','Short Bob'],
+    k:'hairstyle'
+  },
   eyeShape:{lbl:['Large Round','Almond','Upturned','Downturned','Cat-like','Doe Eyes','Hooded'],k:'eyeShape'},
-  clothingTop:{lbl:['T-Shirt','Crop Top','Tied Crop Top','Off-Shoulder Top','Tank Top','Tube Top','Sleeveless Top','Long Sleeve Shirt','Button-Up Shirt','Oversized Shirt','Graphic Tee','Polo Shirt','Ribbed Top','Halter Top','Hoodie','Zip-Up Hoodie','Oversized Hoodie','Sweatshirt'],k:'clothingTop'},
-  clothingBottom:{lbl:['Jeans','Skinny Jeans','Wide-Leg Jeans','Ripped Jeans','Shorts','Denim Shorts','Mini Shorts','High-Waist Shorts','Jogger Pants','Sweatpants','Cargo Pants','Leggings','Pleated Skirt','Mini Skirt','Plaid Skirt','Long Skirt','Denim Skirt'],k:'clothingBottom'},
+  clothingTop:{
+    female:['Crop Top','Tied Crop Top','Off-Shoulder Top','Tube Top','Halter Top','Ribbed Top','Ruffle Top','Corset Top','Bralette','Wrap Top','Bardot Top'],
+    male:  ['Polo Shirt','Henley Shirt','Muscle Tee','Athletic Shirt','Dress Shirt','Flannel Shirt','Rugby Shirt'],
+    shared:['T-Shirt','Tank Top','Sleeveless Top','Long Sleeve Shirt','Button-Up Shirt','Oversized Shirt','Graphic Tee','Hoodie','Zip-Up Hoodie','Oversized Hoodie','Sweatshirt'],
+    k:'clothingTop'
+  },
+  clothingBottom:{
+    female:['Leggings','Pleated Skirt','Mini Skirt','Plaid Skirt','Long Skirt','Denim Skirt','Pencil Skirt','Flared Skirt','Wrap Skirt','High-Waist Shorts','Yoga Pants'],
+    male:  ['Dress Pants','Chinos','Track Pants','Gym Shorts','Swim Trunks','Spa Shorts','Board Shorts','Boxers'],
+    shared:['Jeans','Skinny Jeans','Wide-Leg Jeans','Ripped Jeans','Shorts','Denim Shorts','Jogger Pants','Sweatpants','Cargo Pants'],
+    k:'clothingBottom'
+  },
   nsfwTop:{lbl:['Tiny Top','Strapless Bra Top','Micro Crop Top','Open Back Top','Sheer Top','Fishnet Top','Cutout Top','Exposed Midriff Top'],k:'nsfwTop',nsfw:true},
   nsfwBottom:{lbl:['Micro Miniskirt','Booty Shorts','Thong','Garter Belt','Slit Skirt','Fishnet Stockings','Lace Shorts','Crotchless Shorts'],k:'nsfwBottom',nsfw:true},
-  clothing:{lbl:[
-    'School Uniform','Sailor Uniform','Tracksuit','Casual Streetwear','Sporty Outfit','Sleepwear / Pajamas','Swimsuit','One-Piece Swimsuit',
-    'Formal Suit','Blazer & Pants','Little Black Dress','Evening Gown','Wedding Dress',
-    'Magical Girl','Maid Outfit','Gothic Lolita','Idol Outfit','Cyberpunk Outfit','Kimono','Yukata','Fantasy Armor','Ninja Outfit','Military Uniform'
-  ],k:'clothing'},
+  clothing:{
+    female:['Magical Girl','Maid Outfit','Gothic Lolita','Idol Outfit','Little Black Dress','Evening Gown','Wedding Dress','One-Piece Swimsuit','Sailor Uniform'],
+    male:  ['Business Suit','Formal Tuxedo','Dress Shirt & Tie','Tank Top & Shorts'],
+    shared:['School Uniform','Tracksuit','Casual Streetwear','Sporty Outfit','Sleepwear / Pajamas','Swimsuit','Blazer & Pants','Cyberpunk Outfit','Kimono','Yukata','Fantasy Armor','Ninja Outfit','Military Uniform'],
+    k:'clothing'
+  },
   clothingAcc:{lbl:['Ribbon Bow','Belt','Choker','Backpack','Suspenders','Gloves','Scarf','Cape','Apron','Tie'],arr:'clothingAcc'},
   bodyParts:{lbl:['Penis (Male)','Vagina','Anus','Nipples','Breasts','Cleavage','Bare Legs','Bare Midriff'],arr:'bodyParts',nsfw:true},
   sockColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Maroon','Peach','Orange','Yellow','Gold','Mint','Green','Dark Green','Olive','Teal','Cyan','Sky Blue','Light Blue','Blue','Navy','Indigo','Lavender','Purple','Violet','Magenta','Beige','Brown','Dark Brown','Silver','Striped','Plaid','Sheer'],k:'sockColor'},
@@ -244,6 +275,56 @@ function makeSingle(gid,lbl,val,k,nsfw=false){
     });
     g.appendChild(b);
   });
+}
+
+/* Gender-aware single-select: shows female/shared/male items based on active char gender */
+function makeGenderSingle(gid, dataObj, k){
+  var g = document.getElementById(gid); if(!g) return;
+  g.innerHTML = ''; /* will be re-rendered on gender change */
+  g._dataObj = dataObj; g._k = k;
+
+  var gender = S.characters ? S.characters[typeof activeChar!=='undefined'?activeChar:0] : null;
+  var items;
+  if(dataObj.shared){
+    var set;
+    if(gender==='female')      set = dataObj.female.concat(dataObj.shared);
+    else if(gender==='male')   set = dataObj.male.concat(dataObj.shared);
+    else                       set = dataObj.female.concat(dataObj.shared).concat(dataObj.male);
+    // deduplicate preserving order
+    var seen = {}; items = [];
+    set.forEach(function(x){ if(!seen[x]){seen[x]=1;items.push(x);} });
+  } else {
+    items = dataObj.lbl || [];
+  }
+
+  items.forEach(function(l){
+    if(l.startsWith('—')){ var sep=document.createElement('div');sep.className='og-sep';sep.textContent=l.replace(/—/g,'').trim();g.appendChild(sep);return; }
+    var v = l.toLowerCase();
+    var b = document.createElement('button');
+    b.className='ob'+(S[k]===v?' on':'');
+    b.setAttribute('data-en', l);
+    b.setAttribute('data-val', v);
+    b.innerHTML='<span>'+l+'</span>';
+    b.addEventListener('click',function(){
+      if(S[k]===v){S[k]=null;b.classList.remove('on');}
+      else{g.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});b.classList.add('on');S[k]=v;}
+      rebuild();
+    });
+    g.appendChild(b);
+  });
+}
+
+/* Re-render all gender-aware grids when active char's gender changes */
+function refreshGenderGrids(){
+  ['hairstyleGrid','clothingTopGrid','clothingBottomGrid','clothingGrid'].forEach(function(gid){
+    var g = document.getElementById(gid); if(!g||!g._dataObj) return;
+    var cur = S[g._k]; // preserve selection
+    makeGenderSingle(gid, g._dataObj, g._k);
+    // Re-apply saved selection if still valid
+    if(cur){ g.querySelectorAll('.ob').forEach(function(b){ if(b.getAttribute('data-val')===cur) b.classList.add('on'); }); }
+  });
+  // Also re-run color-picker triggers for rebuilt grids
+  if(typeof attachAllTriggers==='function') attachAllTriggers();
 }
 
 function makeMulti(gid,lbl,arr,nsfw=false,inlineHide=false){
@@ -503,18 +584,45 @@ function _initColorPickerPopup(){
     {gid:'nsfwClothingGrid',  colorKey:'nsfwClothingColor',   stateKey:'nsfwClothing'},
     {gid:'sockLengthGrid',    colorKey:'sockColor',           stateKey:'sockLength'},
     {gid:'shoesGrid',         colorKey:'shoeColor',           stateKey:'shoes'},
+    {gid:'clothingAccGrid',   colorKey:'clothingAccColor',    stateKey:'clothingAcc', isMulti:true},
+    {gid:'faceAccGrid',       colorKey:'faceAccColor',        stateKey:'faceAcc',     isMulti:true},
   ];
 
   function attachAllTriggers(){
-    TRIGGER_MAP.forEach(({gid, colorKey, stateKey}) => {
+    TRIGGER_MAP.forEach(entry => {
+      const {gid, colorKey, stateKey, isMulti} = entry; // ← isMulti properly extracted
       const g = document.getElementById(gid);
       if(!g) return;
       g.querySelectorAll('.ob').forEach(btn => {
-        btn.addEventListener('click', () => {
+        // Add brush zone if not already added
+        if(!btn.querySelector('.ob-brush')){
+          const bz = document.createElement('span');
+          bz.className = 'ob-brush';
+          bz.innerHTML = '<i class="fas fa-paintbrush"></i>';
+          bz.title = 'Pick color';
+          bz.addEventListener('click', e => {
+            e.stopPropagation();
+            if(!isMulti && !btn.classList.contains('on')){
+              g.querySelectorAll('.ob').forEach(x=>x.classList.remove('on'));
+              btn.classList.add('on');
+              S[stateKey] = btn.getAttribute('data-val');
+              rebuild();
+            }
+            const hasVal = isMulti
+              ? (Array.isArray(S[stateKey]) && S[stateKey].length > 0)
+              : btn.classList.contains('on');
+            if(hasVal) setTimeout(() => openPicker(colorKey), 30);
+          });
+          btn.appendChild(bz);
+        }
+        // Main button click (not on brush) = activate without opening color picker
+        btn.addEventListener('click', e => {
+          if(e.target.closest('.ob-brush')) return;
           setTimeout(() => {
-            if(S[stateKey]){
-              openPicker(colorKey);
-            } else {
+            const hasVal = isMulti
+              ? (Array.isArray(S[stateKey]) && S[stateKey].length > 0)
+              : !!S[stateKey];
+            if(!hasVal){
               S[colorKey] = null;
               _updateColorDot(colorKey);
               closePicker();
@@ -525,6 +633,7 @@ function _initColorPickerPopup(){
     });
   }
 
+  window.attachAllTriggers = attachAllTriggers; // expose for refreshGenderGrids
   setTimeout(() => { attachAllTriggers(); }, 100);
 
   window._openColorPicker  = openPicker;
@@ -614,25 +723,22 @@ function toggleNSFW(on){
 const SIL = {
   female: `<i class="fa-solid fa-person-dress"></i>`,
   male:   `<i class="fa-solid fa-person"></i>`,
-  futa:   `<i class="fa-solid fa-person-half-dress"></i>`,
   unset:  `<i class="fa-solid fa-person-circle-plus"></i>`
 };
 
 const GENDER_CFG = {
   female: { cls:'female', label:'Female',   prompt:'1girl'                },
-  male:   { cls:'male',   label:'Male',     prompt:'1boy'                 },
-  futa:   { cls:'futa',   label:'Futanari', prompt:'androgynous, futanari'}
+  male:   { cls:'male',   label:'Male',     prompt:'1boy'                 }
 };
 
 function buildCharCountText(){
   const active = S.characters.filter(Boolean);
   if(!active.length) return '';
-  const c={female:0,male:0,futa:0};
+  const c={female:0,male:0};
   active.forEach(g=>c[g]++);
   const parts=[];
   if(c.female===1)parts.push('1girl'); else if(c.female>1)parts.push(c.female+'girls');
   if(c.male===1)  parts.push('1boy');  else if(c.male>1)  parts.push(c.male+'boys');
-  if(c.futa>0)    parts.push('androgynous, futanari');
   if(active.length>=2) parts.push('multiple characters');
   return parts.join(', ');
 }
@@ -643,39 +749,297 @@ function updateCharWarn(){
   if(warn) warn.classList.toggle('vis', active >= 2);
 }
 
-function renderCharCards(){
-  const row = document.getElementById('charCardsRow');
-  if(!row) return;
-  row.innerHTML='';
+/* ─────────────────────────────────────────────────────────────
+   ID CARD SYSTEM  — build-once, patch-only architecture
+   Cards are created once in initCharCards / gender change.
+   renderCharCards() only PATCHES existing DOM — no innerHTML wipe.
+   Input values are NEVER overwritten while focused.
+───────────────────────────────────────────────────────────── */
 
-  S.characters.forEach((gender,i)=>{
-    const isActive = gender !== null;
-    const cfg = isActive ? GENDER_CFG[gender] : null;
+/* Age number → label (matches D.age vals) */
+function _ageLabel(n){
+  var v = parseInt(n);
+  if(isNaN(v)||v<1) return '';
+  if(v<=3)  return 'toddler';
+  if(v<=8)  return 'child';
+  if(v<=12) return 'preteen';
+  if(v<=17) return 'teen';
+  if(v<=25) return 'young adult';
+  if(v<=35) return 'adult';
+  if(v<=50) return 'middle-aged';
+  return 'elderly';
+}
 
-    const card = document.createElement('div');
-    card.className = 'char-card' + (isActive ? ' active gc-'+gender : '');
-    card.dataset.idx = i;
+/* Build rich tag list from a slot */
+function _buildCardTags(slot, gender){
+  if(!slot) return [];
+  var tags = [];
+  // NO appearance here — those go to mini chips
+  // outfit
+  if(slot.clothing)   tags.push({t:(slot.clothingColor?slot.clothingColor+' ':'')+slot.clothing, cat:'outfit', hi:true});
+  else {
+    if(slot.clothingTop)    tags.push({t:(slot.clothingTopColor?slot.clothingTopColor+' ':'')+slot.clothingTop,    cat:'outfit', hi:true});
+    if(slot.clothingBottom) tags.push({t:(slot.clothingBottomColor?slot.clothingBottomColor+' ':'')+slot.clothingBottom, cat:'outfit'});
+  }
+  if(slot.sockLength) tags.push({t:(slot.sockColor?slot.sockColor+' ':'')+slot.sockLength+' socks', cat:'outfit'});
+  if(slot.shoes)      tags.push({t:(slot.shoeColor?slot.shoeColor+' ':'')+slot.shoes, cat:'outfit'});
+  (slot.clothingAcc||[]).forEach(function(a){ tags.push({t:a, cat:'acc'}); });
+  (slot.faceAcc||[]).forEach(function(a){ tags.push({t:a, cat:'acc'}); });
+  // status
+  if(slot.expression) tags.push({t:slot.expression, cat:'mood', hi:true});
+  (slot.poses||[]).forEach(function(p){ tags.push({t:p, cat:'pose'}); });
+  (slot.effects||[]).forEach(function(e){ tags.push({t:e, cat:'fx'}); });
+  // tools
+  (slot.weapons||[]).forEach(function(w){ tags.push({t:w, cat:'tool', hi:true}); });
+  (slot.props||[]).forEach(function(p){ tags.push({t:p, cat:'tool'}); });
+  (slot.electronics||[]).forEach(function(e){ tags.push({t:e, cat:'tool'}); });
+  return tags;
+}
 
-    card.innerHTML = `
-      ${isActive ? `<div class="char-card-del" data-idx="${i}">×</div>` : ''}
-      <div class="char-silhouette">${isActive ? SIL[gender] : SIL.unset}</div>
-      <div class="char-card-num">Char ${i+1}</div>
-      <div class="char-card-badge ${isActive ? cfg.cls : 'unset'}">${isActive ? cfg.label : 'Set gender'}</div>
-    `;
+/* Render tag HTML */
+function _tagsHtml(tags){
+  if(!tags.length) return '<span class="idc-no-data">// no data loaded</span>';
+  return tags.map(function(tag){
+    return '<span class="idc-tag'+(tag.hi?' hi':'')+' cat-'+tag.cat+'">'+tag.t+'</span>';
+  }).join('');
+}
 
-    card.addEventListener('click', e=>{
-      if(e.target.closest('.char-card-del')) return;
-      openGenderModal(i);
-    });
+/* Build the full card HTML — only called on create / gender change */
+function _buildCardHtml(i, gender, slot){
+  var cfg  = GENDER_CFG[gender];
+  var name = slot && slot._name ? slot._name : '';
+  var age  = slot && slot._age  ? slot._age  : '';
+  var tags = _buildCardTags(slot, gender);
+  var isEd = (typeof activeChar !== 'undefined') && activeChar === i;
 
-    const del = card.querySelector('.char-card-del');
-    if(del) del.addEventListener('click', e=>{
+  /* mini chips — appearance only */
+  var minis = [];
+  if(slot){
+    if(slot.hairColor1 && slot.hairstyle) minis.push(slot.hairColor1+' '+slot.hairstyle);
+    else if(slot.hairColor1) minis.push(slot.hairColor1+' hair');
+    else if(slot.hairstyle)  minis.push(slot.hairstyle);
+    if(slot.eyeColor)  minis.push(slot.eyeColor+(slot.eyeShape?' '+slot.eyeShape:'')+' eyes');
+    if(slot.skin)      minis.push(slot.skin+' skin');
+    if(slot.body)      minis.push(slot.body);
+  }
+  var miniHtml = minis.map(function(m){ return '<span class="c-mini">'+m+'</span>'; }).join('');
+  var tagsHtml = _tagsHtml(tags);
+
+  /* edit indicator — in footer like the reference file */
+  var editHtml = isEd
+    ? '<div class="c-edit"><span class="c-blink">\u25ae</span> EDITING</div>'
+    : '<div class="c-edit c-edit-standby"><span style="opacity:.3">\u25cf</span> STANDBY</div>';
+
+  /* save btn star */
+  var isSaved = !!(slot && slot._saved);
+
+  return `<div class="card-header-row">
+    <div class="c-org">APS \u00b7 UNIT-0${i+1}</div>
+    <div class="card-actions">
+      <button class="c-btn${isSaved?' c-saved':''} idc-save-btn" data-idx="${i}" title="Save">${isSaved?'\u2605':'\u2606'}</button>
+      <button class="c-btn idc-lib-btn"  data-idx="${i}" title="Library">\u2261</button>
+      <button class="c-btn idc-del-btn"  data-idx="${i}" title="Remove">\u2715</button>
+    </div>
+  </div>
+  <div class="c-content">
+    <div class="c-avatar"><span class="c-avatar-icon">${gender==='female'?'\u2640':'\u2642'}</span><div class="c-scan"></div></div>
+    <div class="c-info">
+      <input class="c-name-input" placeholder="Character name\u2026" maxlength="28"
+        value="${name.replace(/"/g,'&quot;')}" autocomplete="off" spellcheck="false">
+      <div class="c-primary">
+        <span class="c-pill">${cfg.label.toUpperCase()}</span>
+        <div class="c-age-wrap">
+          <input class="c-age-input" placeholder="\u2014" maxlength="3"
+            value="${age}" autocomplete="off">
+          <span class="c-age-lbl" id="idcAgeLbl${i}">${age?'\u2192 '+_ageLabel(age):''}</span>
+        </div>
+      </div>
+      <div class="c-secondary">${miniHtml||'<span class="c-no-mini">no details yet</span>'}</div>
+    </div>
+  </div>
+  <div class="c-div"></div>
+  <div class="idc-tags" id="idcTags${i}">${tagsHtml}</div>
+  <div class="c-foot">
+    <span class="c-id">ID#${Math.random().toString(36).slice(2,8).toUpperCase()}-${i+1} \u00b7 ${new Date().toISOString().slice(0,10).replace(/-/g,'.')}</span>
+    <div class="c-bar">${Array.from({length:12},()=>`<span style="height:${30+Math.random()*70}%"></span>`).join('')}</div>
+    ${editHtml}
+  </div>`;
+}
+
+/* Attach events to a card — called once after building */
+function _attachCardEvents(card, i){
+  // Name input
+  var nameIn = card.querySelector('.c-name-input');
+  if(nameIn){
+    nameIn.addEventListener('input', function(e){
       e.stopPropagation();
-      S.characters[i]=null;
-      renderCharCards(); updateCharWarn(); rebuild();
+      if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
+      charSlots[i]._name = e.target.value;
     });
+    nameIn.addEventListener('blur', function(e){
+      if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
+      charSlots[i]._name = e.target.value;
+      /* no rebuild — name doesn't change the prompt */
+    });
+    nameIn.addEventListener('click',   function(e){ e.stopPropagation(); });
+    nameIn.addEventListener('keydown', function(e){ e.stopPropagation(); });
+    nameIn.addEventListener('mousedown',function(e){ e.stopPropagation(); });
+  }
 
-    row.appendChild(card);
+  // Age input
+  var ageIn = card.querySelector('.c-age-input');
+  if(ageIn){
+    ageIn.addEventListener('input', function(e){
+      e.stopPropagation();
+      if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
+      charSlots[i]._age = e.target.value;
+      var lbl = document.getElementById('idcAgeLbl'+i);
+      if(lbl) lbl.textContent = e.target.value ? '→ '+_ageLabel(e.target.value) : '';
+    });
+    ageIn.addEventListener('blur', function(e){
+      if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
+      charSlots[i]._age = e.target.value;
+      /* only push to S.age when this card is active */
+      if(i === (typeof activeChar!=='undefined' ? activeChar : 0)){
+        var al = _ageLabel(e.target.value);
+        S.age = al || null;
+      }
+      rebuild();
+    });
+    ageIn.addEventListener('click',    function(e){ e.stopPropagation(); });
+    ageIn.addEventListener('keydown',  function(e){ e.stopPropagation(); });
+    ageIn.addEventListener('mousedown',function(e){ e.stopPropagation(); });
+  }
+
+  // Save btn
+  var saveBtn = card.querySelector('.idc-save-btn, .c-btn.idc-save-btn');
+  if(saveBtn) saveBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(typeof isLoggedIn==='function' && !isLoggedIn()){ showLoginPrompt(); return; }
+    if(typeof csSavePreset==='function') csSavePreset(i);
+  });
+
+  // Library btn
+  var libBtn = card.querySelector('.idc-lib-btn');
+  if(libBtn) libBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(typeof csOpenLibraryFor==='function') csOpenLibraryFor(i);
+  });
+
+  // Delete btn
+  var delBtn = card.querySelector('.idc-del-btn');
+  if(delBtn) delBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    S.characters[i] = null;
+    if(typeof charSlots!=='undefined') charSlots[i] = null;
+    _rebuildSlot(i);
+    updateCharWarn(); rebuild();
+  });
+
+  // Card click → switch editing
+  card.addEventListener('click', function(e){
+    if(e.target.closest('.idc-actions')) return;
+    var f = document.activeElement;
+    if(f && (f.classList.contains('c-name-input')||f.classList.contains('c-age-input')||f.classList.contains('idc-name-input')||f.classList.contains('idc-age-input'))) return;
+    if(typeof csSwitchTo==='function' && i !== activeChar) csSwitchTo(i);
+    else renderCharCards();
+  });
+}
+
+/* Rebuild a single slot (gender changed / deleted) */
+function _rebuildSlot(i){
+  var row = document.getElementById('charCardsRow');
+  if(!row) return;
+  var existing = row.querySelector('[data-card-idx="'+i+'"]');
+  var gender   = S.characters[i];
+  var slot     = (typeof charSlots!=='undefined') ? charSlots[i] : null;
+
+  if(!gender){
+    // Empty placeholder
+    var ph = existing || document.createElement('div');
+    ph.setAttribute('data-card-idx', i);
+    ph.className = 'idc-card idc-empty';
+    ph.innerHTML = `<div class="idc-add-icon"><i class="fas fa-person-circle-plus"></i></div>
+      <div class="idc-add-lbl">Add Character ${i+1}</div>`;
+    if(!ph._hasClick){
+      ph._hasClick = true;
+      ph.addEventListener('click', function(){ openGenderModal(i); });
+    }
+    if(!existing) row.appendChild(ph);
+    return;
+  }
+
+  // Active card — always rebuild DOM for gender/slot changes
+  var card = document.createElement('div');
+  card.setAttribute('data-card-idx', i);
+  card.className = 'idc-card idc-active idc-'+gender;
+  card.innerHTML = '<div class="idc-inner">'+_buildCardHtml(i, gender, slot)+'</div>';
+  _attachCardEvents(card, i);
+  if(existing) row.replaceChild(card, existing);
+  else row.appendChild(card);
+}
+
+/* ── renderCharCards: patch-only, never destroys inputs ── */
+function renderCharCards(){
+  var row = document.getElementById('charCardsRow');
+  if(!row) return;
+
+  S.characters.forEach(function(gender, i){
+    var existing = row.querySelector('[data-card-idx="'+i+'"]');
+    var slot = (typeof charSlots!=='undefined') ? charSlots[i] : null;
+
+    /* Case 1: no card yet → build from scratch */
+    if(!existing){ _rebuildSlot(i); return; }
+
+    var wasActive = existing.classList.contains('idc-active');
+    var wasGender = existing.classList.contains('idc-female') ? 'female'
+                  : existing.classList.contains('idc-male')   ? 'male' : null;
+
+    /* Case 2: gender changed or activated/deactivated → full rebuild */
+    if(gender !== wasGender){ _rebuildSlot(i); return; }
+
+    /* Case 3: same gender, just update dynamic parts without touching inputs */
+    // Flush active slot before reading (mirror may be stale for non-active char)
+    if(typeof csSave==='function' && i===activeChar) csSave(activeChar);
+    // Re-read slot after flush
+    var freshSlot = (typeof charSlots!=='undefined') ? charSlots[i] : null;
+    // Tags
+    var tagsEl = document.getElementById('idcTags'+i);
+    if(tagsEl){
+      var tags = _buildCardTags(freshSlot, gender);
+      tagsEl.innerHTML = _tagsHtml(tags);
+    }
+    // Mini chips
+    var secEl = existing.querySelector('.c-secondary');
+    if(secEl && freshSlot){
+      var minis2 = [];
+      if(freshSlot.hairColor1 && freshSlot.hairstyle) minis2.push(freshSlot.hairColor1+' '+freshSlot.hairstyle);
+      else if(freshSlot.hairColor1) minis2.push(freshSlot.hairColor1+' hair');
+      else if(freshSlot.hairstyle)  minis2.push(freshSlot.hairstyle);
+      if(freshSlot.eyeColor) minis2.push(freshSlot.eyeColor+(freshSlot.eyeShape?' '+freshSlot.eyeShape:'')+' eyes');
+      if(freshSlot.skin) minis2.push(freshSlot.skin+' skin');
+      if(freshSlot.body) minis2.push(freshSlot.body);
+      secEl.innerHTML = minis2.length
+        ? minis2.map(function(m){ return '<span class="c-mini">'+m+'</span>'; }).join('')
+        : '<span class="c-no-mini">no details yet</span>';
+    }
+    // Editing indicator in footer
+    var isEd2 = (typeof activeChar!=='undefined') && activeChar===i && !!gender;
+    var editEl = existing.querySelector('.c-edit');
+    if(editEl){
+      if(isEd2){
+        editEl.className = 'c-edit';
+        editEl.innerHTML = '<span class="c-blink">▮</span> EDITING';
+      } else {
+        editEl.className = 'c-edit c-edit-standby';
+        editEl.innerHTML = '<span style="opacity:.3">●</span> STANDBY';
+      }
+    }
+    existing.classList.toggle('idc-editing', isEd2);
+
+    // Save btn star glow
+    var saveB = existing.querySelector('.idc-save-btn');
+    if(saveB) saveB.classList.toggle('idc-saved', !!(slot && slot._saved));
   });
 }
 
@@ -703,17 +1067,29 @@ function initGenderModal(){
   document.querySelectorAll('.gender-opt-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       if(_gIdx===null) return;
-      S.characters[_gIdx]=btn.dataset.gender;
+      const setIdx = _gIdx; // capture before closeGenderModal nulls it
+      S.characters[setIdx]=btn.dataset.gender;
       closeGenderModal();
-      renderCharCards(); updateCharWarn(); rebuild();
+      _rebuildSlot(setIdx); updateCharWarn();
+      // Notify char-slots: ensure slot exists and switch editing to new char
+      if(typeof charSlots !== 'undefined'){
+        if(!charSlots[setIdx]) charSlots[setIdx] = (typeof csEmptySlot==='function') ? csEmptySlot() : {};
+        if(setIdx !== activeChar && typeof csSwitchTo==='function') csSwitchTo(setIdx);
+        else if(typeof csSave==='function') csSave(activeChar);
+      }
+      if(typeof refreshGenderGrids==='function') refreshGenderGrids();
+      rebuild();
     });
   });
   document.getElementById('genderModalClose').addEventListener('click', closeGenderModal);
   document.getElementById('genderModalReset').addEventListener('click',()=>{
     if(_gIdx===null) return;
-    S.characters[_gIdx]=null;
+    const resetIdx = _gIdx;
+    S.characters[resetIdx]=null;
+    if(typeof charSlots !== 'undefined') charSlots[resetIdx] = null;
     closeGenderModal();
-    renderCharCards(); updateCharWarn(); rebuild();
+    _rebuildSlot(resetIdx); updateCharWarn();
+    rebuild();
   });
   document.getElementById('genderOverlay').addEventListener('click', e=>{
     if(e.target===document.getElementById('genderOverlay')) closeGenderModal();
@@ -722,9 +1098,13 @@ function initGenderModal(){
 
 function initCharCards(){
   renderCharCards();
-  document.getElementById('charCardsClrBtn').addEventListener('click',()=>{
-    S.characters=[null,null,null];
-    renderCharCards(); updateCharWarn(); rebuild();
+  const clrBtn = document.getElementById('charCardsClrBtn');
+  if(clrBtn) clrBtn.addEventListener('click',()=>{
+    S.characters=[null,null];
+    if(typeof charSlots!=='undefined'){ charSlots[0]=null; charSlots[1]=null; }
+    // Force full slot rebuild for both
+    _rebuildSlot(0); _rebuildSlot(1);
+    updateCharWarn(); rebuild();
   });
 }
 
@@ -784,15 +1164,15 @@ function init(){
   /* Appearance */
   renderColors('hairColorGrid',  HAIR_COLORS,'hairColor1');
   renderColors('hairColor2Grid', HAIR_COLORS,'hairColor2',true);
-  makeSingle('hairstyleGrid',D.hairstyle.lbl,null,'hairstyle');
+  makeGenderSingle('hairstyleGrid',D.hairstyle,'hairstyle');
   renderColors('eyeColorGrid', EYE_COLORS,'eyeColor');
   makeSingle('eyeShapeGrid',D.eyeShape.lbl,null,'eyeShape');
   /* Outfit */
-  makeSingle('clothingTopGrid',    D.clothingTop.lbl,    null, 'clothingTop');
+  makeGenderSingle('clothingTopGrid', D.clothingTop, 'clothingTop');
   makeSingle('nsfwTopGrid',        D.nsfwTop.lbl,        null, 'nsfwTop',    true);
-  makeSingle('clothingBottomGrid', D.clothingBottom.lbl, null, 'clothingBottom');
+  makeGenderSingle('clothingBottomGrid', D.clothingBottom, 'clothingBottom');
   makeSingle('nsfwBottomGrid',     D.nsfwBottom.lbl,     null, 'nsfwBottom', true);
-  makeSingle('clothingGrid',D.clothing.lbl,null,'clothing');
+  makeGenderSingle('clothingGrid', D.clothing, 'clothing');
   // Mutual exclusion: selecting a Full Outfit clears Top+Bottom, and vice versa
   _initClothingMutualExclusion();
   makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
@@ -857,6 +1237,33 @@ function init(){
    EVENTS
 ═══════════════════════════════════ */
 function attachEvents(){
+  /* ── Main section toggle (Characters / Scene) ── */
+  const CHAR_CATS = ['style','character','outfit','mood','tools'];
+  const SCENE_CATS = ['scene','camera','quality','negative'];
+
+  var _activeSection = 'char';
+  function switchMainSection(ms, tabId){
+    _activeSection = ms;
+    document.querySelectorAll('.ms-btn').forEach(b=>b.classList.toggle('ms-active', b.dataset.ms===ms));
+    const isChar = ms==='char';
+    document.getElementById('charTabs').style.display  = isChar ? ''      : 'none';
+    document.getElementById('sceneTabs').style.display = isChar ? 'none'  : '';
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
+    // Activate specific tab or first tab of panel
+    const panel = document.getElementById(isChar ? 'charTabs' : 'sceneTabs');
+    const target = tabId ? panel.querySelector('[data-c="'+tabId+'"]') : panel.querySelector('.tab');
+    if(target){
+      target.classList.add('on');
+      const catEl = document.getElementById('cat-'+target.dataset.c);
+      if(catEl) catEl.classList.add('on');
+    }
+  }
+
+  document.querySelectorAll('.ms-btn').forEach(b=>b.addEventListener('click',()=>{
+    switchMainSection(b.dataset.ms);
+  }));
+
   /* tabs — works with grouped tab structure */
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
@@ -1118,7 +1525,7 @@ function buildPosText(){
   if(S.effects.length)p.push(S.effects.join(', '));
   const fluids=[...S.liquids,...(S.nsfw?S.nsfwFluid:[])];
   if(fluids.length)p.push(fluids.join(', '));
-  const items=[...S.weapons,...S.props,...S.electronics,...S.otherItems];
+  const items=[...(S.weapons||[]),...(S.props||[]),...(S.electronics||[]),...(S.otherItems||[])];
   if(items.length)p.push('holding '+items.join(', '));
   if(S.nsfw&&S.nsfwIndicator.length)p.push(S.nsfwIndicator.join(', '));
   const envs=[...(S.environment?[`in ${S.environment}`]:[]),...(S.nsfw?S.nsfwEnv.map(e=>`in ${e}`):[])];
@@ -1223,7 +1630,7 @@ function buildPosGroups(){
   if(S.effects.length) md.push(S.effects.join(', '));
   const fluids=[...S.liquids,...(S.nsfw?S.nsfwFluid:[])];
   if(fluids.length) md.push(fluids.join(', '));
-  const items=[...S.weapons,...S.props,...S.electronics,...S.otherItems];
+  const items=[...(S.weapons||[]),...(S.props||[]),...(S.electronics||[]),...(S.otherItems||[])];
   if(items.length) md.push('holding '+items.join(', '));
   if(S.nsfw&&S.nsfwIndicator.length) md.push(...S.nsfwIndicator);
   if(md.length) add('m',md);
@@ -1440,6 +1847,8 @@ function rebuild(){
   updateBlueprint();
   if(window.updateBlueprintDisplay) window.updateBlueprintDisplay();
   updateCounter();
+  /* patch card tags/indicators — safe: never destroys focused inputs */
+  if(typeof renderCharCards === 'function') renderCharCards();
 }
 
 /* ═══════════════════════════════════
@@ -1706,7 +2115,7 @@ function renderFavList(){
         // Color dots
         ['clothingColor','clothingTopColor','clothingBottomColor',
          'nsfwTopColor','nsfwBottomColor','nsfwClothingColor',
-         'sockColor','shoeColor'].forEach(k=>_updateColorDot(k));
+         'sockColor','shoeColor','clothingAccColor','faceAccColor'].forEach(k=>_updateColorDot(k));
 
         // NSFW
         if(S.nsfw){
@@ -1980,8 +2389,9 @@ function resolveConflicts(_silent=false){
       _syncGrid('nsfwClothingGrid', v => S.nsfwClothing.includes(v));
     }
   }
-  if(isSwimFull && S.weapons.length){
-    cf('لباس سباحة','أسلحة'); S.weapons=[];
+  const _slot0 = charSlots&&charSlots[0]; 
+  if(isSwimFull && _slot0&&_slot0.weapons&&_slot0.weapons.length){
+    cf('لباس سباحة','أسلحة'); if(_slot0) _slot0.weapons=[];
     _syncGrid('weaponGrid', v => false);
   }
 
@@ -2042,9 +2452,9 @@ function resolveConflicts(_silent=false){
 
   // ─── 3. CAPS — silent trim ────────────────────────────────────────
   if(S.poses.length>2){     sw(); S.poses=S.poses.slice(0,2);           _syncGrid('poseGrid',        v=>S.poses.includes(v)); }
-  if(S.weapons.length>2){   sw(); S.weapons=S.weapons.slice(0,2);       _syncGrid('weaponGrid',      v=>S.weapons.includes(v)); }
-  if(S.props.length>3){     sw(); S.props=S.props.slice(0,3);           _syncGrid('propsGrid',       v=>S.props.includes(v)); }
-  if(S.electronics.length>2){ sw(); S.electronics=S.electronics.slice(0,2); _syncGrid('electronicsGrid', v=>S.electronics.includes(v)); }
+  if(S.weapons&&S.weapons.length>2){ sw(); S.weapons=S.weapons.slice(0,2); _syncGrid('weaponGrid', v=>S.weapons.includes(v)); }
+  if(S.props&&S.props.length>3){ sw(); S.props=S.props.slice(0,3); _syncGrid('propsGrid', v=>S.props.includes(v)); }
+  if(S.electronics&&S.electronics.length>2){ sw(); S.electronics=S.electronics.slice(0,2); _syncGrid('electronicsGrid', v=>S.electronics.includes(v)); }
   if(S.lights.length>3){    sw(); S.lights=S.lights.slice(0,3);         _syncGrid('lightGrid',       v=>S.lights.includes(v)); }
   if(S.effects.length>3){   sw(); S.effects=S.effects.slice(0,3);       _syncGrid('effectsGrid',     v=>S.effects.includes(v)); }
 
@@ -2068,8 +2478,8 @@ function resolveConflicts(_silent=false){
 
   // ─── 5. SLEEP — hard conflict → toast ────────────────────────────
   if(S.poses.includes('sleeping')){
-    if(S.weapons.length){ cf('نائم','أسلحة'); S.weapons=[]; _syncGrid('weaponGrid', v=>false); }
-    if(S.electronics.length){ cf('نائم','إلكترونيات'); S.electronics=[]; _syncGrid('electronicsGrid', v=>false); }
+    if(S.weapons&&S.weapons.length){ cf('نائم','أسلحة'); S.weapons=[]; _syncGrid('weaponGrid', v=>false); }
+    if(S.electronics&&S.electronics.length){ cf('نائم','إلكترونيات'); S.electronics=[]; _syncGrid('electronicsGrid', v=>false); }
   }
 
   // ─── SHOW TOAST ──────────────────────────────────────────────────
@@ -2095,20 +2505,17 @@ function randomize(){
   resetAll(true);
   if(wasNsfw){ S.nsfw=true; toggleNSFW(true); }
 
-  // ── Characters — 80% single, 15% two, 7% three (rounded from user file) ──
+  // ── Characters — 80% single, 20% two ──
   let chosenChars;
   const charRoll = Math.random();
   if(charRoll < 0.80){
     // 80% single — female 80%, male 20%
     chosenChars = maybe(.80) ? ['female'] : ['male'];
-  } else if(charRoll < 0.93){
-    // 13% two characters
-    chosenChars = pick([['female','female'],['male','male'],['female','male']]);
   } else {
-    // 7% three characters
-    chosenChars = pick([['female','female','female'],['male','male','male'],['female','female','male']]);
+    // 20% two characters
+    chosenChars = pick([['female','female'],['male','male'],['female','male']]);
   }
-  chosenChars.forEach((g,i)=>{ if(i<3) S.characters[i]=g; });
+  chosenChars.forEach((g,i)=>{ if(i<2) S.characters[i]=g; });
   renderCharCards(); updateCharWarn();
   S.charCount = null;
 
@@ -2116,16 +2523,17 @@ function randomize(){
   if(maybe(.65)) S.skin       = pick(SKINS).val;
   if(maybe(.70)) S.hairColor1 = pick(HAIR_COLORS).id;
   if(maybe(.60)) S.eyeColor   = pick(EYE_COLORS).id;
-  if(maybe(.70)) S.hairstyle  = pick(D.hairstyle.lbl).toLowerCase();
+  if(maybe(.70)){ var _hList=(D.hairstyle.shared||[]).concat(D.hairstyle.female||[]); S.hairstyle=pick(_hList).toLowerCase(); }
   if(maybe(.20)) S.eyeShape   = pick(D.eyeShape.lbl).toLowerCase();
   if(maybe(.65)) S.age        = pick(D.age.val.filter(v=>!['toddler','child','preteen'].includes(v)));
   if(maybe(.40)) S.body       = pick(D.body.val);
   if(maybe(.30)) S.hairColor2 = pick(HAIR_COLORS).id;
 
   // ── Outfit — Top+Bottom combo (60%) OR Full Outfit (40%) ──
-  const sfwTops    = D.clothingTop.lbl;
-  const sfwBottoms = D.clothingBottom.lbl;
-  const sfwFull    = D.clothing.lbl.filter(x=>!x.startsWith('—'));
+  const _gender0   = S.characters ? (S.characters[0]||'female') : 'female';
+  const sfwTops    = (_gender0==='male') ? (D.clothingTop.male||[]).concat(D.clothingTop.shared||[]) : (D.clothingTop.female||[]).concat(D.clothingTop.shared||[]);
+  const sfwBottoms = (_gender0==='male') ? (D.clothingBottom.male||[]).concat(D.clothingBottom.shared||[]) : (D.clothingBottom.female||[]).concat(D.clothingBottom.shared||[]);
+  const sfwFull    = (D.clothing.shared||[]).concat(D.clothing.female||[]).concat(D.clothing.male||[]).filter(x=>!x.startsWith('—'));
   if(maybe(.60)){
     if(maybe(.75)) S.clothingTop    = pick(sfwTops).toLowerCase();
     if(maybe(.75)) S.clothingBottom = pick(sfwBottoms).toLowerCase();
@@ -2195,7 +2603,7 @@ function randomize(){
   S.negQuality = pickN(D.negQuality.lbl, Math.ceil(Math.random()*3)+2).map(x=>x.toLowerCase());
 
   // ── Contextual coherence ──────────────────────────────────────────
-  const hasCombat   = S.weapons.length > 0;
+  const hasCombat   = (S.weapons&&S.weapons.length>0)||(charSlots&&charSlots.some(function(sl){return sl&&sl.weapons&&sl.weapons.length>0;}));
   const hasFighting = S.poses.some(p=>['fighting stance','running','jumping','crouching'].includes(p));
 
   // ── COMBAT / ACTION scene ──
@@ -2354,7 +2762,7 @@ function resetAll(silent=false){
     else S[k]=null;
   });
   S.extraPos=[];S.extraNeg=[];S.weights={};
-  S.characters=[null,null,null];
+  S.characters=[null,null];
   renderCharCards(); updateCharWarn();
   /* Reset UI */
   document.querySelectorAll('.ob,.cw,.cb').forEach(x=>x.classList.remove('on'));
@@ -2652,7 +3060,7 @@ const LANG_FLAGS = {en:'EN', ar:'AR', ja:'JA'};
 const UI = {
   en: {
     /* ── Header ── */
-    random:'Random', nsfw:'NSFW', saved:'Saved',
+    random:'Random', nsfw:'NSFW', saved:'Saved', ms_characters:'Characters', ms_scene:'Scene',
     tab_style:'Style', tab_mood:'Mood', tab_scene:'Scene', tab_look:'Look', tab_outfit:'Outfit',
     tab_camera:'Camera', tab_quality:'Quality', tab_character:'Character',
     tab_tools:'Tools', tab_avoid:'Avoid',
@@ -2759,7 +3167,7 @@ const UI = {
   },
   ar: {
     /* ── Header ── */
-    random:'عشوائي', nsfw:'محتوى ناضج', saved:'المحفوظات',
+    random:'عشوائي', nsfw:'محتوى ناضج', saved:'المحفوظات', ms_characters:'الشخصيات', ms_scene:'المشهد',
     tab_style:'الأسلوب', tab_mood:'المزاج', tab_scene:'المشهد', tab_look:'المظهر', tab_outfit:'الزي',
     tab_camera:'الكاميرا', tab_quality:'الجودة', tab_character:'الشخصية',
     tab_tools:'الأدوات', tab_avoid:'تجنب',
@@ -3108,6 +3516,7 @@ const OPT_LABELS = { ar: OPT_AR };
 /* ── Japanese UI strings ── */
 UI.ja = {
   random:'ランダム', nsfw:'NSFW', saved:'保存済み',
+    ms_characters:'キャラクター', ms_scene:'シーン',
   tab_style:'スタイル', tab_mood:'ムード', tab_scene:'シーン', tab_look:'外見', tab_outfit:'衣装',
   tab_camera:'カメラ', tab_quality:'品質', tab_character:'キャラ',
   tab_tools:'道具', tab_avoid:'除外',
