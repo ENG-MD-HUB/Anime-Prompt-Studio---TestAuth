@@ -352,22 +352,63 @@ if(_origRandomize){
   randomize = function(){
     _origRandomize();
     csSave(0); activeChar=0;
+
     S.characters.forEach(function(gender,i){
       if(!gender||i===0) return;
-      charSlots[i]=csEmptySlot();
-      var s0=charSlots[0]||{};
-      var oH=HAIR_COLORS.filter(function(h){return h.id!==s0.hairColor1;});
-      var oE=EYE_COLORS.filter(function(e){return e.id!==s0.eyeColor;});
-      charSlots[i].hairColor1 = oH.length?oH[Math.floor(Math.random()*oH.length)].id:(HAIR_COLORS[0]||{}).id;
-      charSlots[i].eyeColor   = oE.length?oE[Math.floor(Math.random()*oE.length)].id:null;
-      charSlots[i].hairstyle  = (function(){ var lst=D&&D.hairstyle?(D.hairstyle.shared||[]).concat(D.hairstyle.female||[]):[];return lst.length?lst[Math.floor(Math.random()*lst.length)].toLowerCase():null;})();
-      charSlots[i].expression = D&&D.expression?D.expression.lbl[Math.floor(Math.random()*D.expression.lbl.length)].toLowerCase():null;
-      charSlots[i].age        = s0.age||null;
-      var outfits=D&&D.clothing?(D.clothing.shared||[]).concat(D.clothing.female||[]):[];
-      if(outfits.length) charSlots[i].clothing=outfits[Math.floor(Math.random()*outfits.length)].toLowerCase();
-      var poses=D&&D.pose?D.pose.lbl:[];
-      if(poses.length) charSlots[i].poses=[poses[Math.floor(Math.random()*poses.length)].toLowerCase()];
+
+      charSlots[i] = csEmptySlot();
+      var s0 = charSlots[0] || {};
+
+      /* helpers */
+      function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+      function maybe(p){ return Math.random() < p; }
+      function pickN(arr,n){ var a=arr.slice().sort(function(){return .5-Math.random();}); return a.slice(0,n); }
+
+      /* ── Appearance ── */
+      var oH = HAIR_COLORS.filter(function(h){ return h.id !== s0.hairColor1; });
+      var oE = EYE_COLORS.filter(function(e){ return e.id !== s0.eyeColor; });
+      charSlots[i].hairColor1 = oH.length ? pick(oH).id : (HAIR_COLORS[0]||{}).id;
+      charSlots[i].eyeColor   = oE.length ? pick(oE).id : null;
+
+      /* hairstyle — prefer gender-appropriate */
+      var hList = D&&D.hairstyle ? (gender==='male'
+        ? (D.hairstyle.male||[]).concat(D.hairstyle.shared||[])
+        : (D.hairstyle.female||[]).concat(D.hairstyle.shared||[])
+      ) : [];
+      if(hList.length) charSlots[i].hairstyle = pick(hList).toLowerCase();
+
+      if(maybe(.25)) charSlots[i].eyeShape = D&&D.eyeShape ? pick(D.eyeShape.lbl).toLowerCase() : null;
+      charSlots[i].age  = s0.age || null;
+      if(maybe(.65)) charSlots[i].skin = D&&D.skin ? pick(SKINS).val : null;
+      if(maybe(.40)) charSlots[i].body = D&&D.body ? pick(D.body.val) : null;
+
+      /* ── Outfit ── */
+      var g2 = gender || 'female';
+      if(maybe(.60)){
+        /* Top + Bottom */
+        var tops    = D&&D.clothingTop    ? (D.clothingTop[g2]||[]).concat(D.clothingTop.shared||[])       : [];
+        var bottoms = D&&D.clothingBottom ? (D.clothingBottom[g2]||[]).concat(D.clothingBottom.shared||[]) : [];
+        if(tops.length    && maybe(.75)) charSlots[i].clothingTop    = pick(tops).toLowerCase();
+        if(bottoms.length && maybe(.75)) charSlots[i].clothingBottom = pick(bottoms).toLowerCase();
+      } else {
+        /* Full outfit */
+        var fullList = D&&D.clothing ? (D.clothing[g2]||[]).concat(D.clothing.shared||[]).filter(function(x){ return !x.startsWith('—'); }) : [];
+        if(fullList.length) charSlots[i].clothing = pick(fullList).toLowerCase();
+      }
+      if(maybe(.30)&&D&&D.shoes)      charSlots[i].shoes      = pick(D.shoes.lbl).toLowerCase();
+      if(maybe(.30)&&D&&D.sockLength) charSlots[i].sockLength  = pick(D.sockLength.lbl.filter(function(x){return x!=='None';})).toLowerCase();
+      if(maybe(.35)&&D&&D.clothingAcc) charSlots[i].clothingAcc = pickN(D.clothingAcc.lbl,Math.ceil(Math.random()*2)).map(function(x){return x.toLowerCase();});
+
+      /* ── Mood ── */
+      if(D&&D.expression) charSlots[i].expression = pick(D.expression.lbl).toLowerCase();
+      if(D&&D.pose&&maybe(.80)) charSlots[i].poses = [pick(D.pose.lbl).toLowerCase()];
+      if(D&&D.effects&&maybe(.30)) charSlots[i].effects = pickN(D.effects.lbl,1).map(function(x){return x.toLowerCase();});
+
+      /* ── Tools ── */
+      if(D&&D.weapons&&maybe(.30)) charSlots[i].weapons = [pick(D.weapons.lbl).toLowerCase()];
+      if(D&&D.props&&maybe(.25))   charSlots[i].props   = [pick(D.props.lbl).toLowerCase()];
     });
+
     csRenderTabs();
   };
 }
@@ -842,9 +883,10 @@ function ppGoTo(idx){
   if(!lib.length) return;
   _ppIndex = Math.max(0, Math.min(idx, lib.length-1));
   var track = document.getElementById('ppTrack');
-  if(track) track.style.transform = 'translateX(-'+(_ppIndex*100)+'%)';
+  /* Each card is (100/total)% of track width, so slide by _ppIndex × (100/total)% */
+  var pct = lib.length > 1 ? (_ppIndex * (100 / lib.length)) : 0;
+  if(track) track.style.transform = 'translateX(-' + pct + '%)';
   _ppRenderDots(lib.length, _ppIndex);
-  /* Update prev/next */
   var prev = document.getElementById('ppPrev');
   var next = document.getElementById('ppNext');
   if(prev) prev.disabled = _ppIndex === 0;
@@ -882,6 +924,9 @@ function openPassportLibrary(charIdx){
     track.innerHTML = lib.map(function(entry, i){
       return _ppBuildCard(entry, i, lib.length);
     }).join('');
+
+    /* Set track width = number of cards × 100% so cards don't overlap */
+    track.style.width = (lib.length * 100) + '%';
 
     /* Reset position */
     track.style.transition = 'none';
