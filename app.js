@@ -4,7 +4,7 @@
 const S={
   characters:[null,null],
   charCount:null,age:null,skin:null,body:null,
-  hairColor1:null,hairColor2:null,hairstyle:null,
+  hairColor1:null,hairstyle:null,
   eyeColor:null,eyeShape:null,
   clothing:null,clothingColor:null,
   clothingTop:null,clothingTopColor:null,
@@ -105,17 +105,14 @@ const SKINS=[
    BLUEPRINT CELLS
 ═══════════════════════════════════ */
 const BP_CELLS=[
-  {id:'bp-char',   icon:'fa-users',               lbl:'Characters', keys:['charCount','characters']},
-  {id:'bp-age',    icon:'fa-cake-candles',         lbl:'Age',        keys:['age']},
-  {id:'bp-skin',   icon:'fa-circle-half-stroke',   lbl:'Skin & Body',keys:['skin','body']},
-  {id:'bp-hair',   icon:'fa-scissors',             lbl:'Hair',       keys:['hairColor1','hairstyle']},
-  {id:'bp-eyes',   icon:'fa-eye',                  lbl:'Eyes',       keys:['eyeColor','eyeShape']},
-  {id:'bp-outfit', icon:'fa-shirt',                lbl:'Outfit',     keys:['clothing','clothingAcc','shoes']},
-  {id:'bp-mood',   icon:'fa-face-smile',           lbl:'Mood',       keys:['expression','poses']},
-  {id:'bp-tools',  icon:'fa-sword',                lbl:'Tools',      keys:['weapons','props']},
-  {id:'bp-scene',  icon:'fa-mountain-sun',         lbl:'Scene',      keys:['environment','style']},
-  {id:'bp-camera', icon:'fa-camera',               lbl:'Camera',     keys:['angle','shot','look']},
-  {id:'bp-quality',icon:'fa-sparkles',             lbl:'Quality',    keys:['quality','lights','glow']}
+  {id:'bp-char',   icon:'fa-users',               lbl:'Character', keys:['characters','age','skin','body']},
+  {id:'bp-outfit', icon:'fa-shirt',                lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','shoes']},
+  {id:'bp-mood',   icon:'fa-face-smile',           lbl:'Mood',      keys:['expression','poses','effects']},
+  {id:'bp-tools',  icon:'fa-sword',                lbl:'Tools',     keys:['weapons','props','electronics','otherItems']},
+  {id:'bp-style',  icon:'fa-paintbrush',           lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow']},
+  {id:'bp-scene',  icon:'fa-mountain-sun',         lbl:'Scene',     keys:['environment']},
+  {id:'bp-camera', icon:'fa-camera',               lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect']},
+  {id:'bp-quality',icon:'fa-sparkles',             lbl:'Quality',   keys:['quality','lights','glow','smooth']}
 ];
 
 /* ═══════════════════════════════════
@@ -259,8 +256,8 @@ function makeSingle(gid,lbl,val,k,nsfw=false){
     b.setAttribute('data-val', v);
     b.innerHTML=`<span>${l}</span>`;
     b.addEventListener('click',()=>{
-      if(S[k]===v){S[k]=null;b.classList.remove('on');}
-      else{g.querySelectorAll('.ob').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[k]=v;}
+      if(S[k]===v){S[k]=null;b.classList.remove('on');var bar=b.querySelector('.hcp-bar');if(bar)bar.style.background='transparent';}
+      else{g.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');var xb=x.querySelector('.hcp-bar');if(xb)xb.style.background='transparent';});b.classList.add('on');S[k]=v;}
       // When selecting NSFW: clear SFW counterpart silently
       if(nsfw && S[k]!==null){
         if(k==='nsfwTop' && S.clothingTop){ S.clothingTop=null; _syncGrid('clothingTopGrid',()=>false); }
@@ -306,8 +303,8 @@ function makeGenderSingle(gid, dataObj, k){
     b.setAttribute('data-val', v);
     b.innerHTML='<span>'+l+'</span>';
     b.addEventListener('click',function(){
-      if(S[k]===v){S[k]=null;b.classList.remove('on');}
-      else{g.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});b.classList.add('on');S[k]=v;}
+      if(S[k]===v){S[k]=null;b.classList.remove('on');var bar=b.querySelector('.hcp-bar');if(bar)bar.style.background='transparent';}
+      else{g.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');var xb=x.querySelector('.hcp-bar');if(xb)xb.style.background='transparent';});b.classList.add('on');S[k]=v;}
       rebuild();
     });
     g.appendChild(b);
@@ -325,6 +322,7 @@ function refreshGenderGrids(){
   });
   // Also re-run color-picker triggers for rebuilt grids
   if(typeof attachAllTriggers==='function') attachAllTriggers();
+  if(typeof attachHairEyePopups==='function') attachHairEyePopups();
 }
 
 function makeMulti(gid,lbl,arr,nsfw=false,inlineHide=false){
@@ -364,9 +362,13 @@ function renderColors(gid,arr,sk,toggleable=false){
       } else {
         g.querySelectorAll('.cb').forEach((x,xi)=>{
           x.classList.remove('on');x.style.borderColor='transparent';
+          /* clear bar on deselected buttons */
+          var xbar=x.querySelector('.hcp-bar'); if(xbar) xbar.style.background='transparent';
         });
         b.classList.add('on');b.style.borderColor='white';S[sk]=col.id;
       }
+      /* update colour bar for this button */
+      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(b, sk);
       rebuild();
     });
     g.appendChild(b);
@@ -573,103 +575,315 @@ function _initColorPickerPopup(){
   });
   overlay.addEventListener('click', e => { if(e.target===overlay) closePicker(); });
 
-  // Universal: attach color picker trigger to any grid
-  // map: gridId → { colorKey, stateKey }
-  const TRIGGER_MAP = [
-    {gid:'clothingGrid',      colorKey:'clothingColor',       stateKey:'clothing'},
-    {gid:'clothingTopGrid',   colorKey:'clothingTopColor',    stateKey:'clothingTop'},
-    {gid:'clothingBottomGrid',colorKey:'clothingBottomColor', stateKey:'clothingBottom'},
-    {gid:'nsfwTopGrid',       colorKey:'nsfwTopColor',        stateKey:'nsfwTop'},
-    {gid:'nsfwBottomGrid',    colorKey:'nsfwBottomColor',     stateKey:'nsfwBottom'},
-    {gid:'nsfwClothingGrid',  colorKey:'nsfwClothingColor',   stateKey:'nsfwClothing'},
-    {gid:'sockLengthGrid',    colorKey:'sockColor',           stateKey:'sockLength'},
-    {gid:'shoesGrid',         colorKey:'shoeColor',           stateKey:'shoes'},
-    {gid:'clothingAccGrid',   colorKey:'clothingAccColor',    stateKey:'clothingAcc', isMulti:true},
-    {gid:'faceAccGrid',       colorKey:'faceAccColor',        stateKey:'faceAcc',     isMulti:true},
-  ];
-
-  function attachAllTriggers(){
-    TRIGGER_MAP.forEach(entry => {
-      const {gid, colorKey, stateKey, isMulti} = entry; // ← isMulti properly extracted
-      const g = document.getElementById(gid);
-      if(!g) return;
-      g.querySelectorAll('.ob').forEach(btn => {
-        // Add brush zone if not already added
-        if(!btn.querySelector('.ob-brush')){
-          const bz = document.createElement('span');
-          bz.className = 'ob-brush';
-          bz.innerHTML = '<i class="fas fa-paintbrush"></i>';
-          bz.title = 'Pick color';
-          bz.addEventListener('click', e => {
-            e.stopPropagation();
-            if(!isMulti && !btn.classList.contains('on')){
-              g.querySelectorAll('.ob').forEach(x=>x.classList.remove('on'));
-              btn.classList.add('on');
-              S[stateKey] = btn.getAttribute('data-val');
-              rebuild();
-            }
-            const hasVal = isMulti
-              ? (Array.isArray(S[stateKey]) && S[stateKey].length > 0)
-              : btn.classList.contains('on');
-            if(hasVal) setTimeout(() => openPicker(colorKey), 30);
-          });
-          btn.appendChild(bz);
-        }
-        // Main button click (not on brush) = activate without opening color picker
-        btn.addEventListener('click', e => {
-          if(e.target.closest('.ob-brush')) return;
-          setTimeout(() => {
-            const hasVal = isMulti
-              ? (Array.isArray(S[stateKey]) && S[stateKey].length > 0)
-              : !!S[stateKey];
-            if(!hasVal){
-              S[colorKey] = null;
-              _updateColorDot(colorKey);
-              closePicker();
-            }
-          }, 50);
-        });
-      });
-    });
-  }
-
-  window.attachAllTriggers = attachAllTriggers; // expose for refreshGenderGrids
-  setTimeout(() => { attachAllTriggers(); }, 100);
-
   window._openColorPicker  = openPicker;
   window._closeColorPicker = closePicker;
 }
 
 function _updateColorDot(colorKey){
-  // map colorKey → which grid and which stateKey to check
-  const DOT_MAP = {
-    sockColor:          {gid:'sockLengthGrid',    stateKey:'sockLength'},
-    shoeColor:          {gid:'shoesGrid',          stateKey:'shoes'},
-    clothingColor:      {gid:'clothingGrid',       stateKey:'clothing'},
-    clothingTopColor:   {gid:'clothingTopGrid',    stateKey:'clothingTop'},
-    clothingBottomColor:{gid:'clothingBottomGrid', stateKey:'clothingBottom'},
-    nsfwTopColor:       {gid:'nsfwTopGrid',        stateKey:'nsfwTop'},
-    nsfwBottomColor:    {gid:'nsfwBottomGrid',     stateKey:'nsfwBottom'},
-    nsfwClothingColor:  {gid:'nsfwClothingGrid',   stateKey:'nsfwClothing'},
+  /* Uses hcp-bar system — updates bar on the active button */
+  var DOT_MAP = {
+    sockColor:          {gid:'sockLengthGrid',    isCb:false},
+    shoeColor:          {gid:'shoesGrid',          isCb:false},
+    clothingColor:      {gid:'clothingGrid',       isCb:false},
+    clothingTopColor:   {gid:'clothingTopGrid',    isCb:false},
+    clothingBottomColor:{gid:'clothingBottomGrid', isCb:false},
+    nsfwTopColor:       {gid:'nsfwTopGrid',        isCb:false},
+    nsfwBottomColor:    {gid:'nsfwBottomGrid',     isCb:false},
+    nsfwClothingColor:  {gid:'nsfwClothingGrid',   isCb:false},
+    clothingAccColor:   {gid:'clothingAccGrid',    isCb:false},
+    faceAccColor:       {gid:'faceAccGrid',        isCb:false},
+    /* hair/eye now on ob grids */
+    hairColor1:         {gid:'hairstyleGrid',      isCb:false},
+    eyeColor:           {gid:'eyeShapeGrid',       isCb:false},
   };
-  const entry = DOT_MAP[colorKey]; if(!entry) return;
-  const g = document.getElementById(entry.gid); if(!g) return;
-  g.querySelectorAll('.ob').forEach(btn => {
-    const old = btn.querySelector('.color-dot');
-    if(old) old.remove();
-    const span = btn.querySelector('span');
-    const val  = span ? span.textContent.toLowerCase() : '';
-    if(S[entry.stateKey] === val && S[colorKey]){
-      const key = S[colorKey].charAt(0).toUpperCase() + S[colorKey].slice(1);
-      const col = SIMPLE_COLOR_MAP[key] || {bg:'#888', fg:'#fff'};
-      const dot = document.createElement('span');
-      dot.className = 'color-dot';
-      dot.style.cssText = `display:inline-flex;align-items:center;gap:3px;background:${col.bg};border-radius:20px;padding:1px 6px 1px 3px;margin-left:5px;border:1.5px solid rgba(255,255,255,.5);vertical-align:middle;position:relative;z-index:2;`;
-      dot.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);display:inline-block;"></span><span style="font-size:.55rem;font-weight:700;color:${col.fg||'#fff'};text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;">${key}</span>`;
-      btn.appendChild(dot);
+  var entry = DOT_MAP[colorKey]; if(!entry) return;
+  var g = document.getElementById(entry.gid); if(!g) return;
+  g.querySelectorAll('.ob').forEach(function(btn){
+    var old=btn.querySelector('.color-dot'); if(old) old.remove();
+    if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn, colorKey);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   SHARED HOVER COLOUR POPUP
+   Single popup on body, positioned via getBoundingClientRect
+   Avoids overflow:hidden clipping on .ob buttons
+══════════════════════════════════════════════════════ */
+var _HCP_ROWS = [
+  [{n:'Red',bg:'#ef4444'},{n:'Crimson',bg:'#b91c1c'},{n:'Orange',bg:'#f97316'},{n:'Amber',bg:'#f59e0b'},{n:'Gold',bg:'#eab308'},{n:'Yellow',bg:'#fde047'},{n:'Lime',bg:'#84cc16'},{n:'Green',bg:'#22c55e'},{n:'Teal',bg:'#14b8a6'}],
+  [{n:'Sky Blue',bg:'#38bdf8'},{n:'Blue',bg:'#3b82f6'},{n:'Navy',bg:'#1e3a8a'},{n:'Indigo',bg:'#6366f1'},{n:'Purple',bg:'#7c3aed'},{n:'Violet',bg:'#8b5cf6'},{n:'Pink',bg:'#f472b6'},{n:'Magenta',bg:'#e879f9'},{n:'Lavender',bg:'#c4b5fd'}],
+  [{n:'White',bg:'#f1f5f9'},{n:'Light Gray',bg:'#cbd5e1'},{n:'Gray',bg:'#6b7280'},{n:'Dark Gray',bg:'#374151'},{n:'Black',bg:'#111827'},{n:'Beige',bg:'#d4b896'},{n:'Brown',bg:'#92400e'},{n:'Dark Brown',bg:'#451a03'},{n:'Silver',bg:'#94a3b8'}]
+];
+var _HCP_PATTERNS = [
+  {n:'Striped',bg:'repeating-linear-gradient(45deg,#e5e7eb 0,#e5e7eb 4px,#374151 4px,#374151 8px)'},
+  {n:'Plaid',bg:'repeating-linear-gradient(0deg,rgba(220,38,38,.4) 0,rgba(220,38,38,.4) 3px,transparent 3px,transparent 12px),repeating-linear-gradient(90deg,rgba(220,38,38,.4) 0,rgba(220,38,38,.4) 3px,transparent 3px,transparent 12px),#1e3a5f'},
+  {n:'Sheer',bg:'rgba(200,200,200,.25)'}
+];
+var _HAIR_ROWS = [
+  [{n:'red',bg:'#ef4444'},{n:'coral',bg:'#ff6347'},{n:'orange',bg:'#f97316'},{n:'peach',bg:'#ffb366'},{n:'gold',bg:'#ffd700'},{n:'blonde',bg:'#fef08a'},{n:'yellow',bg:'#fde047'},{n:'lime',bg:'#84cc16'},{n:'green',bg:'#22c55e'}],
+  [{n:'mint',bg:'#6ee7b7'},{n:'teal',bg:'#14b8a6'},{n:'cyan',bg:'#22d3ee'},{n:'blue',bg:'#3b82f6'},{n:'indigo',bg:'#4338ca'},{n:'purple',bg:'#7c3aed'},{n:'lavender',bg:'#c4b5fd'},{n:'pink',bg:'#f472b6'},{n:'magenta',bg:'#e879f9'}],
+  [{n:'auburn',bg:'#9a3412'},{n:'brown',bg:'#78350f'},{n:'black',bg:'#111827'},{n:'white',bg:'#f1f5f9'},{n:'silver',bg:'#94a3b8'},{n:'gray',bg:'#6b7280'}]
+];
+var _NO_HAIR_COLOR = {bald:1,stubble:1};
+
+/* ── Shared popup state ── */
+var _hcpEl       = null;   /* the #hcpPopup div */
+var _hcpColorKey = null;   /* current colorKey */
+var _hcpTrigger  = null;   /* current trigger button */
+var _hcpHideT    = null;
+var _hcpShowT    = null;
+
+function _hcpInit(){
+  if(_hcpEl) return;
+  _hcpEl = document.getElementById('hcpPopup');
+  if(!_hcpEl) return;
+  /* hide when clicking outside */
+  document.addEventListener('mousedown', function(e){
+    if(_hcpEl && !_hcpEl.contains(e.target) && e.target !== _hcpTrigger && (!_hcpTrigger || !_hcpTrigger.contains(e.target))){
+      _hcpHide(true);
     }
   });
 }
+
+function _hcpPosition(btn){
+  var r = btn.getBoundingClientRect();
+  var pw = _hcpEl.offsetWidth || 220;
+  var left = r.left + r.width/2 - pw/2;
+  var top  = r.top - 10;
+  if(left < 4) left = 4;
+  if(left + pw > window.innerWidth - 4) left = window.innerWidth - pw - 4;
+  /* place above button */
+  _hcpEl.style.left = left + 'px';
+  _hcpEl.style.top  = '';
+  _hcpEl.style.bottom = (window.innerHeight - r.top + 10) + 'px';
+}
+
+function _hcpShow(btn, colorKey, rows, hasPatterns){
+  _hcpInit(); if(!_hcpEl) return;
+  clearTimeout(_hcpHideT); _hcpHideT = null;
+  clearTimeout(_hcpShowT); _hcpShowT = null;
+
+  _hcpColorKey = colorKey;
+  _hcpTrigger  = btn;
+
+  /* Build content */
+  _hcpEl.innerHTML = '';
+  _hcpEl.className = 'hcp-popup hcp-show';
+
+  var allRows = hasPatterns ? rows.concat([_HCP_PATTERNS]) : rows;
+  allRows.forEach(function(rowData){
+    var rowEl = document.createElement('div');
+    rowEl.className = 'hcp-row';
+    rowData.forEach(function(c){
+      var sw = document.createElement('div');
+      sw.className = 'hcp-sw' + (S[colorKey]===c.n.toLowerCase() ? ' on' : '');
+      sw.style.background = c.bg;
+      sw.title = c.n;
+      sw.addEventListener('mousedown', function(e){
+        e.preventDefault(); e.stopPropagation();
+        _hcpEl.querySelectorAll('.hcp-sw').forEach(function(x){x.classList.remove('on');});
+        sw.classList.add('on');
+        S[colorKey] = c.n.toLowerCase();
+        _hcpUpdateBar(btn, colorKey);
+        rebuild();
+      });
+      rowEl.appendChild(sw);
+    });
+    _hcpEl.appendChild(rowEl);
+  });
+
+  /* Clear row */
+  var clrRow = document.createElement('div');
+  clrRow.className = 'hcp-row hcp-clr-row';
+  var clrLbl = document.createElement('span'); clrLbl.className='hcp-clr-lbl'; clrLbl.textContent='Clear color';
+  var clrBtn = document.createElement('div');  clrBtn.className='hcp-clr-btn'; clrBtn.textContent='✕';
+  clrBtn.addEventListener('mousedown', function(e){
+    e.preventDefault(); e.stopPropagation();
+    S[colorKey]=null;
+    _hcpUpdateBar(btn, colorKey);
+    _hcpHide(true);
+    rebuild();
+  });
+  clrRow.appendChild(clrLbl); clrRow.appendChild(clrBtn);
+  _hcpEl.appendChild(clrRow);
+
+  _hcpEl.style.display = 'block';
+  _hcpPosition(btn);
+
+  /* keep open while hovering popup */
+  _hcpEl.onmouseenter = function(){ clearTimeout(_hcpHideT); _hcpHideT=null; };
+  _hcpEl.onmouseleave = function(){ _hcpHide(false); };
+}
+
+function _hcpHide(immediate){
+  clearTimeout(_hcpHideT);
+  if(immediate){
+    if(_hcpEl){ _hcpEl.style.display='none'; _hcpEl.className='hcp-popup'; }
+    _hcpColorKey=null; _hcpTrigger=null;
+  } else {
+    _hcpHideT = setTimeout(function(){
+      if(_hcpEl){ _hcpEl.style.display='none'; _hcpEl.className='hcp-popup'; }
+      _hcpColorKey=null; _hcpTrigger=null;
+    }, 350);
+  }
+}
+
+/* colour bar under the button label */
+function _hcpUpdateBar(btn, colorKey){
+  var bar = btn.querySelector('.hcp-bar');
+  if(!bar) return;
+  var val = S[colorKey];
+  if(!val){ bar.style.background='transparent'; return; }
+  var bg = null;
+
+  /* 1. Check HAIR_COLORS (for hairColor1) */
+  if(!bg && typeof HAIR_COLORS!=='undefined'){
+    var hc=HAIR_COLORS.find(function(c){return c.id===val;});
+    if(hc) bg=hc.m;
+  }
+  /* 2. Check EYE_COLORS (for eyeColor) */
+  if(!bg && typeof EYE_COLORS!=='undefined'){
+    var ec=EYE_COLORS.find(function(c){return c.id===val;});
+    if(ec) bg=ec.m;
+  }
+  /* 3. Check popup rows (for clothing colours) */
+  if(!bg){
+    var allRows=_HCP_ROWS.concat([_HCP_PATTERNS]).concat(_HAIR_ROWS);
+    for(var i=0;i<allRows.length;i++){
+      for(var j=0;j<allRows[i].length;j++){
+        if(allRows[i][j].n.toLowerCase()===val){ bg=allRows[i][j].bg; break; }
+      }
+      if(bg) break;
+    }
+  }
+  /* 4. Fallback: SIMPLE_COLOR_MAP */
+  if(!bg && typeof SIMPLE_COLOR_MAP!=='undefined'){
+    var k=val.charAt(0).toUpperCase()+val.slice(1);
+    if(SIMPLE_COLOR_MAP[k]) bg=SIMPLE_COLOR_MAP[k].bg;
+  }
+  bar.style.background = bg || 'transparent';
+}
+
+/* inject .hcp-bar span into a button and attach hover events */
+function _hcpAttach(btn, colorKey, isOnFn, rows, hasPatterns){
+  if(btn.dataset.hcpDone) return;
+  btn.dataset.hcpDone = '1';
+
+  /* inject colour bar span (sits below text, inside button) */
+  if(!btn.querySelector('.hcp-bar')){
+    var bar = document.createElement('span');
+    bar.className = 'hcp-bar';
+    btn.appendChild(bar);
+  }
+
+  /* hover trigger */
+  btn.addEventListener('mouseenter', function(){
+    if(!isOnFn()) return;
+    clearTimeout(_hcpHideT); _hcpHideT=null;
+    clearTimeout(_hcpShowT);
+    _hcpShowT = setTimeout(function(){ _hcpShow(btn, colorKey, rows, hasPatterns); }, 650);
+  });
+  btn.addEventListener('mouseleave', function(e){
+    clearTimeout(_hcpShowT); _hcpShowT=null;
+    if(_hcpEl && _hcpEl.contains(e.relatedTarget)) return;
+    _hcpHide(false);
+  });
+
+  /* click: if already on and popup closed → open immediately; if on and popup open → close */
+  btn.addEventListener('click', function(e){
+    if(e.target.closest('#hcpPopup')) return;
+    clearTimeout(_hcpShowT); _hcpShowT=null;
+    setTimeout(function(){
+      if(!isOnFn()){
+        /* deselected → clear colour + close + clear all bars in grid */
+        if(S[colorKey]){
+          S[colorKey]=null;
+          /* clear bars on ALL buttons in same grid */
+          var parentGrid = btn.closest('[id]');
+          if(parentGrid) parentGrid.querySelectorAll('.hcp-bar').forEach(function(b){ b.style.background='transparent'; });
+          rebuild();
+        }
+        if(_hcpTrigger===btn) _hcpHide(true);
+        return;
+      }
+      if(_hcpTrigger===btn && _hcpEl && _hcpEl.style.display!=='none'){
+        _hcpHide(true); /* toggle close */
+      } else {
+        _hcpShow(btn, colorKey, rows, hasPatterns);
+      }
+    }, 30);
+  });
+}
+
+function attachAllTriggers(){
+  var TMAP = [
+    {gid:'clothingGrid',      ck:'clothingColor',       sk:'clothing',      multi:false, pat:true},
+    {gid:'clothingTopGrid',   ck:'clothingTopColor',    sk:'clothingTop',   multi:false, pat:true},
+    {gid:'clothingBottomGrid',ck:'clothingBottomColor', sk:'clothingBottom',multi:false, pat:true},
+    {gid:'nsfwTopGrid',       ck:'nsfwTopColor',        sk:'nsfwTop',       multi:false, pat:true},
+    {gid:'nsfwBottomGrid',    ck:'nsfwBottomColor',     sk:'nsfwBottom',    multi:false, pat:true},
+    {gid:'nsfwClothingGrid',  ck:'nsfwClothingColor',   sk:'nsfwClothing',  multi:true,  pat:true},
+    {gid:'sockLengthGrid',    ck:'sockColor',           sk:'sockLength',    multi:false, pat:false},
+    {gid:'shoesGrid',         ck:'shoeColor',           sk:'shoes',         multi:false, pat:false},
+    {gid:'clothingAccGrid',   ck:'clothingAccColor',    sk:'clothingAcc',   multi:true,  pat:false},
+    {gid:'faceAccGrid',       ck:'faceAccColor',        sk:'faceAcc',       multi:true,  pat:false}
+  ];
+  TMAP.forEach(function(entry){
+    var gid=entry.gid, ck=entry.ck, sk=entry.sk, multi=entry.multi, pat=entry.pat;
+    var g=document.getElementById(gid); if(!g) return;
+    g.querySelectorAll('.ob').forEach(function(btn){
+      var isOn = function(){ return multi ? (Array.isArray(S[sk])&&S[sk].length>0) : btn.classList.contains('on'); };
+      _hcpAttach(btn, ck, isOn, _HCP_ROWS, pat);
+    });
+  });
+}
+window.attachAllTriggers = attachAllTriggers;
+
+function attachHairEyePopups(){
+  /* Hairstyle buttons → hair colour popup */
+  var hg = document.getElementById('hairstyleGrid');
+  if(hg) hg.querySelectorAll('.ob').forEach(function(btn){
+    if(btn.dataset.hcpDone) return;
+    /* inject bar */
+    if(!btn.querySelector('.hcp-bar')){ var b=document.createElement('span'); b.className='hcp-bar'; btn.appendChild(b); }
+    var isOn = function(){ return btn.classList.contains('on'); };
+    _hcpAttach(btn, 'hairColor1', isOn, _HAIR_ROWS, false);
+  });
+
+  /* Eye Shape buttons → eye colour popup */
+  var eg = document.getElementById('eyeShapeGrid');
+  if(eg) eg.querySelectorAll('.ob').forEach(function(btn){
+    if(btn.dataset.hcpDone) return;
+    if(!btn.querySelector('.hcp-bar')){ var b=document.createElement('span'); b.className='hcp-bar'; btn.appendChild(b); }
+    var isOn = function(){ return btn.classList.contains('on'); };
+    _hcpAttach(btn, 'eyeColor', isOn, _HCP_ROWS, false);
+  });
+}
+window.attachHairEyePopups = attachHairEyePopups;
+
+/* merged clear buttons */
+document.addEventListener('DOMContentLoaded', function(){
+  var ch=document.getElementById('clrHair');
+  if(ch) ch.addEventListener('click', function(){
+    S.hairstyle=null; S.hairColor1=null;
+    var g1=document.getElementById('hairstyleGrid');
+    if(g1) g1.querySelectorAll('.ob').forEach(function(x){
+      x.classList.remove('on');
+      var bar=x.querySelector('.hcp-bar'); if(bar) bar.style.background='transparent';
+    });
+    rebuild();
+  });
+  var ce=document.getElementById('clrEye');
+  if(ce) ce.addEventListener('click', function(){
+    S.eyeShape=null; S.eyeColor=null;
+    var g1=document.getElementById('eyeShapeGrid');
+    if(g1) g1.querySelectorAll('.ob').forEach(function(x){
+      x.classList.remove('on');
+      var bar=x.querySelector('.hcp-bar'); if(bar) bar.style.background='transparent';
+    });
+    rebuild();
+  });
+});
 
 function renderSkins(){
   const g=document.getElementById('skinGrid');if(!g)return;
@@ -711,6 +925,7 @@ function toggleNSFW(on){
     if(el) el.style.display=on?'grid':'none';
   });
   document.getElementById('leftPanel').classList.toggle('nsfw-active',on);
+  if(on) setTimeout(function(){ if(typeof attachAllTriggers==='function') attachAllTriggers(); },80);
 }
 
 /* ═══════════════════════════════════
@@ -774,8 +989,7 @@ function _ageLabel(n){
 function _buildCardTags(slot, gender){
   if(!slot) return [];
   var tags = [];
-  // NO appearance here — those go to mini chips
-  // outfit
+  /* ── Outfit ── */
   if(slot.clothing)   tags.push({t:(slot.clothingColor?slot.clothingColor+' ':'')+slot.clothing, cat:'outfit', hi:true});
   else {
     if(slot.clothingTop)    tags.push({t:(slot.clothingTopColor?slot.clothingTopColor+' ':'')+slot.clothingTop,    cat:'outfit', hi:true});
@@ -784,15 +998,24 @@ function _buildCardTags(slot, gender){
   if(slot.sockLength) tags.push({t:(slot.sockColor?slot.sockColor+' ':'')+slot.sockLength+' socks', cat:'outfit'});
   if(slot.shoes)      tags.push({t:(slot.shoeColor?slot.shoeColor+' ':'')+slot.shoes, cat:'outfit'});
   (slot.clothingAcc||[]).forEach(function(a){ tags.push({t:a, cat:'acc'}); });
-  (slot.faceAcc||[]).forEach(function(a){ tags.push({t:a, cat:'acc'}); });
-  // status
+  (slot.faceAcc||[]).forEach(function(a){     tags.push({t:a, cat:'acc'}); });
+  (slot.clothingCondition||[]).forEach(function(c){ tags.push({t:c, cat:'acc'}); });
+  /* NSFW clothing */
+  (slot.nsfwClothing||[]).forEach(function(c){ tags.push({t:c, cat:'outfit'}); });
+  if(slot.nsfwTop)    tags.push({t:(slot.nsfwTopColor?slot.nsfwTopColor+' ':'')+slot.nsfwTop, cat:'outfit'});
+  if(slot.nsfwBottom) tags.push({t:(slot.nsfwBottomColor?slot.nsfwBottomColor+' ':'')+slot.nsfwBottom, cat:'outfit'});
+  /* ── Mood / Pose / FX ── */
   if(slot.expression) tags.push({t:slot.expression, cat:'mood', hi:true});
-  (slot.poses||[]).forEach(function(p){ tags.push({t:p, cat:'pose'}); });
-  (slot.effects||[]).forEach(function(e){ tags.push({t:e, cat:'fx'}); });
-  // tools
-  (slot.weapons||[]).forEach(function(w){ tags.push({t:w, cat:'tool', hi:true}); });
-  (slot.props||[]).forEach(function(p){ tags.push({t:p, cat:'tool'}); });
-  (slot.electronics||[]).forEach(function(e){ tags.push({t:e, cat:'tool'}); });
+  (slot.poses||[]).forEach(function(p){    tags.push({t:p, cat:'pose'}); });
+  (slot.nsfwPose||[]).forEach(function(p){ tags.push({t:p, cat:'pose'}); });
+  (slot.effects||[]).forEach(function(e){  tags.push({t:e, cat:'fx'}); });
+  (slot.liquids||[]).forEach(function(l){  tags.push({t:l, cat:'fx'}); });
+  (slot.nsfwFluid||[]).forEach(function(f){ tags.push({t:f, cat:'fx'}); });
+  /* ── Tools ── */
+  (slot.weapons||[]).forEach(function(w){     tags.push({t:w, cat:'tool', hi:true}); });
+  (slot.props||[]).forEach(function(p){        tags.push({t:p, cat:'tool'}); });
+  (slot.electronics||[]).forEach(function(e){  tags.push({t:e, cat:'tool'}); });
+  (slot.otherItems||[]).forEach(function(o){   tags.push({t:o, cat:'tool'}); });
   return tags;
 }
 
@@ -804,72 +1027,90 @@ function _tagsHtml(tags){
   }).join('');
 }
 
-/* Build the full card HTML — only called on create / gender change */
+/* Build the full card HTML — Option 2: Header Band */
 function _buildCardHtml(i, gender, slot){
-  var cfg  = GENDER_CFG[gender];
-  var name = slot && slot._name ? slot._name : '';
-  var age  = slot && slot._age  ? slot._age  : '';
-  var tags = _buildCardTags(slot, gender);
-  var isEd = (typeof activeChar !== 'undefined') && activeChar === i;
-
-  /* mini chips — appearance only */
-  var minis = [];
-  if(slot){
-    if(slot.hairColor1 && slot.hairstyle) minis.push(slot.hairColor1+' '+slot.hairstyle);
-    else if(slot.hairColor1) minis.push(slot.hairColor1+' hair');
-    else if(slot.hairstyle)  minis.push(slot.hairstyle);
-    if(slot.eyeColor)  minis.push(slot.eyeColor+(slot.eyeShape?' '+slot.eyeShape:'')+' eyes');
-    if(slot.skin)      minis.push(slot.skin+' skin');
-    if(slot.body)      minis.push(slot.body);
-  }
-  var miniHtml = minis.map(function(m){ return '<span class="c-mini">'+m+'</span>'; }).join('');
-  var tagsHtml = _tagsHtml(tags);
-
-  /* edit indicator — in footer like the reference file */
-  var editHtml = isEd
-    ? '<div class="c-edit"><span class="c-blink">\u25ae</span> EDITING</div>'
-    : '<div class="c-edit c-edit-standby"><span style="opacity:.3">\u25cf</span> STANDBY</div>';
-
-  /* save btn star */
+  var cfg   = GENDER_CFG[gender];
+  var name  = slot && slot._name ? slot._name : '';
+  var age   = slot && slot._age  ? slot._age  : '';
+  var isEd  = (typeof activeChar !== 'undefined') && activeChar === i;
+  var isFem = gender === 'female';
   var isSaved = !!(slot && slot._saved);
 
-  return `<div class="card-header-row">
-    <div class="c-org">APS \u00b7 UNIT-0${i+1}</div>
-    <div class="card-actions">
-      <button class="c-btn${isSaved?' c-saved':''} idc-save-btn" data-idx="${i}" title="Save">${isSaved?'\u2605':'\u2606'}</button>
-      <button class="c-btn idc-lib-btn"  data-idx="${i}" title="Library">\u2261</button>
-      <button class="c-btn idc-del-btn"  data-idx="${i}" title="Remove">\u2715</button>
-    </div>
-  </div>
-  <div class="c-content">
-    <div class="c-avatar"><span class="c-avatar-icon">${gender==='female'?'\u2640':'\u2642'}</span><div class="c-scan"></div></div>
-    <div class="c-info">
-      <input class="c-name-input" placeholder="Character name\u2026" maxlength="28"
-        value="${name.replace(/"/g,'&quot;')}" autocomplete="off" spellcheck="false">
-      <div class="c-primary">
-        <span class="c-pill">${cfg.label.toUpperCase()}</span>
-        <div class="c-age-wrap">
-          <input class="c-age-input" placeholder="\u2014" maxlength="3"
-            value="${age}" autocomplete="off">
-          <span class="c-age-lbl" id="idcAgeLbl${i}">${age?'\u2192 '+_ageLabel(age):''}</span>
-        </div>
-      </div>
-      <div class="c-secondary">${miniHtml||'<span class="c-no-mini">no details yet</span>'}</div>
-    </div>
-  </div>
-  <div class="c-div"></div>
-  <div class="idc-tags" id="idcTags${i}">${tagsHtml}</div>
-  <div class="c-foot">
-    <span class="c-id">ID#${Math.random().toString(36).slice(2,8).toUpperCase()}-${i+1} \u00b7 ${new Date().toISOString().slice(0,10).replace(/-/g,'.')}</span>
-    <div class="c-bar">${Array.from({length:12},()=>`<span style="height:${30+Math.random()*70}%"></span>`).join('')}</div>
-    ${editHtml}
-  </div>`;
+  /* ── Appearance chips ── */
+  var chips = [];
+  if(slot){
+    if(slot.hairColor1 && slot.hairstyle) chips.push({t:slot.hairColor1+' '+slot.hairstyle, cat:'hair'});
+    else if(slot.hairColor1) chips.push({t:slot.hairColor1+' hair', cat:'hair'});
+    else if(slot.hairstyle)  chips.push({t:slot.hairstyle, cat:'hair'});
+    if(slot.eyeColor) chips.push({t:slot.eyeColor+(slot.eyeShape?' · '+slot.eyeShape:''), cat:'eye'});
+    if(slot.skin)     chips.push({t:slot.skin, cat:'skin'});
+    if(slot.body)     chips.push({t:slot.body, cat:'body'});
+  }
+  var chipHtml = chips.map(function(c){
+    return '<span class="cb-chip cb-chip-'+c.cat+'">'+c.t+'</span>';
+  }).join('') || '<span class="cb-no-data">no appearance set</span>';
+
+  /* ── Detail tags (outfit/mood/tools) ── */
+  var tags     = _buildCardTags(slot, gender);
+  var tagsHtml = _tagsHtml(tags) || '<span class="cb-no-data">no details yet</span>';
+
+  /* ── Meta string for header ── */
+  var ageDisplay = '';
+  if(age && typeof _ageLabel === 'function') ageDisplay = age + ' · ' + _ageLabel(age);
+  else if(age) ageDisplay = age;
+
+  /* ── Status ── */
+  var statusHtml = isEd
+    ? '<span class="cb-dot cb-dot-on"></span><span class="cb-status-lbl cb-editing">EDITING</span>'
+    : '<span class="cb-dot cb-dot-off"></span><span class="cb-status-lbl">STANDBY</span>';
+
+  return ''
+  /* ══ HEADER BAND ══ */
+  +'<div class="cb-head cb-head-'+gender+'">'
+  +  '<div class="cb-head-left">'
+  +    '<div class="cb-head-icon cb-icon-'+gender+'">'
+  +      '<i class="fa-solid '+(isFem?'fa-person-dress':'fa-person')+'"></i>'
+  +    '</div>'
+  +    '<div class="cb-head-info">'
+  +      '<input class="cb-name-input cb-name-'+gender+'" placeholder="Character name…" maxlength="28" value="'+name.replace(/"/g,'&quot;')+'" autocomplete="off" spellcheck="false">'
+  +      '<div class="cb-meta">'
+  +        '<span class="cb-badge cb-badge-'+gender+'">'+cfg.label.toUpperCase()+'</span>'
+  +        '<input class="cb-age-input" placeholder="age" maxlength="3" value="'+age+'" autocomplete="off">'
+  +        '<span class="cb-age-lbl" id="idcAgeLbl'+i+'">'+(age && typeof _ageLabel==='function' ? _ageLabel(age) : '')+'</span>'
+  +      '</div>'
+  +    '</div>'
+  +  '</div>'
+  +  '<div class="cb-head-btns">'
+  +    '<button class="cb-btn idc-save-btn'+(isSaved?' cb-saved':'')+'" data-idx="'+i+'" title="Save"><i class="fas fa-star"></i></button>'
+  +    '<button class="cb-btn idc-lib-btn" data-idx="'+i+'" title="Library"><i class="fas fa-address-book"></i></button>'
+  +    '<button class="cb-btn cb-del idc-del-btn" data-idx="'+i+'" title="Remove"><i class="fas fa-xmark"></i></button>'
+  +  '</div>'
+  +'</div>'
+
+  /* ══ BODY ══ */
+  +'<div class="cb-body">'
+
+  /* Appearance section */
+  +  '<div class="cb-section-lbl">Appearance</div>'
+  +  '<div class="cb-chips" id="cbChips'+i+'">'+chipHtml+'</div>'
+
+  /* Details section */
+  +  '<div class="cb-section-lbl" style="margin-top:8px">Details</div>'
+  +  '<div class="idc-tags cb-tags" id="idcTags'+i+'">'+tagsHtml+'</div>'
+
+  +'</div>'
+
+  /* ══ FOOTER ══ */
+  +'<div class="cb-foot">'
+  +  '<div class="cb-status">'+statusHtml+'</div>'
+  +  '<span class="cb-unit">UNIT · 0'+(i+1)+'</span>'
+  +'</div>';
 }
 
 /* Attach events to a card — called once after building */
 function _attachCardEvents(card, i){
-  // Name input
-  var nameIn = card.querySelector('.c-name-input');
+  // Name input — supports cb-name-input, c2-name-input, c-name-input
+  var nameIn = card.querySelector('.cb-name-input, .c2-name-input, .c-name-input');
   if(nameIn){
     nameIn.addEventListener('input', function(e){
       e.stopPropagation();
@@ -880,15 +1121,14 @@ function _attachCardEvents(card, i){
     nameIn.addEventListener('blur', function(e){
       if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
       charSlots[i]._name = e.target.value;
-      /* no rebuild — name doesn't change the prompt */
     });
     nameIn.addEventListener('click',   function(e){ e.stopPropagation(); });
     nameIn.addEventListener('keydown', function(e){ e.stopPropagation(); });
     nameIn.addEventListener('mousedown',function(e){ e.stopPropagation(); });
   }
 
-  // Age input
-  var ageIn = card.querySelector('.c-age-input');
+  // Age input — supports cb-age-input, c2-age-input, c-age-input
+  var ageIn = card.querySelector('.cb-age-input, .c2-age-input, .c-age-input');
   if(ageIn){
     ageIn.addEventListener('input', function(e){
       e.stopPropagation();
@@ -901,22 +1141,18 @@ function _attachCardEvents(card, i){
     ageIn.addEventListener('blur', function(e){
       if(!charSlots[i]) charSlots[i] = typeof csEmptySlot==='function' ? csEmptySlot() : {};
       charSlots[i]._age = e.target.value;
-      /* only push to S.age when this card is active */
       if(i === (typeof activeChar!=='undefined' ? activeChar : 0)){
         var al = _ageLabel(e.target.value);
         S.age = al || null;
-        /* Auto-select matching Age Group button */
         if(al){
           var ageG = document.getElementById('ageGrid');
           if(ageG){
-            var matched = false;
             ageG.querySelectorAll('.ob').forEach(function(btn){
               var bv = btn.getAttribute('data-val');
               if(bv === al){
                 ageG.querySelectorAll('.ob').forEach(function(x){ x.classList.remove('on'); });
                 btn.classList.add('on');
                 S.age = bv;
-                matched = true;
               }
             });
           }
@@ -930,7 +1166,7 @@ function _attachCardEvents(card, i){
   }
 
   // Save btn
-  var saveBtn = card.querySelector('.idc-save-btn, .c-btn.idc-save-btn');
+  var saveBtn = card.querySelector('.idc-save-btn');
   if(saveBtn) saveBtn.addEventListener('click', function(e){
     e.stopPropagation();
     if(typeof isLoggedIn==='function' && !isLoggedIn()){ showLoginPrompt(); return; }
@@ -958,7 +1194,7 @@ function _attachCardEvents(card, i){
   card.addEventListener('click', function(e){
     if(e.target.closest('.idc-actions')) return;
     var f = document.activeElement;
-    if(f && (f.classList.contains('c-name-input')||f.classList.contains('c-age-input')||f.classList.contains('idc-name-input')||f.classList.contains('idc-age-input'))) return;
+    if(f && (f.classList.contains('cb-name-input')||f.classList.contains('cb-age-input')||f.classList.contains('c2-name-input')||f.classList.contains('c2-age-input')||f.classList.contains('c-name-input')||f.classList.contains('c-age-input'))) return;
     if(typeof csSwitchTo==='function' && i !== activeChar) csSwitchTo(i);
     else renderCharCards();
   });
@@ -1023,56 +1259,84 @@ function renderCharCards(){
     if(i === (typeof activeChar!=='undefined' ? activeChar : 0)){
       // Build a synthetic slot from current S values — always accurate
       freshSlot = {
-        hairColor1:S.hairColor1, hairColor2:S.hairColor2, hairstyle:S.hairstyle,
+        hairColor1:S.hairColor1, hairstyle:S.hairstyle,
         eyeColor:S.eyeColor, eyeShape:S.eyeShape, skin:S.skin, body:S.body,
         clothing:S.clothing, clothingColor:S.clothingColor,
         clothingTop:S.clothingTop, clothingTopColor:S.clothingTopColor,
         clothingBottom:S.clothingBottom, clothingBottomColor:S.clothingBottomColor,
-        clothingAcc:S.clothingAcc||[], sockLength:S.sockLength, sockColor:S.sockColor,
-        shoes:S.shoes, shoeColor:S.shoeColor, faceAcc:S.faceAcc||[],
-        expression:S.expression, poses:S.poses||[], effects:S.effects||[],
-        weapons:S.weapons||[], props:S.props||[], electronics:S.electronics||[],
+        clothingAcc:S.clothingAcc||[], clothingCondition:S.clothingCondition||[],
+        sockLength:S.sockLength, sockColor:S.sockColor,
+        shoes:S.shoes, shoeColor:S.shoeColor,
+        faceAcc:S.faceAcc||[],
+        expression:S.expression,
+        poses:S.poses||[], effects:S.effects||[], liquids:S.liquids||[],
+        nsfwTop:S.nsfwTop, nsfwTopColor:S.nsfwTopColor,
+        nsfwBottom:S.nsfwBottom, nsfwBottomColor:S.nsfwBottomColor,
+        nsfwClothing:S.nsfwClothing||[], nsfwPose:S.nsfwPose||[], nsfwFluid:S.nsfwFluid||[],
+        weapons:S.weapons||[], props:S.props||[], electronics:S.electronics||[], otherItems:S.otherItems||[],
         _name:S._name, _age:S._age
       };
     } else {
       /* inactive char — read slot directly, NEVER write S into it */
       freshSlot = (typeof charSlots!=='undefined') ? charSlots[i] : null;
     }
+    // Update age label if visible
+    var ageLblEl = document.getElementById('idcAgeLbl'+i);
+    if(ageLblEl && freshSlot && freshSlot._age){
+      var al = typeof _ageLabel==='function' ? _ageLabel(freshSlot._age) : '';
+      ageLblEl.textContent = al ? al : '';
+    }
     // Tags
     var tagsEl = document.getElementById('idcTags'+i);
     if(tagsEl){
       var tags = _buildCardTags(freshSlot, gender);
-      tagsEl.innerHTML = _tagsHtml(tags);
+      tagsEl.innerHTML = _tagsHtml(tags)||'<span class="cb-no-data">no details yet</span>';
     }
-    // Mini chips
-    var secEl = existing.querySelector('.c-secondary');
-    if(secEl && freshSlot){
-      var minis2 = [];
-      if(freshSlot.hairColor1 && freshSlot.hairstyle) minis2.push(freshSlot.hairColor1+' '+freshSlot.hairstyle);
-      else if(freshSlot.hairColor1) minis2.push(freshSlot.hairColor1+' hair');
-      else if(freshSlot.hairstyle)  minis2.push(freshSlot.hairstyle);
-      if(freshSlot.eyeColor) minis2.push(freshSlot.eyeColor+(freshSlot.eyeShape?' '+freshSlot.eyeShape:'')+' eyes');
-      if(freshSlot.skin) minis2.push(freshSlot.skin+' skin');
-      if(freshSlot.body) minis2.push(freshSlot.body);
-      secEl.innerHTML = minis2.length
-        ? minis2.map(function(m){ return '<span class="c-mini">'+m+'</span>'; }).join('')
-        : '<span class="c-no-mini">no details yet</span>';
+    // Appearance chips — cb design
+    var chipsEl = document.getElementById('cbChips'+i);
+    if(chipsEl && freshSlot){
+      var chips2 = [];
+      if(freshSlot.hairColor1 && freshSlot.hairstyle) chips2.push({t:freshSlot.hairColor1+' '+freshSlot.hairstyle,cat:'hair'});
+      else if(freshSlot.hairColor1) chips2.push({t:freshSlot.hairColor1+' hair',cat:'hair'});
+      else if(freshSlot.hairstyle)  chips2.push({t:freshSlot.hairstyle,cat:'hair'});
+      if(freshSlot.eyeColor) chips2.push({t:freshSlot.eyeColor+(freshSlot.eyeShape?' · '+freshSlot.eyeShape:''),cat:'eye'});
+      if(freshSlot.skin) chips2.push({t:freshSlot.skin,cat:'skin'});
+      if(freshSlot.body) chips2.push({t:freshSlot.body,cat:'body'});
+      chipsEl.innerHTML = chips2.length
+        ? chips2.map(function(c){ return '<span class="cb-chip cb-chip-'+c.cat+'">'+c.t+'</span>'; }).join('')
+        : '<span class="cb-no-data">no appearance set</span>';
     }
-    // Editing indicator in footer
+    // Fallback: old .c2-chips-row
+    var chipsRow = existing.querySelector('.c2-chips-row');
+    if(chipsRow && freshSlot && !chipsEl){
+      var chips3 = [];
+      if(freshSlot.hairColor1 && freshSlot.hairstyle) chips3.push({t:freshSlot.hairColor1+' '+freshSlot.hairstyle, cat:'hair'});
+      else if(freshSlot.hairColor1) chips3.push({t:freshSlot.hairColor1+' hair', cat:'hair'});
+      else if(freshSlot.hairstyle)  chips3.push({t:freshSlot.hairstyle, cat:'hair'});
+      if(freshSlot.eyeColor) chips3.push({t:freshSlot.eyeColor+(freshSlot.eyeShape?' · '+freshSlot.eyeShape:''), cat:'eye'});
+      if(freshSlot.skin) chips3.push({t:freshSlot.skin, cat:'skin'});
+      if(freshSlot.body) chips3.push({t:freshSlot.body, cat:'body'});
+      chipsRow.innerHTML = chips3.length
+        ? chips3.map(function(c){ return '<span class="cb-chip cb-chip-'+c.cat+'">'+c.t+'</span>'; }).join('')
+        : '<span class="cb-no-data">no appearance set</span>';
+    }
+    // Editing indicator — cb-status
     var isEd2 = (typeof activeChar!=='undefined') && activeChar===i && !!gender;
-    var editEl = existing.querySelector('.c-edit');
-    if(editEl){
-      if(isEd2){
-        editEl.className = 'c-edit';
-        editEl.innerHTML = '<span class="c-blink">▮</span> EDITING';
-      } else {
-        editEl.className = 'c-edit c-edit-standby';
-        editEl.innerHTML = '<span style="opacity:.3">●</span> STANDBY';
-      }
+    var statusEl = existing.querySelector('.cb-status');
+    if(statusEl){
+      statusEl.innerHTML = isEd2
+        ? '<span class="cb-dot cb-dot-on"></span><span class="cb-status-lbl cb-editing">EDITING</span>'
+        : '<span class="cb-dot cb-dot-off"></span><span class="cb-status-lbl">STANDBY</span>';
+    }
+    // Fallback old c2-status
+    var statusEl2 = existing.querySelector('.c2-status');
+    if(statusEl2){
+      statusEl2.innerHTML = isEd2
+        ? '<span class="c-status-dot c-status-editing"></span><span class="c-status-lbl">EDITING</span>'
+        : '<span class="c-status-dot c-status-standby"></span><span class="c-status-lbl">STANDBY</span>';
     }
     existing.classList.toggle('idc-editing', isEd2);
-
-    // Save btn star glow
+    // Save btn
     var saveB = existing.querySelector('.idc-save-btn');
     if(saveB) saveB.classList.toggle('idc-saved', !!(slot && slot._saved));
   });
@@ -1083,6 +1347,7 @@ let _gIdx = null;
 
 function openGenderModal(idx){
   _gIdx = idx;
+  window._gIdx = idx; // expose for char-slots
   const cur = S.characters[idx];
   const sub = document.getElementById('genderModalSub');
   if(sub) sub.textContent = 'Character '+(idx+1);
@@ -1096,12 +1361,15 @@ function openGenderModal(idx){
 function closeGenderModal(){
   document.getElementById('genderOverlay').classList.remove('open');
   _gIdx=null;
+  /* keep window._gIdx for a tick so char-slots.js savedBtn handler can read it */
+  setTimeout(function(){ window._gIdx = null; }, 50);
 }
 
 function initGenderModal(){
   document.querySelectorAll('.gender-opt-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       if(_gIdx===null) return;
+      if(!btn.dataset.gender) return; // skip non-gender buttons (e.g. saved)
       const setIdx = _gIdx; // capture before closeGenderModal nulls it
       S.characters[setIdx]=btn.dataset.gender;
       closeGenderModal();
@@ -1197,11 +1465,9 @@ function init(){
   makeSingle('bodyGrid',  D.body.lbl,   D.body.val,  'body');
   makeMulti('nsfwBodyGrid',D.nsfwBody.lbl,'nsfwBody',true,false);
   /* Appearance */
-  renderColors('hairColorGrid',  HAIR_COLORS,'hairColor1');
-  renderColors('hairColor2Grid', HAIR_COLORS,'hairColor2',true);
   makeGenderSingle('hairstyleGrid',D.hairstyle,'hairstyle');
-  renderColors('eyeColorGrid', EYE_COLORS,'eyeColor');
   makeSingle('eyeShapeGrid',D.eyeShape.lbl,null,'eyeShape');
+  setTimeout(function(){ if(typeof attachHairEyePopups==='function') attachHairEyePopups(); },200);
   /* Outfit */
   makeGenderSingle('clothingTopGrid', D.clothingTop, 'clothingTop');
   makeSingle('nsfwTopGrid',        D.nsfwTop.lbl,        null, 'nsfwTop',    true);
@@ -1533,10 +1799,7 @@ function buildPosText(){
   else if(S.eyeShape)p.push(`${S.eyeShape} eyes`);
   else if(S.eyeColor)p.push(`${S.eyeColor} eyes`);
   // Fix 3+4: hair color + style combined, no duplication
-  if(S.hairColor1&&S.hairColor2&&S.hairstyle)p.push(`${S.hairColor1} to ${S.hairColor2} ombre ${S.hairstyle} hair`);
-  else if(S.hairColor1&&S.hairstyle)p.push(`${S.hairColor1} ${S.hairstyle} hair`);
-  else if(S.hairColor2&&S.hairstyle)p.push(`${S.hairColor2} ombre ${S.hairstyle} hair`);
-  else if(S.hairColor1&&S.hairColor2)p.push(`${S.hairColor1} to ${S.hairColor2} ombre hair`);
+  if(S.hairColor1&&S.hairstyle)p.push(`${S.hairColor1} ${S.hairstyle} hair`);
   else if(S.hairColor1)p.push(`${S.hairColor1} hair`);
   else if(S.hairstyle)p.push(`${S.hairstyle} hair`);
   // Build outfit: Top+Bottom combo OR Full Outfit — never mix both
@@ -1641,10 +1904,7 @@ function buildPosGroups(){
   if(S.eyeShape&&S.eyeColor) lk.push(S.eyeShape+', '+S.eyeColor+' eyes');
   else if(S.eyeShape) lk.push(S.eyeShape+' eyes');
   else if(S.eyeColor) lk.push(S.eyeColor+' eyes');
-  if(S.hairColor1&&S.hairColor2&&S.hairstyle) lk.push(S.hairColor1+' to '+S.hairColor2+' ombre '+S.hairstyle+' hair');
-  else if(S.hairColor1&&S.hairstyle) lk.push(S.hairColor1+' '+S.hairstyle+' hair');
-  else if(S.hairColor2&&S.hairstyle) lk.push(S.hairColor2+' ombre '+S.hairstyle+' hair');
-  else if(S.hairColor1&&S.hairColor2) lk.push(S.hairColor1+' to '+S.hairColor2+' ombre hair');
+  if(S.hairColor1&&S.hairstyle) lk.push(S.hairColor1+' '+S.hairstyle+' hair');
   else if(S.hairColor1) lk.push(S.hairColor1+' hair');
   else if(S.hairstyle) lk.push(S.hairstyle+' hair');
   if(lk.length) add('l',lk);
@@ -1719,11 +1979,20 @@ function showWeightSlider(chip, key, label){
   activeTip = tip;
   chip.classList.add('w-open');
 
-  // Tag label
+  // Header row: tag label + close button
+  const tipHd = document.createElement('div');
+  tipHd.className = 'w-tip-hd';
   const tagLbl = document.createElement('div');
   tagLbl.className = 'w-tip-tag';
   tagLbl.textContent = '⚖ ' + label;
-  tip.appendChild(tagLbl);
+  const closeX = document.createElement('button');
+  closeX.className = 'w-tip-close';
+  closeX.innerHTML = '&#x2715;';
+  closeX.title = 'Close';
+  closeX.addEventListener('click', e=>{ e.stopPropagation(); closeWeightTip(); });
+  tipHd.appendChild(tagLbl);
+  tipHd.appendChild(closeX);
+  tip.appendChild(tipHd);
 
   // Slider row
   const row = document.createElement('div');
@@ -1806,7 +2075,137 @@ function showWeightSlider(chip, key, label){
   }, 10);
 }
 
-function makeWeightedChip(text, cls){
+/* Remove an auto-generated chip by matching its text to state */
+function _chipRemoveAuto(text){
+  const t = text.toLowerCase().trim();
+
+  /* _safeReflect: reflectUI handles globals, csReflectButtons handles per-char */
+  function _safeReflect(){
+    reflectUI();
+    if(typeof csReflectButtons === 'function') csReflectButtons();
+  }
+
+  /* helper: turn off all .ob buttons in a grid */
+  function offGrid(gid){
+    const g=document.getElementById(gid);
+    if(g) g.querySelectorAll('.ob').forEach(function(b){
+      b.classList.remove('on');
+      var bar=b.querySelector('.hcp-bar'); if(bar) bar.style.background='transparent';
+    });
+  }
+  /* helper: turn off all .cb buttons in a grid */
+  function offCb(gid){
+    const g=document.getElementById(gid);
+    if(g) g.querySelectorAll('.cb').forEach(function(b){
+      b.classList.remove('on'); b.style.borderColor='transparent';
+    });
+  }
+  /* helper: null scalar + off grid */
+  function clearScalar(key, gid){
+    S[key]=null;
+    if(gid) offGrid(gid);
+  }
+  /* helper: clear array + off grid */
+  function clearArr(key, gid){
+    S[key]=[];
+    if(gid) offGrid(gid);
+  }
+
+  /* Quality */
+  if(S.quality.length){
+    const qi = S.quality.findIndex(q=>t.includes(q.toLowerCase()));
+    if(qi>=0){ S.quality.splice(qi,1); offGrid('qualityGrid'); _safeReflect(); rebuild(); return; }
+  }
+
+  /* Look — hair */
+  if(t.includes('hair')){
+    clearScalar('hairColor1', null); clearScalar('hairstyle','hairstyleGrid');
+    // clear hcp-bars on hairstyleGrid
+    const hg=document.getElementById('hairstyleGrid');
+    if(hg) hg.querySelectorAll('.hcp-bar').forEach(function(b){b.style.background='transparent';});
+    _safeReflect(); rebuild(); return;
+  }
+  /* Look — eyes */
+  if(t.includes(' eye') || t.endsWith('eyes')){
+    clearScalar('eyeColor', null); clearScalar('eyeShape','eyeShapeGrid');
+    const eg=document.getElementById('eyeShapeGrid');
+    if(eg) eg.querySelectorAll('.hcp-bar').forEach(function(b){b.style.background='transparent';});
+    _safeReflect(); rebuild(); return;
+  }
+
+  /* Single scalar fields */
+  const scalarMap = {
+    age:'ageGrid', body:'bodyGrid', skin:'skinGrid',
+    expression:'expressionGrid',
+    clothing:'clothingGrid', clothingTop:'clothingTopGrid', clothingBottom:'clothingBottomGrid',
+    environment:'environmentGrid', era:'eraGrid', style:'styleGrid',
+    animeStudio:'animeStudioGrid', colorGrade:'colorGradeGrid',
+    stroke:'strokeGrid', shadow:'shadowGrid', glow:'glowGrid', smooth:'smoothGrid',
+    angle:'angleGrid', shot:'shotGrid', look:'lookGrid', lens:'lensGrid',
+    lensEffect:'lensEffectGrid', sockLength:'sockLengthGrid', shoes:'shoesGrid',
+    charCount:null
+  };
+  for(const [k,gid] of Object.entries(scalarMap)){
+    if(S[k] && t.includes(String(S[k]).toLowerCase())){
+      clearScalar(k, gid);
+      _safeReflect(); rebuild(); return;
+    }
+  }
+
+  /* Arrays */
+  const arrMap = {
+    nsfwBody:'nsfwBodyGrid', nsfwPose:'nsfwPoseGrid', nsfwFluid:'nsfwFluidGrid',
+    nsfwIndicator:'nsfwIndicatorGrid', nsfwShot:'nsfwShotGrid', nsfwEnv:'nsfwEnvGrid',
+    nsfwClothing:'nsfwClothingGrid',
+    clothingAcc:'clothingAccGrid', faceAcc:'faceAccGrid', bodyParts:'bodyPartsGrid',
+    lights:'lightGrid', poses:'poseGrid', effects:'effectsGrid', liquids:'liquidsGrid',
+    weapons:'weaponGrid', props:'propsGrid', electronics:'electronicsGrid', otherItems:'otherItemsGrid'
+  };
+  for(const [k,gid] of Object.entries(arrMap)){
+    if(Array.isArray(S[k]) && S[k].length){
+      const before = S[k].length;
+      S[k] = S[k].filter(v=>!t.includes(String(v).toLowerCase()));
+      if(S[k].length < before){
+        // turn off deselected buttons
+        const g=document.getElementById(gid);
+        if(g) g.querySelectorAll('.ob').forEach(function(b){
+          const v=(b.getAttribute('data-val')||'').toLowerCase();
+          if(v && !S[k].map(x=>String(x).toLowerCase()).includes(v)){
+            b.classList.remove('on');
+          }
+        });
+        _safeReflect(); rebuild(); return;
+      }
+    }
+  }
+
+  /* wearing ... */
+  if(t.startsWith('wearing')){
+    clearScalar('clothing','clothingGrid'); clearScalar('clothingTop','clothingTopGrid');
+    clearScalar('clothingBottom','clothingBottomGrid');
+    clearScalar('nsfwTop','nsfwTopGrid'); clearScalar('nsfwBottom','nsfwBottomGrid');
+    clearArr('nsfwClothing','nsfwClothingGrid');
+    _safeReflect(); rebuild(); return;
+  }
+  /* socks */
+  if(t.includes('sock')){ clearScalar('sockLength','sockLengthGrid'); S.sockColor=null; _safeReflect(); rebuild(); return; }
+  /* holding */
+  if(t.startsWith('holding')){
+    clearArr('weapons','weaponGrid'); clearArr('props','propsGrid');
+    clearArr('electronics','electronicsGrid'); clearArr('otherItems','otherItemsGrid');
+    _safeReflect(); rebuild(); return;
+  }
+  /* in + environment */
+  if(t.startsWith('in ')){ clearScalar('environment','environmentGrid'); _safeReflect(); rebuild(); return; }
+  /* looking */
+  if(t.startsWith('looking')){ clearScalar('look','lookGrid'); _safeReflect(); rebuild(); return; }
+  /* lens */
+  if(t.includes('lens')){ clearScalar('lens','lensGrid'); clearScalar('lensEffect','lensEffectGrid'); _safeReflect(); rebuild(); return; }
+
+  _safeReflect(); rebuild();
+}
+
+function makeWeightedChip(text, cls, removeFn){
   const key = text.toLowerCase();
   const w   = S.weights[key] || 1.0;
 
@@ -1825,7 +2224,22 @@ function makeWeightedChip(text, cls){
   badge.style.display = w === 1.0 ? 'none' : '';
   sp.appendChild(badge);
 
+  /* ✕ remove button — always shown */
+  const xbtn = document.createElement('span');
+  xbtn.className = 'ps-remove';
+  xbtn.innerHTML = '&times;';
+  xbtn.title = 'Remove';
+  xbtn.addEventListener('mousedown', e=>{ e.preventDefault(); e.stopPropagation(); });
+  xbtn.addEventListener('click', e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    if(removeFn){ removeFn(); }
+    else { _chipRemoveAuto(text); }
+  });
+  sp.appendChild(xbtn);
+
   sp.addEventListener('click', e=>{
+    if(e.target.classList.contains('ps-remove')) return;
     e.stopPropagation();
     showWeightSlider(sp, key, text);
   });
@@ -1843,11 +2257,37 @@ function renderPromptChips(el, groups, extraArr, negCls){
   el.className='ptxt'+(negCls?' neg':'');
   groups.forEach(g=>{
     g.items.forEach(item=>{
-      el.appendChild(makeWeightedChip(item, 'ps-'+(negCls?'n':g.cls)));
+      let removeFn = null;
+      /* For negative auto chips — build removeFn based on src */
+      if(negCls && g.src){
+        const src = g.src;
+        const val = item.toLowerCase();
+        removeFn = ()=>{
+          if(src==='negatives'){ S.negatives = S.negatives.filter(v=>v.toLowerCase()!==val); }
+          else if(src==='negBody'){
+            S.negBody = S.negBody.filter(v=>v.toLowerCase()!==val);
+            const g2=document.getElementById('negBodyGrid');
+            if(g2) g2.querySelectorAll('.ob').forEach(b=>{ if((b.getAttribute('data-val')||'').toLowerCase()===val) b.classList.remove('on'); });
+          }
+          else if(src==='negQuality'){
+            S.negQuality = S.negQuality.filter(v=>v.toLowerCase()!==val);
+            const g2=document.getElementById('negQualityGrid');
+            if(g2) g2.querySelectorAll('.ob').forEach(b=>{ if((b.getAttribute('data-val')||'').toLowerCase()===val) b.classList.remove('on'); });
+          }
+          delete S.weights[val];
+          rebuild();
+        };
+      }
+      el.appendChild(makeWeightedChip(item, 'ps-'+(negCls?'n':g.cls), removeFn));
     });
   });
-  extraArr.forEach(t=>{
-    el.appendChild(makeWeightedChip(t, negCls?'ps-n':'ps-usr'));
+  extraArr.forEach((t,i)=>{
+    const removeFn = ()=>{
+      if(negCls){ S.extraNeg.splice(i,1); } else { S.extraPos.splice(i,1); }
+      delete S.weights[t.toLowerCase()];
+      rebuild();
+    };
+    el.appendChild(makeWeightedChip(t, negCls?'ps-n':'ps-usr', removeFn));
   });
 }
 
@@ -1873,8 +2313,12 @@ function rebuild(){
   // Negative
   const hasNeg=S.negatives.length>0||S.negBody.length>0||S.negQuality.length>0||S.extraNeg.length>0;
   if(hasNeg){
-    const negItems=[...S.negatives,...S.negBody,...S.negQuality].map(n=>({cls:'n',items:[n]}));
-    renderPromptChips(ne,negItems,S.extraNeg,true);
+    const negItems=[
+      ...S.negatives.map(n=>({cls:'n',items:[n],src:'negatives'})),
+      ...S.negBody.map(n=>({cls:'n',items:[n],src:'negBody'})),
+      ...S.negQuality.map(n=>({cls:'n',items:[n],src:'negQuality'}))
+    ];
+    renderPromptChips(ne, negItems, S.extraNeg, true);
     ne.classList.add('flash');
     setTimeout(()=>ne.classList.remove('flash'),500);
     document.getElementById('negWC').textContent=(S.negatives.length+S.negBody.length+S.negQuality.length+S.extraNeg.length)+' '+(typeof t==='function'?t('tags'):'tags');
@@ -2133,16 +2577,11 @@ function renderFavList(){
         });
 
         // Hair / Eye colors
-        [{gid:'hairColorGrid',sk:'hairColor1'},{gid:'hairColor2Grid',sk:'hairColor2'},{gid:'eyeColorGrid',sk:'eyeColor'}]
-        .forEach(({gid,sk})=>{
-          if(!S[sk]) return;
-          const g=document.getElementById(gid); if(!g) return;
-          g.querySelectorAll('.cb').forEach(b=>{
-            const on=(b.getAttribute('data-val')||'').toLowerCase()===S[sk].toLowerCase();
-            b.classList.toggle('on',on);
-            b.style.borderColor=on?'rgba(255,255,255,.8)':'transparent';
-          });
-        });
+        // Hair/Eye colour bars — update on hairstyle/eyeShape buttons
+        if(typeof _updateColorDot==='function'){
+          _updateColorDot('hairColor1');
+          _updateColorDot('eyeColor');
+        }
 
         // Skin
         document.querySelectorAll('.sb').forEach(b=>{
@@ -2152,10 +2591,11 @@ function renderFavList(){
           b.style.borderColor=on?'white':(SKINS.find(s=>s.val===bv)?.bg||'transparent');
         });
 
-        // Color dots
+        // Color bars
         ['clothingColor','clothingTopColor','clothingBottomColor',
          'nsfwTopColor','nsfwBottomColor','nsfwClothingColor',
-         'sockColor','shoeColor','clothingAccColor','faceAccColor'].forEach(k=>_updateColorDot(k));
+         'sockColor','shoeColor','clothingAccColor','faceAccColor',
+         'hairColor1','eyeColor'].forEach(k=>_updateColorDot(k));
 
         // NSFW
         if(S.nsfw){
@@ -2194,23 +2634,34 @@ function renderFavList(){
 
 /* Reflect loaded state back onto buttons */
 function reflectUI(){
-  // Single-select buttons
+  /* Per-character grids — these are EXCLUSIVELY managed by csReflectButtons().
+     reflectUI must never touch them, otherwise it corrupts the per-slot state. */
+  var PER_CHAR_GRIDS = {
+    hairstyleGrid:1, hairColorGrid:1, eyeShapeGrid:1, eyeColorGrid:1,
+    skinGrid:1, bodyGrid:1, ageGrid:1,
+    clothingGrid:1, clothingTopGrid:1, clothingBottomGrid:1,
+    nsfwTopGrid:1, nsfwBottomGrid:1,
+    sockLengthGrid:1, shoesGrid:1, expressionGrid:1,
+    clothingAccGrid:1, clothingConditionGrid:1, faceAccGrid:1,
+    poseGrid:1, effectsGrid:1, liquidsGrid:1,
+    weaponGrid:1, propsGrid:1, electronicsGrid:1, otherItemsGrid:1,
+    nsfwBodyGrid:1, nsfwClothingGrid:1, nsfwPoseGrid:1, nsfwFluidGrid:1, nsfwIndicatorGrid:1,
+    bodyPartsGrid:1
+  };
+
+  // Clear .on only on NON-per-char .ob buttons
   document.querySelectorAll('.ob').forEach(b=>{
-    const grid=b.closest('[id]');
+    var grid = b.closest('[id]');
+    var gid  = grid ? grid.id : null;
+    if(gid && PER_CHAR_GRIDS[gid]) return; // skip per-char grids
     b.classList.remove('on');
   });
   document.querySelectorAll('.cw,.cb').forEach(w=>{w.classList.remove('on');if(w.classList.contains('cb'))w.style.borderColor='transparent';});
-  document.querySelectorAll('.sb').forEach((b,i)=>{b.classList.remove('on');if(SKINS[i])b.style.borderColor=SKINS[i].bg;});
+  // Do NOT touch .sb (skin) — handled by csReflectButtons
 
-  // Re-apply state visually
-  // For single-select: find the button in each grid whose text matches state value
+  // Scene / Camera / Quality / Global singles only
   const singleMap={
-    charCountGrid:'charCount', ageGrid:'age', bodyGrid:'body',
-    hairstyleGrid:'hairstyle', eyeShapeGrid:'eyeShape',
-    clothingTopGrid:'clothingTop', clothingBottomGrid:'clothingBottom',
-    nsfwTopGrid:'nsfwTop', nsfwBottomGrid:'nsfwBottom',
-    clothingGrid:'clothing', sockLengthGrid:'sockLength',
-    shoesGrid:'shoes', expressionGrid:'expression',
+    charCountGrid:'charCount',
     envGrid:'environment', styleGrid:'style', eraGrid:'era', animeStudioGrid:'animeStudio',
     strokeGrid:'stroke', shadowGrid:'shadow', glowGrid:'glow', smoothGrid:'smooth',
     angleGrid:'angle', shotGrid:'shot', lookGrid:'look', lensGrid:'lens', lensEffectGrid:'lensEffect',
@@ -2225,18 +2676,12 @@ function reflectUI(){
       if(bv===sv) b.classList.add('on');
     });
   });
-  // Multi-select
+
+  // Global multi-select only
   const multiMap={
-    clothingAccGrid:'clothingAcc', clothingConditionGrid:'clothingCondition',
-    faceAccGrid:'faceAcc', poseGrid:'poses',
-    effectsGrid:'effects', liquidsGrid:'liquids', weaponGrid:'weapons',
-    propsGrid:'props', electronicsGrid:'electronics', otherItemsGrid:'otherItems',
-    qualityGrid:'quality', lightGrid:'lights', negativeGrid:'negatives',
+    qualityGrid:'quality', lightGrid:'lights',
     negBodyGrid:'negBody', negQualityGrid:'negQuality',
-    nsfwBodyGrid:'nsfwBody',
-    nsfwClothingGrid:'nsfwClothing', nsfwPoseGrid:'nsfwPose',
-    nsfwFluidGrid:'nsfwFluid', nsfwEnvGrid:'nsfwEnv', nsfwIndicatorGrid:'nsfwIndicator',
-    nsfwShotGrid:'nsfwShot', bodyPartsGrid:'bodyParts'
+    nsfwEnvGrid:'nsfwEnv', nsfwShotGrid:'nsfwShot'
   };
   Object.entries(multiMap).forEach(([gid,k])=>{
     const g=document.getElementById(gid);if(!g)return;
@@ -2245,34 +2690,10 @@ function reflectUI(){
       if(S[k]&&S[k].map(v=>String(v).toLowerCase()).includes(bv)) b.classList.add('on');
     });
   });
-  // Color pickers — now using .cb buttons (renderColors)
-  [{gid:'hairColorGrid',sk:'hairColor1',arr:HAIR_COLORS},
-   {gid:'hairColor2Grid',sk:'hairColor2',arr:HAIR_COLORS},
-   {gid:'eyeColorGrid',sk:'eyeColor',arr:EYE_COLORS}
-  ].forEach(({gid,sk,arr})=>{
-    const g=document.getElementById(gid);if(!g||!S[sk])return;
-    g.querySelectorAll('.cb').forEach((b,i)=>{
-      if(!arr[i])return;
-      const on=arr[i].id===S[sk];
-      b.classList.toggle('on',on);
-      b.style.borderColor=on?'rgba(255,255,255,.85)':'transparent';
-    });
-  });
-  // Update color dots on sock/shoe buttons
-  _updateColorDot('sockColor');
-  _updateColorDot('shoeColor');
-  _updateColorDot('clothingColor');
-  _updateColorDot('clothingTopColor');
-  _updateColorDot('clothingBottomColor');
-  _updateColorDot('nsfwTopColor');
-  _updateColorDot('nsfwBottomColor');
-  _updateColorDot('nsfwClothingColor');
-  // Skin
-  document.querySelectorAll('.sb').forEach((b,i)=>{
-    if(S.skin&&S.skin===SKINS[i].val){b.classList.add('on');b.style.borderColor='white';}
-  });
-  // NSFW
-  document.getElementById('nsfwBtn').classList.toggle('on',S.nsfw);
+
+  // NSFW toggle only
+  const nsfwBtn = document.getElementById('nsfwBtn');
+  if(nsfwBtn) nsfwBtn.classList.toggle('on',S.nsfw);
   toggleNSFW(S.nsfw);
 }
 
@@ -2567,7 +2988,6 @@ function randomize(){
   if(maybe(.20)) S.eyeShape   = pick(D.eyeShape.lbl).toLowerCase();
   if(maybe(.65)) S.age        = pick(D.age.val.filter(v=>!['toddler','child','preteen'].includes(v)));
   if(maybe(.40)) S.body       = pick(D.body.val);
-  if(maybe(.30)) S.hairColor2 = pick(HAIR_COLORS).id;
 
   // ── Outfit — Top+Bottom combo (60%) OR Full Outfit (40%) ──
   const _gender0   = S.characters ? (S.characters[0]||'female') : 'female';
@@ -2786,7 +3206,10 @@ function randomize(){
   // ── Fix conflicts after randomizing ──
   resolveConflicts(true);
 
-  reflectUI(); rebuild(); toast('🎲 Randomized!');
+  reflectUI();
+  if(typeof csReflectButtons === 'function') csReflectButtons();
+  rebuild();
+  toast('🎲 Randomized!');
 }
 
 
@@ -3151,10 +3574,9 @@ const UI = {
     neg_body_anatomy:'Body & Anatomy', neg_image_quality:'Image Quality',
     body_parts_note:'Focus camera on specific body parts — NSFW mode only.',
     /* ── Blueprint labels ── */
-    bp_char:'Characters', bp_age:'Age', bp_skin:'Skin & Body',
-    bp_hair:'Hair', bp_eyes:'Eyes', bp_outfit:'Outfit',
-    bp_mood:'Mood', bp_tools:'Tools', bp_scene:'Scene',
-    bp_camera:'Camera', bp_quality:'Quality',
+    bp_char:'Character', bp_outfit:'Outfit',
+    bp_mood:'Mood', bp_tools:'Tools', bp_style:'Style',
+    bp_scene:'Scene', bp_camera:'Camera', bp_quality:'Quality',
     /* ── About modal ── */
     about_p1:'Anime Prompt Studio is a free, browser-based tool designed to help artists and enthusiasts craft detailed, high-quality prompts for AI image generation.',
     about_p2:'Built with a focus on anime and illustration styles, it gives you full control over character appearance, outfit, mood, scene, lighting, camera, and more — all in one place.',
@@ -3258,10 +3680,9 @@ const UI = {
     neg_body_anatomy:'الجسم والتشريح', neg_image_quality:'جودة الصورة',
     body_parts_note:'تركيز الكاميرا على أجزاء محددة — يتطلب تفعيل وضع المحتوى الناضج.',
     /* ── Blueprint labels ── */
-    bp_char:'الشخصيات', bp_age:'العمر', bp_skin:'البشرة والجسم',
-    bp_hair:'الشعر', bp_eyes:'العيون', bp_outfit:'الزي',
-    bp_mood:'المزاج', bp_tools:'الأدوات', bp_scene:'المشهد',
-    bp_camera:'الكاميرا', bp_quality:'الجودة',
+    bp_char:'الشخصية', bp_outfit:'الزي',
+    bp_mood:'المزاج', bp_tools:'الأدوات', bp_style:'الأسلوب',
+    bp_scene:'المشهد', bp_camera:'الكاميرا', bp_quality:'الجودة',
     /* ── About modal ── */
     about_p1:'Anime Prompt Studio أداة مجانية تعمل في المتصفح، مصممة لمساعدة الفنانين والمهتمين على صياغة برومبتات تفصيلية عالية الجودة لتوليد الصور بالذكاء الاصطناعي.',
     about_p2:'مبنية بتركيز على أسلوب الأنيمي والرسوم التوضيحية، تمنحك تحكماً كاملاً في مظهر الشخصية والزي والمزاج والمشهد والإضاءة والكاميرا — كل شيء في مكان واحد.',
@@ -3907,10 +4328,9 @@ function applyLang(lang){
 
   // Translate Blueprint cell labels
   const bpMap = {
-    'bp-char':'bp_char','bp-age':'bp_age','bp-skin':'bp_skin',
-    'bp-hair':'bp_hair','bp-eyes':'bp_eyes','bp-outfit':'bp_outfit',
-    'bp-mood':'bp_mood','bp-tools':'bp_tools','bp-scene':'bp_scene',
-    'bp-camera':'bp_camera','bp-quality':'bp_quality'
+    'bp-char':'bp_char','bp-outfit':'bp_outfit',
+    'bp-mood':'bp_mood','bp-tools':'bp_tools','bp-style':'bp_style',
+    'bp-scene':'bp_scene','bp-camera':'bp_camera','bp-quality':'bp_quality'
   };
   Object.entries(bpMap).forEach(([id,key])=>{
     const el = document.getElementById(id);
@@ -3951,84 +4371,9 @@ document.addEventListener('click', e=>{
 
 initModal();
 init();
-// Re-apply lang after init() builds all buttons
 applyLang(_lang);
-
-// ── PROMPT OPTIMIZER ──────────────────────────────────────────
-(function(){
-  const btn    = document.getElementById('optimizerBtn');
-  const input  = document.getElementById('optimizerInput');
-  const output = document.getElementById('optimizerOutput');
-  const status = document.getElementById('optimizerStatus');
-  const insBtn = document.getElementById('optimizerInsertBtn');
-  if(!btn) return;
-
-  const SYSTEM = `You are an expert anime AI image prompt engineer specializing in models like NovelAI, Stable Diffusion (anime checkpoints), and ComfyUI anime pipelines.
-
-Your task: Convert any user description (in any language) into a highly optimized, model-ready anime prompt.
-
-Rules:
-- Output ONLY the final prompt — no explanations, no labels, no markdown
-- Use comma-separated English tags in the standard booru/danbooru tag format
-- Start with quality boosters: masterpiece, best quality, ultra-detailed, highly detailed
-- Include art style tags: anime style, 2d, illustration
-- Translate and expand the user's description into relevant tags
-- Add complementary tags that enhance the scene naturally
-- End with technical quality tags: sharp focus, vibrant colors, intricate details
-- Keep it under 120 words total
-- Never include: realistic, photorealistic, 3d render`;
-
-  btn.addEventListener('click', async () => {
-    const text = input.value.trim();
-    if(!text){ status.textContent = '⚠ اكتب وصفاً أولاً'; return; }
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحسين...';
-    status.textContent = '';
-    output.style.display = 'none';
-    insBtn.style.display = 'none';
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 300,
-          system: SYSTEM,
-          messages: [{ role: 'user', content: text }]
-        })
-      });
-
-      if(!res.ok) throw new Error(`API error ${res.status}`);
-      const data = await res.json();
-      const result = (data.content||[]).map(b=>b.text||'').join('').trim();
-
-      output.textContent = result;
-      output.style.display = 'block';
-      insBtn.style.display = 'flex';
-      status.textContent = '✓ تم';
-
-      insBtn.onclick = () => {
-        // Append optimized prompt to the extra/custom field if it exists, else show copied msg
-        const extraField = document.getElementById('extraPos');
-        if(extraField){
-          extraField.value = (extraField.value ? extraField.value + ', ' : '') + result;
-          extraField.dispatchEvent(new Event('input'));
-          status.textContent = '✓ تمت الإضافة للبرومبت';
-        } else {
-          navigator.clipboard.writeText(result).then(()=>{ status.textContent = '✓ تم النسخ'; });
-        }
-      };
-
-    } catch(e) {
-      status.textContent = '✗ خطأ: ' + (e.message||'فشل الاتصال');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Optimize Prompt / تحسين';
-    }
-  });
-})();
+attachAllTriggers();
+attachHairEyePopups();
 
 /* ═══════════════════════════════════
    FIREBASE AUTH + FIRESTORE SYNC
@@ -4071,8 +4416,6 @@ Rules:
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
-        // Load character library from Firestore
-        loadCharsFromCloud(_uid);
       } else {
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
@@ -4110,7 +4453,6 @@ Rules:
       _menuOpen = false;
       await window._fbAuth.signOut();
       localStorage.removeItem('aps6Favs');
-      localStorage.removeItem('aps_charLib');
       // Full page reload — clears all state and cache
       window.location.reload();
     });
@@ -4118,7 +4460,8 @@ Rules:
   } // end setupAuth
 
   // ── Load favourites from Firestore → replace local ──
-  async function loadFavsFromCloud(uid){    try {
+  async function loadFavsFromCloud(uid){
+    try {
       const cloud = await window._fbFavs.load(uid);
       // احذف تلقائياً المفضلة القديمة بدون state
       const valid = [];
@@ -4141,21 +4484,4 @@ Rules:
   }
 
   // _currentUser is set inside the main onAuth handler above
-
-  // ── Load character library from Firestore → replace local ──
-  async function loadCharsFromCloud(uid){
-    if(!window._fbChars) return;
-    try {
-      const cloud = await window._fbChars.load(uid);
-      if(typeof csLibrary !== 'undefined'){
-        csLibrary.length = 0;
-        cloud.forEach(function(c){ csLibrary.push(c); });
-      }
-      localStorage.setItem('aps_charLib', JSON.stringify(cloud));
-      if(typeof csRenderLibrary === 'function') csRenderLibrary();
-      if(cloud.length) toast('☁️ Loaded '+cloud.length+' character'+(cloud.length>1?'s':''));
-    } catch(e){
-      console.warn('loadCharsFromCloud error:', e);
-    }
-  }
 })();

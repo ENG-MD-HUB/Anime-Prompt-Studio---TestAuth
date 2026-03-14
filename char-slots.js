@@ -13,7 +13,7 @@
 var CHAR_KEYS = [
   '_name','_age',
   'age','skin','body',
-  'hairColor1','hairColor2','hairstyle',
+  'hairColor1','hairstyle',
   'eyeColor','eyeShape',
   'clothing','clothingColor',
   'clothingTop','clothingTopColor',
@@ -29,7 +29,7 @@ var CHAR_KEYS = [
 
 var GENDER_TAG = { female:'1girl', male:'1boy' };
 var CS_GCOLOR  = { female:'#f472b6', male:'#60a5fa' };
-var CS_GICON   = { female:'Female', male:'Male' };
+var CS_GICON   = { female:'👩', male:'👨' };
 
 var charSlots  = [null, null];
 var activeChar = 0;
@@ -97,13 +97,7 @@ function csReflectButtons(){
       btn.classList.toggle('on', matches);
     });
     /* hair color grids */
-    ['hairColorGrid','hairColor2Grid'].forEach(function(gid){
-      var hv = gid==='hairColorGrid' ? S.hairColor1 : S.hairColor2;
-      var hg = document.getElementById(gid);
-      if(hg) hg.querySelectorAll('.cb,.ob').forEach(function(btn){
-        btn.classList.toggle('on', btn.getAttribute('data-val')===hv);
-      });
-    });
+    var _hg=document.getElementById('hairColorGrid'); if(_hg) _hg.querySelectorAll('.cb,.ob').forEach(function(btn){ btn.classList.toggle('on',btn.getAttribute('data-val')===S.hairColor1); });
   })();
   Object.keys(singles).forEach(function(gid){
     var k = singles[gid];
@@ -132,7 +126,6 @@ function csReflectButtons(){
     });
   });
   [{gid:'hairColorGrid',k:'hairColor1',arr:HAIR_COLORS},
-   {gid:'hairColor2Grid',k:'hairColor2',arr:HAIR_COLORS},
    {gid:'eyeColorGrid',k:'eyeColor',arr:EYE_COLORS}
   ].forEach(function(cfg){
     var g = document.getElementById(cfg.gid); if(!g) return;
@@ -193,10 +186,7 @@ function csBuildCharText(d, gTag){
   if(d.eyeShape&&d.eyeColor) p.push(d.eyeShape+', '+d.eyeColor+' eyes');
   else if(d.eyeShape) p.push(d.eyeShape+' eyes');
   else if(d.eyeColor) p.push(d.eyeColor+' eyes');
-  if(d.hairColor1&&d.hairColor2&&d.hairstyle) p.push(d.hairColor1+' to '+d.hairColor2+' ombre '+d.hairstyle+' hair');
-  else if(d.hairColor1&&d.hairstyle) p.push(d.hairColor1+' '+d.hairstyle+' hair');
-  else if(d.hairColor2&&d.hairstyle) p.push(d.hairColor2+' ombre '+d.hairstyle+' hair');
-  else if(d.hairColor1&&d.hairColor2) p.push(d.hairColor1+' to '+d.hairColor2+' ombre hair');
+  if(d.hairColor1&&d.hairstyle) p.push(d.hairColor1+' '+d.hairstyle+' hair');
   else if(d.hairColor1) p.push(d.hairColor1+' hair');
   else if(d.hairstyle)  p.push(d.hairstyle+' hair');
   var wear = [];
@@ -442,15 +432,13 @@ function csBuildSaveBar(charIdx){
 /* ══ CHARACTER LIBRARY ══ */
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
-async function csLibSave(charIdx){
-  if(!window._currentUser){
-    csToast('🔒 Sign in to save characters','warn');
-    return;
-  }
-  /* Read name */
+function csLibSave(charIdx){
+  /* Read name: from slot (always synced via mirror/blur), then from card input as fallback */
   var name = '';
+  /* 1. Try slot._name (updated on every input event via mirror) */
   if(charIdx === activeChar && S._name) name = S._name.trim();
   if(!name && charSlots[charIdx] && charSlots[charIdx]._name) name = charSlots[charIdx]._name.trim();
+  /* 2. Fallback: read directly from IDC card input */
   if(!name){
     var row = document.getElementById('charCardsRow');
     if(row){
@@ -473,19 +461,8 @@ async function csLibSave(charIdx){
     date: new Date().toLocaleDateString()
   };
   csLibrary.unshift(entry);
-  /* ── Sync to Firestore FIRST, then update local ── */
-  try {
-    var docId = await window._fbChars.save(window._currentUser.uid, entry);
-    entry._docId = docId;
-    csLibrary[0]._docId = docId;
-    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-    csToast('✓ Saved & synced "'+name+'"','ok');
-  } catch(e){
-    /* Firestore failed — still save locally */
-    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-    csToast('✓ Saved locally (sync failed)','ok');
-    console.warn('Firestore char save error:', e);
-  }
+  localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+  csToast('✓ Saved "'+name+'" to library','ok');
   csRenderTabs();
   csRenderLibrary();
 }
@@ -503,14 +480,8 @@ function csLibLoad(entry, charIdx){
 }
 
 function csLibDelete(id){
-  var entry = csLibrary.find(function(c){ return c.id===id; });
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-  /* Delete from Firestore if logged in */
-  var u = window._currentUser;
-  if(u && entry && entry._docId && window._fbChars){
-    window._fbChars.del(u.uid, entry._docId).catch(console.warn);
-  }
   csRenderLibrary();
   csToast('Deleted','ok');
 }
@@ -537,7 +508,6 @@ function csRenderLibrary(){
     var item = document.createElement('div');
     item.className = 'cs-lib-item';
     item.style.setProperty('--cs-color', color);
-    item.style.cursor = 'pointer';
     item.innerHTML =
       '<div class="cs-lib-icon">'+icon+'</div>'+
       '<div class="cs-lib-info">'+
@@ -546,13 +516,13 @@ function csRenderLibrary(){
         (summary?'<div class="cs-lib-summary">'+summary+'</div>':'')+
       '</div>'+
       '<div class="cs-lib-actions">'+
+        '<button class="cs-lib-load-btn" title="Load to active character"><i class="fas fa-arrow-down"></i> Load</button>'+
+        (S.characters&&S.characters[_csLibTargetChar===0?1:0]?'<button class="cs-lib-load2-btn" title="Load to other character"><i class="fas fa-arrow-down"></i> Other</button>':'')+
         '<button class="cs-lib-del-btn" title="Delete"><i class="fas fa-trash"></i></button>'+
       '</div>';
-    item.addEventListener('click', function(e){
-      if(e.target.closest('.cs-lib-del-btn')) return;
-      csLibLoad(entry, _csLibTargetChar);
-      document.getElementById('csLibOverlay').classList.remove('open');
-    });
+    item.querySelector('.cs-lib-load-btn').addEventListener('click', function(e){ e.stopPropagation(); csLibLoad(entry, _csLibTargetChar); document.getElementById('csLibOverlay').classList.remove('open'); });
+    var l2btn = item.querySelector('.cs-lib-load2-btn');
+    if(l2btn) l2btn.addEventListener('click', function(e){ e.stopPropagation(); csLibLoad(entry, _csLibTargetChar===0?1:0); document.getElementById('csLibOverlay').classList.remove('open'); });
     item.querySelector('.cs-lib-del-btn').addEventListener('click', function(e){ e.stopPropagation(); csLibDelete(entry.id); });
     list.appendChild(item);
   });
@@ -630,3 +600,419 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 })();
+
+/* ════════════════════════════════════════════════════════════════
+   SAVE CHARACTER DIALOG — star button flow
+════════════════════════════════════════════════════════════════ */
+var _scTargetIdx = 0;
+
+function openSaveCharDialog(charIdx){
+  _scTargetIdx = charIdx;
+  var overlay = document.getElementById('scOverlay');
+  var inp     = document.getElementById('scNameInput');
+  if(!overlay || !inp) return;
+  /* Pre-fill if name already exists in slot */
+  var existingName = '';
+  if(charIdx === activeChar && S._name) existingName = S._name;
+  else if(charSlots[charIdx] && charSlots[charIdx]._name) existingName = charSlots[charIdx]._name;
+  inp.value = existingName;
+  overlay.classList.add('open');
+  setTimeout(function(){ inp.focus(); inp.select(); }, 80);
+}
+
+function closeSaveCharDialog(){
+  var overlay = document.getElementById('scOverlay');
+  if(overlay) overlay.classList.remove('open');
+}
+
+/* Intercept the existing idc-save-btn click — open our dialog instead */
+document.addEventListener('DOMContentLoaded', function(){
+  /* ── Save dialog logic ── */
+  var scOverlay = document.getElementById('scOverlay');
+  var scInp     = document.getElementById('scNameInput');
+  var scSave    = document.getElementById('scSave');
+  var scCancel  = document.getElementById('scCancel');
+
+  function _doSave(){
+    var name = scInp ? scInp.value.trim() : '';
+    if(!name){ if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); } return; }
+    /* Write name into slot */
+    if(!charSlots[_scTargetIdx]) charSlots[_scTargetIdx] = csEmptySlot();
+    charSlots[_scTargetIdx]._name = name;
+    if(_scTargetIdx === activeChar) S._name = name;
+    /* Also update the card input so it shows immediately */
+    var row = document.getElementById('charCardsRow');
+    if(row){
+      var card = row.querySelector('[data-card-idx="'+_scTargetIdx+'"]');
+      if(card){ var cin = card.querySelector('.c-name-input'); if(cin) cin.value = name; }
+    }
+    closeSaveCharDialog();
+    csLibSave(_scTargetIdx);
+  }
+
+  if(scSave) scSave.addEventListener('click', _doSave);
+  if(scCancel) scCancel.addEventListener('click', closeSaveCharDialog);
+  if(scOverlay) scOverlay.addEventListener('click', function(e){ if(e.target===scOverlay) closeSaveCharDialog(); });
+  if(scInp) scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
+
+  /* Override save-btn click on IDC cards to use dialog */
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.idc-save-btn');
+    if(!btn) return;
+    /* Don't stopPropagation — just open the dialog */
+    var idx = parseInt(btn.getAttribute('data-idx'));
+    if(isNaN(idx)) return;
+    openSaveCharDialog(idx);
+  });
+
+  /* ── Gender modal "Saved Character" button ── */
+  var savedBtn = document.getElementById('genderModalSaved');
+  if(savedBtn){
+    savedBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      /* Capture idx BEFORE closeGenderModal nulls _gIdx */
+      var targetIdx = (typeof window._gIdx !== 'undefined' && window._gIdx !== null)
+        ? window._gIdx
+        : activeChar;
+      /* Close gender modal */
+      var gOver = document.getElementById('genderOverlay');
+      if(gOver) gOver.classList.remove('open');
+      /* Open passport library */
+      openPassportLibrary(targetIdx);
+    });
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   PASSPORT LIBRARY
+════════════════════════════════════════════════════════════════ */
+var _ppTargetChar = 0;
+var _ppIndex      = 0;  /* current card index */
+
+/* Build full prompt text for a saved character entry */
+function _ppBuildPrompt(entry){
+  var d = entry.slot || {};
+  var g = entry.gender || 'female';
+  var parts = csBuildCharText(d, GENDER_TAG[g]||'1girl');
+  return parts.join(', ');
+}
+
+/* Build passport card DOM — clean ID card style */
+function _ppBuildCard(entry, idx, total){
+  var d     = entry.slot || {};
+  var g     = entry.gender || 'female';
+  var isFem = g === 'female';
+  var gCls  = isFem ? 'female' : 'male';
+  var gIcon = isFem ? '<i class="fa-solid fa-person-dress"></i>' : '<i class="fa-solid fa-person"></i>';
+  var gSex  = isFem ? 'F' : 'M';
+  var gLabel= isFem ? 'FEMALE' : 'MALE';
+
+  /* helper: field row */
+  function fld(label, val){
+    if(!val) return '';
+    return '<div class="pp-card-field"><span class="pp-card-field-label">'+label+'</span><span class="pp-card-field-value">'+val+'</span></div>';
+  }
+  function fldFull(label, val){
+    if(!val) return '';
+    return '<div class="pp-card-field full"><span class="pp-card-field-label">'+label+'</span><span class="pp-card-field-value">'+val+'</span></div>';
+  }
+  function attr(label, val){
+    if(!val) return '';
+    return '<div class="pp-card-attr"><span class="pp-card-attr-lbl">'+label+'</span><span class="pp-card-attr-val">'+val+'</span></div>';
+  }
+  function attrFull(label, val){
+    if(!val) return '';
+    return '<div class="pp-card-attr full"><span class="pp-card-attr-lbl">'+label+'</span><span class="pp-card-attr-val">'+val+'</span></div>';
+  }
+
+  /* ── Data assembly ── */
+  var ageStr = '';
+  if(d._age) ageStr = d._age + (typeof _ageLabel==='function' ? ' ('+_ageLabel(d._age)+')' : '');
+  else if(d.age) ageStr = d.age;
+
+  var hairStr = [d.hairColor1, d.hairstyle].filter(Boolean).join(' ') || '';
+  var eyeStr  = [d.eyeColor, d.eyeShape].filter(Boolean).join(' · ') || '';
+
+  var outfitParts = [];
+  if(d.clothing) outfitParts.push((d.clothingColor?d.clothingColor+' ':'')+d.clothing);
+  else {
+    if(d.clothingTop)    outfitParts.push((d.clothingTopColor?d.clothingTopColor+' ':'')+d.clothingTop);
+    if(d.clothingBottom) outfitParts.push((d.clothingBottomColor?d.clothingBottomColor+' ':'')+d.clothingBottom);
+  }
+  if(d.sockLength) outfitParts.push((d.sockColor?d.sockColor+' ':'')+d.sockLength+' socks');
+  if(d.shoes)      outfitParts.push((d.shoeColor?d.shoeColor+' ':'')+d.shoes);
+  var outfitStr = outfitParts.join(', ');
+
+  var accStr = (d.clothingAcc||[]).concat(d.faceAcc||[]).join(', ');
+
+  var moodParts = [];
+  if(d.expression) moodParts.push(d.expression);
+  (d.poses||[]).forEach(function(p){ moodParts.push(p); });
+  var moodStr = moodParts.join(', ');
+
+  var toolStr = (d.weapons||[]).concat(d.props||[]).concat(d.electronics||[]).concat(d.otherItems||[]).join(', ');
+
+  /* ── MRZ lines ── */
+  var mrzName = entry.name.toUpperCase().replace(/\s+/g,'<');
+  var mrzPad  = 'P<APS<'+mrzName;
+  while(mrzPad.length < 44) mrzPad += '<';
+  var mrzId   = entry.id.toString(36).toUpperCase().slice(-9).padEnd(9,'<')+'<'+gSex+'<';
+  while(mrzId.length < 44) mrzId += '<';
+
+  /* ── Photo area: show uploaded image or icon ── */
+  var photoHtml;
+  if(entry.photo){
+    photoHtml = '<div class="pp-card-photo pp-card-photo-'+gCls+' pp-has-photo" data-entry-id="'+entry.id+'">'
+      +'<img src="'+entry.photo+'" class="pp-photo-img" alt="character photo">'
+      +'<button class="pp-photo-remove" data-entry-id="'+entry.id+'" title="Remove photo">&times;</button>'
+    +'</div>';
+  } else {
+    photoHtml = '<div class="pp-card-photo pp-card-photo-'+gCls+'" data-entry-id="'+entry.id+'">'
+      +'<div class="pp-card-photo-icon">'+gIcon+'</div>'
+      +'<div class="pp-card-photo-sex">'+gSex+'</div>'
+      +'<label class="pp-photo-upload" title="Add photo">'
+      +'<input type="file" accept="image/*" class="pp-photo-file" data-entry-id="'+entry.id+'" style="display:none">'
+      +'<span>＋</span>'
+      +'</label>'
+    +'</div>';
+  }
+
+  return '<div class="pp-card pp-card-'+gCls+'" data-entry-id="'+entry.id+'">'
+
+  /* color band */
+  +'<div class="pp-card-band"></div>'
+
+  /* header */
+  +'<div class="pp-card-head">'
+  +  '<span class="pp-card-issuer">Anime Prompt Studio &middot; Character ID</span>'
+  +  '<span class="pp-card-doc-type">'+gLabel+'</span>'
+  +  '<span class="pp-card-serial">'+String(idx+1).padStart(2,'0')+'/'+String(total).padStart(2,'0')+'</span>'
+  +'</div>'
+
+  /* main: photo + info */
+  +'<div class="pp-card-main">'
+  +  photoHtml
+
+  +  '<div class="pp-card-info">'
+  +    '<div class="pp-card-name-lbl">Surname / Name</div>'
+  +    '<div class="pp-card-fullname">'+entry.name+'</div>'
+  +    '<div class="pp-card-grid">'
+  +      fld('Date Saved', entry.date)
+  +      fld('Age', ageStr || '—')
+  +      fld('Skin', d.skin || '—')
+  +      fld('Body', d.body || '—')
+  +      '<div class="pp-card-field"><span class="pp-card-field-label">Document No.</span><span class="pp-card-field-value muted" style="font-size:.58rem;letter-spacing:.05em">'+entry.id.toString(36).toUpperCase().slice(-8)+'</span></div>'
+  +    '</div>'
+  +  '</div>'
+
+  +'</div>'/* /pp-card-main */
+
+  /* appearance attributes */
+  +'<div class="pp-card-divider"></div>'
+  +'<div class="pp-card-attrs">'
+  +  '<div class="pp-card-attrs-title">Appearance &amp; Details</div>'
+  +  '<div class="pp-card-attr-grid">'
+  +    attr('Hair', hairStr || '—')
+  +    attr('Eyes', eyeStr || '—')
+  +    (outfitStr ? attrFull('Outfit', outfitStr) : '')
+  +    (accStr    ? attrFull('Accessories', accStr) : '')
+  +    (moodStr   ? attr('Expression', moodStr) : '')
+  +    (toolStr   ? attr('Weapons / Props', toolStr) : '')
+  +  '</div>'
+  +'</div>'
+
+  /* MRZ */
+  +'<div class="pp-mrz">'
+  +  '<div class="pp-mrz-line">'+mrzPad+'</div>'
+  +  '<div class="pp-mrz-line">'+mrzId+'</div>'
+  +'</div>'
+
+  +'</div>'; /* /pp-card */
+}
+
+function _ppRenderDots(total, current){
+  var dots = document.getElementById('ppDots');
+  if(!dots) return;
+  dots.innerHTML = '';
+  for(var i=0;i<total;i++){
+    var d = document.createElement('button');
+    d.className = 'pp-dot'+(i===current?' on':'');
+    d.setAttribute('data-i', i);
+    d.addEventListener('click', (function(idx){ return function(){ ppGoTo(idx); }; })(i));
+    dots.appendChild(d);
+  }
+}
+
+function ppGoTo(idx){
+  var lib = csLibrary;
+  if(!lib.length) return;
+  _ppIndex = Math.max(0, Math.min(idx, lib.length-1));
+  var track = document.getElementById('ppTrack');
+  if(track) track.style.transform = 'translateX(-'+(_ppIndex*100)+'%)';
+  _ppRenderDots(lib.length, _ppIndex);
+  /* Update prev/next */
+  var prev = document.getElementById('ppPrev');
+  var next = document.getElementById('ppNext');
+  if(prev) prev.disabled = _ppIndex === 0;
+  if(next) next.disabled = _ppIndex === lib.length-1;
+}
+
+function openPassportLibrary(charIdx){
+  _ppTargetChar = typeof charIdx !== 'undefined' ? charIdx : activeChar;
+  _ppIndex = 0;
+
+  var overlay   = document.getElementById('ppOverlay');
+  var track     = document.getElementById('ppTrack');
+  var viewport  = document.getElementById('ppViewport');
+  var nav       = document.getElementById('ppNav');
+  var empty     = document.getElementById('ppEmpty');
+  var actions   = overlay ? overlay.querySelector('.pp-actions') : null;
+
+  if(!overlay) return;
+
+  var lib = csLibrary;
+
+  if(!lib.length){
+    if(track)    track.innerHTML  = '';
+    if(viewport) viewport.style.display = 'none';
+    if(nav)      nav.style.display      = 'none';
+    if(empty)    empty.style.display    = 'flex';
+    if(actions)  actions.style.display  = 'none';
+  } else {
+    if(empty)    empty.style.display    = 'none';
+    if(viewport) viewport.style.display = '';
+    if(nav)      nav.style.display      = lib.length > 1 ? '' : 'none';
+    if(actions)  actions.style.display  = '';
+
+    /* Build all cards */
+    track.innerHTML = lib.map(function(entry, i){
+      return _ppBuildCard(entry, i, lib.length);
+    }).join('');
+
+    /* Reset position */
+    track.style.transition = 'none';
+    track.style.transform  = 'translateX(0)';
+    setTimeout(function(){ track.style.transition = ''; }, 30);
+
+    _ppRenderDots(lib.length, 0);
+    var prev = document.getElementById('ppPrev');
+    var next = document.getElementById('ppNext');
+    if(prev) prev.disabled = true;
+    if(next) next.disabled = lib.length <= 1;
+  }
+
+  overlay.classList.add('open');
+}
+
+function closePassportLibrary(){
+  var overlay = document.getElementById('ppOverlay');
+  if(overlay) overlay.classList.remove('open');
+}
+
+/* Wire up passport overlay controls */
+document.addEventListener('DOMContentLoaded', function(){
+  var overlay  = document.getElementById('ppOverlay');
+  var closeBtn = document.getElementById('ppClose');
+  var prevBtn  = document.getElementById('ppPrev');
+  var nextBtn  = document.getElementById('ppNext');
+  var loadBtn  = document.getElementById('ppLoadBtn');
+  var delBtn   = document.getElementById('ppDelBtn');
+
+  if(closeBtn) closeBtn.addEventListener('click', closePassportLibrary);
+  if(overlay)  overlay.addEventListener('click',  function(e){ if(e.target===overlay) closePassportLibrary(); });
+
+  if(prevBtn) prevBtn.addEventListener('click', function(){ ppGoTo(_ppIndex-1); });
+  if(nextBtn) nextBtn.addEventListener('click', function(){ ppGoTo(_ppIndex+1); });
+
+  /* Keyboard left/right */
+  document.addEventListener('keydown', function(e){
+    var ov = document.getElementById('ppOverlay');
+    if(!ov || !ov.classList.contains('open')) return;
+    if(e.key==='ArrowLeft')  ppGoTo(_ppIndex-1);
+    if(e.key==='ArrowRight') ppGoTo(_ppIndex+1);
+    if(e.key==='Escape')     closePassportLibrary();
+  });
+
+  /* Touch swipe */
+  var _touchStartX = null;
+  if(overlay){
+    overlay.addEventListener('touchstart', function(e){ _touchStartX = e.touches[0].clientX; }, {passive:true});
+    overlay.addEventListener('touchend', function(e){
+      if(_touchStartX===null) return;
+      var dx = e.changedTouches[0].clientX - _touchStartX;
+      _touchStartX = null;
+      if(Math.abs(dx) < 40) return;
+      if(dx < 0) ppGoTo(_ppIndex+1);
+      else        ppGoTo(_ppIndex-1);
+    }, {passive:true});
+  }
+
+  /* ── Photo upload via event delegation on the track ── */
+  var track2 = document.getElementById('ppTrack');
+  if(track2){
+    track2.addEventListener('change', function(e){
+      if(!e.target.classList.contains('pp-photo-file')) return;
+      var file = e.target.files[0];
+      if(!file) return;
+      var entryId = parseInt(e.target.getAttribute('data-entry-id'));
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        var b64 = ev.target.result;
+        var entry = csLibrary.find(function(c){ return c.id === entryId; });
+        if(entry){
+          entry.photo = b64;
+          localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+          /* Rebuild carousel at current position */
+          var cur = _ppIndex;
+          openPassportLibrary(_ppTargetChar);
+          ppGoTo(cur);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    /* Remove photo */
+    track2.addEventListener('click', function(e){
+      var btn = e.target.closest('.pp-photo-remove');
+      if(!btn) return;
+      e.stopPropagation();
+      var entryId = parseInt(btn.getAttribute('data-entry-id'));
+      var entry = csLibrary.find(function(c){ return c.id === entryId; });
+      if(entry){
+        delete entry.photo;
+        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+        var cur = _ppIndex;
+        openPassportLibrary(_ppTargetChar);
+        ppGoTo(cur);
+      }
+    });
+  }
+    loadBtn.addEventListener('click', function(){
+      var lib = csLibrary;
+      if(!lib.length || _ppIndex >= lib.length) return;
+      var entry = lib[_ppIndex];
+      csLibLoad(entry, _ppTargetChar);
+      closePassportLibrary();
+    });
+  }
+
+  /* Delete button */
+  if(delBtn){
+    delBtn.addEventListener('click', function(){
+      var lib = csLibrary;
+      if(!lib.length || _ppIndex >= lib.length) return;
+      var entry = lib[_ppIndex];
+      csLibDelete(entry.id);
+      /* Re-render or close if empty */
+      if(!csLibrary.length){
+        closePassportLibrary();
+        return;
+      }
+      _ppIndex = Math.max(0, _ppIndex-1);
+      openPassportLibrary(_ppTargetChar);
+    });
+  }
+});
+
+/* Also override the csOpenLibrary / csOpenLibraryFor to use passport UI */
+window.csOpenLibrary = function(){ openPassportLibrary(activeChar); };
+window.csOpenLibraryFor = function(charIdx){ openPassportLibrary(charIdx); };

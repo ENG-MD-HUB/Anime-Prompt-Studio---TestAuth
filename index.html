@@ -33,6 +33,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<canvas id="meshBg" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55;"></canvas>
 
 <!-- ═══ HEADER ═══ -->
 <div class="hdr">
@@ -218,24 +219,12 @@
 
     <!-- ── LOOK (merged into Character) ── -->
     <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" data-k="hairstyle"><span data-i18n="clear">Clear</span></button></div>
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" id="clrHair"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="hairstyleGrid"></div>
     </div>
     <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-palette"></i></div><span class="sec-title" data-i18n="sec_hair_color1">Hair Color (Primary)</span><button class="sec-clr" data-k="hairColor1"><span data-i18n="clear">Clear</span></button></div>
-      <div class="cg" id="hairColorGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-arrow-trend-up"></i></div><span class="sec-title" data-i18n="sec_hair_color2">Hair Ombré (2nd Color)</span><button class="sec-clr" data-k="hairColor2"><span data-i18n="clear">Clear</span></button></div>
-      <div class="cg" id="hairColor2Grid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-star"></i></div><span class="sec-title" data-i18n="sec_eye_shape">Eye Shape</span><button class="sec-clr" data-k="eyeShape"><span data-i18n="clear">Clear</span></button></div>
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-star"></i></div><span class="sec-title" data-i18n="sec_eye_shape">Eye Shape</span><button class="sec-clr" id="clrEye"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="eyeShapeGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-eye"></i></div><span class="sec-title" data-i18n="sec_eye_color">Eye Color</span><button class="sec-clr" data-k="eyeColor"><span data-i18n="clear">Clear</span></button></div>
-      <div class="cg" id="eyeColorGrid"></div>
     </div>
   </div>
 
@@ -359,45 +348,7 @@
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-mobile-screen"></i></div><span class="sec-title" data-i18n="sec_electronics">Electronics</span><span class="sec-max">max 2</span></div>
       <div class="og c3" id="electronicsGrid"></div>
     </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico" style="background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--pl);"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title">AI Prompt Optimizer</span></div>
-      <p style="font-size:.76rem;color:var(--tx2);margin-bottom:.75rem;line-height:1.5;">اكتب أي وصف بالعربي أو الإنجليزي وسيتحول إلى برومبت احترافي لموديلات الأنمي.</p>
-      <textarea id="optimizerInput" placeholder="e.g. anime girl with red hair sitting in a garden at sunset... أو: بنت أنمي بشعر أحمر جالسة في حديقة وقت الغروب" style="
-        width:100%;min-height:90px;resize:vertical;
-        background:var(--surf2);border:1.5px solid var(--brd);border-radius:10px;
-        color:var(--tx);font-family:inherit;font-size:.82rem;padding:.65rem .75rem;
-        line-height:1.55;outline:none;transition:border-color .2s;
-      " onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--brd)'"></textarea>
-      <div style="display:flex;gap:.5rem;margin-top:.55rem;align-items:center;flex-wrap:wrap;">
-        <button id="optimizerBtn" style="
-          display:flex;align-items:center;gap:.45rem;
-          background:linear-gradient(135deg,var(--p),var(--pl));
-          color:#fff;border:none;border-radius:9px;padding:.52rem 1.1rem;
-          font-size:.82rem;font-weight:600;cursor:pointer;
-          transition:opacity .2s,transform .15s;
-        " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          <i class="fas fa-wand-magic-sparkles"></i> Optimize Prompt / تحسين
-        </button>
-        <button id="optimizerInsertBtn" style="
-          display:none;align-items:center;gap:.4rem;
-          background:rgba(16,185,129,.12);color:#10b981;
-          border:1.5px solid rgba(16,185,129,.3);border-radius:9px;
-          padding:.5rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;
-          transition:opacity .2s;
-        ">
-          <i class="fas fa-plus"></i> إضافة للبرومبت
-        </button>
-        <span id="optimizerStatus" style="font-size:.76rem;color:var(--tx3);"></span>
-      </div>
-      <div id="optimizerOutput" style="
-        display:none;margin-top:.75rem;
-        background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.2);
-        border-radius:10px;padding:.75rem;
-        font-size:.8rem;line-height:1.6;color:var(--tx);
-        font-family:'DM Mono',monospace;
-        white-space:pre-wrap;word-break:break-word;
-      "></div>
-    </div>
+
   </div>
 
   <!-- ── SCENE ── -->
@@ -637,6 +588,15 @@
         <div class="gender-opt-info">
           <span class="gender-opt-name">Male</span>
           <span class="gender-opt-tag">1boy</span>
+        </div>
+      </button>
+
+      <!-- Saved Character -->
+      <button class="gender-opt-btn opt-saved" id="genderModalSaved">
+        <div class="gender-opt-sil"><i class="fa-solid fa-address-card"></i></div>
+        <div class="gender-opt-info">
+          <span class="gender-opt-name">Saved Character</span>
+          <span class="gender-opt-tag">from library</span>
         </div>
       </button>
 
@@ -890,31 +850,65 @@
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     },
   };
-
-  // ── Character Library — same pattern as _fbFavs ──
-  window._fbChars = {
-    save: async (uid, entry) => {
-      const ref = collection(db, 'users', uid, 'characters');
-      const docRef = await addDoc(ref, { ...entry, createdAt: serverTimestamp() });
-      return docRef.id;
-    },
-    load: async (uid) => {
-      const ref  = collection(db, 'users', uid, 'characters');
-      const q    = query(ref, orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
-    },
-    del: async (uid, docId) => {
-      await deleteDoc(doc(db, 'users', uid, 'characters', docId));
-    },
-    clear: async (uid) => {
-      const ref  = collection(db, 'users', uid, 'characters');
-      const snap = await getDocs(ref);
-      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-    },
-  };
 </script>
 <script src="app.js"></script>
 <script src="char-slots.js"></script>
+
+<!-- ═══ SAVE CHARACTER DIALOG ═══ -->
+<div class="sc-overlay" id="scOverlay">
+  <div class="sc-dialog">
+    <div class="sc-dialog-ttl"><i class="fas fa-star"></i> Save Character</div>
+    <div class="sc-dialog-sub">Enter a name for this character to save to your library.</div>
+    <input class="sc-dialog-inp" id="scNameInput" placeholder="e.g. Sakura, Zephyr, Unit-07…" maxlength="32" autocomplete="off">
+    <div class="sc-dialog-row">
+      <button class="sc-dialog-cancel" id="scCancel">Cancel</button>
+      <button class="sc-dialog-save" id="scSave"><i class="fas fa-star"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PASSPORT LIBRARY OVERLAY ═══ -->
+<div class="pp-overlay" id="ppOverlay">
+  <div class="pp-modal">
+    <div class="pp-hd">
+      <div class="pp-title"><i class="fas fa-address-card"></i> Character Library</div>
+      <button class="pp-close" id="ppClose"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="pp-empty" id="ppEmpty" style="display:none">
+      <i class="fas fa-user-slash"></i>
+      <span>No saved characters yet.<br>Build a character and click the ★ star to save.</span>
+    </div>
+    <div class="pp-viewport" id="ppViewport">
+      <div class="pp-track" id="ppTrack"></div>
+    </div>
+    <div class="pp-nav" id="ppNav">
+      <button class="pp-arr pp-prev" id="ppPrev"><i class="fas fa-chevron-left"></i></button>
+      <div class="pp-dots" id="ppDots"></div>
+      <button class="pp-arr pp-next" id="ppNext"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="pp-actions">
+      <button class="pp-load-btn" id="ppLoadBtn"><i class="fas fa-arrow-down"></i> Load Character</button>
+      <button class="pp-del-btn"  id="ppDelBtn"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="hcpPopup" style="display:none;position:fixed;z-index:99999;"></div>
+
+<script>
+(function(){
+  /* ── Mesh Gradient ── */
+  var c=document.getElementById('meshBg'),ctx=c.getContext('2d');
+  var P=[{x:.08,y:.15,h:245,r:.55,sx:.28,sy:.22,px:0,py:0},{x:.55,y:.08,h:270,r:.50,sx:.20,sy:.35,px:1.1,py:.7},{x:.92,y:.22,h:300,r:.52,sx:.33,sy:.18,px:2.3,py:1.4},{x:.18,y:.82,h:220,r:.50,sx:.25,sy:.28,px:.5,py:2.1},{x:.72,y:.75,h:255,r:.55,sx:.30,sy:.24,px:3.1,py:.3},{x:.50,y:.50,h:285,r:.48,sx:.18,sy:.32,px:1.7,py:1.9},{x:.85,y:.55,h:235,r:.45,sx:.22,sy:.20,px:4.0,py:2.8},{x:.25,y:.45,h:310,r:.45,sx:.26,sy:.30,px:2.6,py:.9}];
+  var t=0,W,H;
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    P.forEach(function(p){var ox=Math.sin(t*p.sx+p.px)*.13,oy=Math.cos(t*p.sy+p.py)*.10,px=(p.x+ox)*W,py=(p.y+oy)*H,r=p.r*Math.max(W,H),hue=p.h+Math.sin(t*.18+p.px)*18,g=ctx.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,'hsla('+hue+',72%,52%,.26)');g.addColorStop(.45,'hsla('+hue+',65%,45%,.10)');g.addColorStop(1,'hsla('+hue+',60%,38%,0)');ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();});
+    t+=.008;requestAnimationFrame(draw);
+  })();
+})();
+</script>
 </body>
 </html>
