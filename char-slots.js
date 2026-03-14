@@ -98,15 +98,27 @@ function csReflectButtons(){
       btn.classList.toggle('on', matches);
       btn.style.borderColor = matches ? 'white' : (SKINS[Array.from(sg.querySelectorAll('.sb')).indexOf(btn)]||{bg:'transparent'}).bg;
     });
-    /* hair color: reflected via hcp-bar on hairstyleGrid buttons */
+    /* hair color bar: show on selected hairstyle button only, clear others */
     var hg=document.getElementById('hairstyleGrid');
     if(hg) hg.querySelectorAll('.ob').forEach(function(btn){
-      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'hairColor1');
+      var bar=btn.querySelector('.hcp-bar');
+      if(!bar) return;
+      if(btn.classList.contains('on')){
+        if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'hairColor1');
+      } else {
+        bar.style.background='transparent';
+      }
     });
-    /* eye color: reflected via hcp-bar on eyeShapeGrid buttons */
+    /* eye color bar: show on selected eyeShape button only, clear others */
     var eg=document.getElementById('eyeShapeGrid');
     if(eg) eg.querySelectorAll('.ob').forEach(function(btn){
-      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'eyeColor');
+      var bar=btn.querySelector('.hcp-bar');
+      if(!bar) return;
+      if(btn.classList.contains('on')){
+        if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'eyeColor');
+      } else {
+        bar.style.background='transparent';
+      }
     });
   })();
   Object.keys(singles).forEach(function(gid){
@@ -795,22 +807,21 @@ function _ppBuildCard(entry, idx, total){
   var mrzId   = entry.id.toString(36).toUpperCase().slice(-9).padEnd(9,'<')+'<'+gSex+'<';
   while(mrzId.length < 44) mrzId += '<';
 
-  /* ── Photo area: show uploaded image or icon ── */
+  /* ── Photo area: entire box is clickable for upload ── */
   var photoHtml;
   if(entry.photo){
-    photoHtml = '<div class="pp-card-photo pp-card-photo-'+gCls+' pp-has-photo" data-entry-id="'+entry.id+'">'
+    photoHtml = '<label class="pp-card-photo pp-card-photo-'+gCls+' pp-has-photo" title="Change photo" style="cursor:pointer">'
+      +'<input type="file" accept="image/*" class="pp-photo-file" data-entry-id="'+entry.id+'" style="display:none">'
       +'<img src="'+entry.photo+'" class="pp-photo-img" alt="character photo">'
-      +'<button class="pp-photo-remove" data-entry-id="'+entry.id+'" title="Remove photo">&times;</button>'
-    +'</div>';
+      +'<div class="pp-photo-overlay"><span>⬆</span></div>'
+    +'</label>';
   } else {
-    photoHtml = '<div class="pp-card-photo pp-card-photo-'+gCls+'" data-entry-id="'+entry.id+'">'
+    photoHtml = '<label class="pp-card-photo pp-card-photo-'+gCls+' pp-no-photo" title="Upload photo" style="cursor:pointer">'
+      +'<input type="file" accept="image/*" class="pp-photo-file" data-entry-id="'+entry.id+'" style="display:none">'
       +'<div class="pp-card-photo-icon">'+gIcon+'</div>'
       +'<div class="pp-card-photo-sex">'+gSex+'</div>'
-      +'<label class="pp-photo-upload" title="Add photo">'
-      +'<input type="file" accept="image/*" class="pp-photo-file" data-entry-id="'+entry.id+'" style="display:none">'
-      +'<span>＋</span>'
-      +'</label>'
-    +'</div>';
+      +'<div class="pp-photo-overlay"><span>＋</span></div>'
+    +'</label>';
   }
 
   return '<div class="pp-card pp-card-'+gCls+'" data-entry-id="'+entry.id+'">'
@@ -1001,28 +1012,11 @@ document.addEventListener('DOMContentLoaded', function(){
         if(entry){
           entry.photo = b64;
           localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-          /* Rebuild carousel at current position */
-          var cur = _ppIndex;
           openPassportLibrary(_ppTargetChar);
-          ppGoTo(cur);
+          ppGoTo(_ppIndex);
         }
       };
       reader.readAsDataURL(file);
-    });
-    /* Remove photo */
-    track2.addEventListener('click', function(e){
-      var btn = e.target.closest('.pp-photo-remove');
-      if(!btn) return;
-      e.stopPropagation();
-      var entryId = parseInt(btn.getAttribute('data-entry-id'));
-      var entry = csLibrary.find(function(c){ return c.id === entryId; });
-      if(entry){
-        delete entry.photo;
-        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-        var cur = _ppIndex;
-        openPassportLibrary(_ppTargetChar);
-        ppGoTo(cur);
-      }
     });
   }
 

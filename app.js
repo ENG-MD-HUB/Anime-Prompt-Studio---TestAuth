@@ -580,7 +580,7 @@ function _initColorPickerPopup(){
 }
 
 function _updateColorDot(colorKey){
-  /* Uses hcp-bar system — updates bar on the active button */
+  /* Uses hcp-bar system — updates bar ONLY on the active (selected) button */
   var DOT_MAP = {
     sockColor:          {gid:'sockLengthGrid',    isCb:false},
     shoeColor:          {gid:'shoesGrid',          isCb:false},
@@ -592,7 +592,6 @@ function _updateColorDot(colorKey){
     nsfwClothingColor:  {gid:'nsfwClothingGrid',   isCb:false},
     clothingAccColor:   {gid:'clothingAccGrid',    isCb:false},
     faceAccColor:       {gid:'faceAccGrid',        isCb:false},
-    /* hair/eye now on ob grids */
     hairColor1:         {gid:'hairstyleGrid',      isCb:false},
     eyeColor:           {gid:'eyeShapeGrid',       isCb:false},
   };
@@ -600,7 +599,14 @@ function _updateColorDot(colorKey){
   var g = document.getElementById(entry.gid); if(!g) return;
   g.querySelectorAll('.ob').forEach(function(btn){
     var old=btn.querySelector('.color-dot'); if(old) old.remove();
-    if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn, colorKey);
+    var bar=btn.querySelector('.hcp-bar');
+    if(btn.classList.contains('on')){
+      /* Only show color bar on the selected button */
+      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn, colorKey);
+    } else {
+      /* Clear bar on all non-selected buttons */
+      if(bar) bar.style.background='transparent';
+    }
   });
 }
 
@@ -2650,9 +2656,18 @@ function reflectUI(){
   };
 
   // Clear .on only on NON-per-char .ob buttons
+  // Use parentElement chain to find the direct grid container (has class 'og' or 'skin-grid')
   document.querySelectorAll('.ob').forEach(b=>{
-    var grid = b.closest('[id]');
-    var gid  = grid ? grid.id : null;
+    // Walk up to find the containing grid div (direct parent with an id)
+    var el = b.parentElement;
+    var gid = null;
+    while(el && el !== document.body){
+      if(el.id && (el.classList.contains('og') || el.classList.contains('skin-grid') ||
+                   el.id.endsWith('Grid') || el.id.endsWith('grid'))){
+        gid = el.id; break;
+      }
+      el = el.parentElement;
+    }
     if(gid && PER_CHAR_GRIDS[gid]) return; // skip per-char grids
     b.classList.remove('on');
   });
