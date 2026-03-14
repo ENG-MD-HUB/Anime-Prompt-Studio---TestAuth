@@ -882,17 +882,7 @@ function ppGoTo(idx){
   var lib = csLibrary;
   if(!lib.length) return;
   _ppIndex = Math.max(0, Math.min(idx, lib.length-1));
-  var track    = document.getElementById('ppTrack');
-  var viewport = document.getElementById('ppViewport');
-  if(!track) return;
-
-  /* Get card width from first card (set in px) */
-  var firstCard = track.querySelector('.pp-card');
-  var cardW = firstCard ? firstCard.offsetWidth : (viewport ? viewport.offsetWidth : 360);
-  if(cardW < 10) cardW = 360;
-
-  track.style.transform = 'translateX(-' + (_ppIndex * cardW) + 'px)';
-
+  _ppRenderCard(lib, _ppIndex);
   _ppRenderDots(lib.length, _ppIndex);
   var prev = document.getElementById('ppPrev');
   var next = document.getElementById('ppNext');
@@ -900,23 +890,34 @@ function ppGoTo(idx){
   if(next) next.disabled = _ppIndex === lib.length - 1;
 }
 
+function _ppRenderCard(lib, idx){
+  var track = document.getElementById('ppTrack');
+  if(!track || !lib[idx]) return;
+  track.style.transition = 'opacity .15s';
+  track.style.opacity = '0';
+  setTimeout(function(){
+    track.innerHTML = _ppBuildCard(lib[idx], idx, lib.length);
+    track.style.opacity = '1';
+  }, 150);
+}
+
+
 function openPassportLibrary(charIdx){
   _ppTargetChar = typeof charIdx !== 'undefined' ? charIdx : activeChar;
   _ppIndex = 0;
 
-  var overlay   = document.getElementById('ppOverlay');
-  var track     = document.getElementById('ppTrack');
-  var viewport  = document.getElementById('ppViewport');
-  var nav       = document.getElementById('ppNav');
-  var empty     = document.getElementById('ppEmpty');
-  var actions   = overlay ? overlay.querySelector('.pp-actions') : null;
+  var overlay  = document.getElementById('ppOverlay');
+  var track    = document.getElementById('ppTrack');
+  var viewport = document.getElementById('ppViewport');
+  var nav      = document.getElementById('ppNav');
+  var empty    = document.getElementById('ppEmpty');
+  var actions  = overlay ? overlay.querySelector('.pp-actions') : null;
 
   if(!overlay) return;
-
   var lib = csLibrary;
 
   if(!lib.length){
-    if(track)    track.innerHTML  = '';
+    if(track)    track.innerHTML        = '';
     if(viewport) viewport.style.display = 'none';
     if(nav)      nav.style.display      = 'none';
     if(empty)    empty.style.display    = 'flex';
@@ -927,33 +928,11 @@ function openPassportLibrary(charIdx){
     if(nav)      nav.style.display      = lib.length > 1 ? '' : 'none';
     if(actions)  actions.style.display  = '';
 
-    /* Build all cards */
-    track.innerHTML = lib.map(function(entry, i){
-      return _ppBuildCard(entry, i, lib.length);
-    }).join('');
-
-    /* Size cards to viewport width in px after render */
-    var _sizeCards = function(){
-      var vpW = viewport ? viewport.offsetWidth : 360;
-      if(vpW < 10) vpW = 360;
-      track.querySelectorAll('.pp-card').forEach(function(card){
-        card.style.width    = vpW + 'px';
-        card.style.minWidth = vpW + 'px';
-        card.style.maxWidth = vpW + 'px';
-        card.style.flex     = '0 0 ' + vpW + 'px';
-      });
-      track.style.width = (vpW * lib.length) + 'px';
-      track.style.transform = 'translateX(0)';
-    };
-    /* Try immediately, then again after paint */
-    _sizeCards();
-    requestAnimationFrame(_sizeCards);
-
-    /* Reset position */
-    track.style.transition = 'none';
-    track.style.transform  = 'translateX(0)';
-    setTimeout(function(){ track.style.transition = ''; }, 30);
-
+    /* Show only card 0 — navigation swaps content */
+    if(track){
+      track.style.opacity = '1';
+      track.innerHTML = _ppBuildCard(lib[0], 0, lib.length);
+    }
     _ppRenderDots(lib.length, 0);
     var prev = document.getElementById('ppPrev');
     var next = document.getElementById('ppNext');
@@ -963,7 +942,6 @@ function openPassportLibrary(charIdx){
 
   overlay.classList.add('open');
 }
-
 function closePassportLibrary(){
   var overlay = document.getElementById('ppOverlay');
   if(overlay) overlay.classList.remove('open');

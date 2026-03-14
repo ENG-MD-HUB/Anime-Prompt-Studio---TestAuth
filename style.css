@@ -1999,22 +1999,17 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
 .pp-empty{display:flex;flex-direction:column;align-items:center;gap:.7rem;padding:2.5rem 1rem;color:var(--tx3);font-size:.8rem;text-align:center;line-height:1.6;}
 .pp-empty i{font-size:2rem;opacity:.3;}
 .pp-viewport{
-  overflow:hidden;
   border-radius:12px;
-  position:relative;
+  overflow:hidden;
   width:100%;
-  display:block;
   background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(244,114,182,.05));
 }
 .pp-track{
-  display:flex;
-  flex-wrap:nowrap;
-  align-items:flex-start;
-  transition:transform .42s cubic-bezier(.22,.68,0,1.2);
-  will-change:transform;
+  width:100%;
+  transition:opacity .15s ease;
 }
 .pp-card{
-  flex-shrink:0;
+  width:100%;
   box-sizing:border-box;
   background:rgba(17,24,39,.55);
   backdrop-filter:blur(24px) saturate(1.4);
