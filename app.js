@@ -2660,6 +2660,7 @@ function reflectUI(){
   // Do NOT touch .sb (skin) — handled by csReflectButtons
 
   // Scene / Camera / Quality / Global singles only
+  // NOTE: ageGrid and bodyGrid are per-character — handled by csReflectButtons
   const singleMap={
     charCountGrid:'charCount',
     envGrid:'environment', styleGrid:'style', eraGrid:'era', animeStudioGrid:'animeStudio',

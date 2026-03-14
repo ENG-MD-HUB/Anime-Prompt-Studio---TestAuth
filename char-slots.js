@@ -81,7 +81,8 @@ function csSwitchTo(idx){
 
 function csReflectButtons(){
   var singles = {
-    ageGrid:'age', bodyGrid:'body', hairstyleGrid:'hairstyle',
+    ageGrid:'age', bodyGrid:'body',
+    hairstyleGrid:'hairstyle',
     eyeShapeGrid:'eyeShape',
     clothingGrid:'clothing',
     clothingTopGrid:'clothingTop', clothingBottomGrid:'clothingBottom',
