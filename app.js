@@ -2637,7 +2637,7 @@ function reflectUI(){
   /* Per-character grids — these are EXCLUSIVELY managed by csReflectButtons().
      reflectUI must never touch them, otherwise it corrupts the per-slot state. */
   var PER_CHAR_GRIDS = {
-    hairstyleGrid:1, hairColorGrid:1, eyeShapeGrid:1, eyeColorGrid:1,
+    hairstyleGrid:1, eyeShapeGrid:1,
     skinGrid:1, bodyGrid:1, ageGrid:1,
     clothingGrid:1, clothingTopGrid:1, clothingBottomGrid:1,
     nsfwTopGrid:1, nsfwBottomGrid:1,

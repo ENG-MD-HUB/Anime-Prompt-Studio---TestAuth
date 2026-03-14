@@ -82,7 +82,7 @@ function csSwitchTo(idx){
 function csReflectButtons(){
   var singles = {
     ageGrid:'age', bodyGrid:'body', hairstyleGrid:'hairstyle',
-    eyeShapeGrid:'eyeShape', eyeColorGrid:'eyeColor',
+    eyeShapeGrid:'eyeShape',
     clothingGrid:'clothing',
     clothingTopGrid:'clothingTop', clothingBottomGrid:'clothingBottom',
     nsfwTopGrid:'nsfwTop', nsfwBottomGrid:'nsfwBottom',
@@ -95,9 +95,18 @@ function csReflectButtons(){
     if(sg) sg.querySelectorAll('.sb').forEach(function(btn){
       var matches = btn.getAttribute('data-val') === sv;
       btn.classList.toggle('on', matches);
+      btn.style.borderColor = matches ? 'white' : (SKINS[Array.from(sg.querySelectorAll('.sb')).indexOf(btn)]||{bg:'transparent'}).bg;
     });
-    /* hair color grids */
-    var _hg=document.getElementById('hairColorGrid'); if(_hg) _hg.querySelectorAll('.cb,.ob').forEach(function(btn){ btn.classList.toggle('on',btn.getAttribute('data-val')===S.hairColor1); });
+    /* hair color: reflected via hcp-bar on hairstyleGrid buttons */
+    var hg=document.getElementById('hairstyleGrid');
+    if(hg) hg.querySelectorAll('.ob').forEach(function(btn){
+      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'hairColor1');
+    });
+    /* eye color: reflected via hcp-bar on eyeShapeGrid buttons */
+    var eg=document.getElementById('eyeShapeGrid');
+    if(eg) eg.querySelectorAll('.ob').forEach(function(btn){
+      if(typeof _hcpUpdateBar==='function') _hcpUpdateBar(btn,'eyeColor');
+    });
   })();
   Object.keys(singles).forEach(function(gid){
     var k = singles[gid];
@@ -125,22 +134,7 @@ function csReflectButtons(){
       b.classList.toggle('on', !!(v && vals.includes(v)));
     });
   });
-  [{gid:'hairColorGrid',k:'hairColor1',arr:HAIR_COLORS},
-   {gid:'eyeColorGrid',k:'eyeColor',arr:EYE_COLORS}
-  ].forEach(function(cfg){
-    var g = document.getElementById(cfg.gid); if(!g) return;
-    g.querySelectorAll('.cb').forEach(function(b,i){
-      var on = cfg.arr[i] && cfg.arr[i].id === S[cfg.k];
-      b.classList.toggle('on', !!on);
-      b.style.borderColor = on ? 'rgba(255,255,255,.85)' : 'transparent';
-    });
-  });
-  document.querySelectorAll('.sb').forEach(function(b,i){
-    if(!SKINS[i]) return;
-    var on = S.skin === SKINS[i].val;
-    b.classList.toggle('on', on);
-    b.style.borderColor = on ? 'white' : SKINS[i].bg;
-  });
+  /* color dots on clothing/sock/shoe buttons */
   ['clothingColor','clothingTopColor','clothingBottomColor',
    'nsfwTopColor','nsfwBottomColor','nsfwClothingColor','sockColor','shoeColor'
   ].forEach(function(k){ if(window._updateColorDot) _updateColorDot(k); });
@@ -986,6 +980,9 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   }
+
+  /* Load button */
+  if(loadBtn){
     loadBtn.addEventListener('click', function(){
       var lib = csLibrary;
       if(!lib.length || _ppIndex >= lib.length) return;
