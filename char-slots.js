@@ -882,15 +882,22 @@ function ppGoTo(idx){
   var lib = csLibrary;
   if(!lib.length) return;
   _ppIndex = Math.max(0, Math.min(idx, lib.length-1));
-  var track = document.getElementById('ppTrack');
-  /* Each card is (100/total)% of track width, so slide by _ppIndex × (100/total)% */
-  var pct = lib.length > 1 ? (_ppIndex * (100 / lib.length)) : 0;
-  if(track) track.style.transform = 'translateX(-' + pct + '%)';
+  var track    = document.getElementById('ppTrack');
+  var viewport = document.getElementById('ppViewport');
+  if(!track) return;
+
+  /* Get card width from first card (set in px) */
+  var firstCard = track.querySelector('.pp-card');
+  var cardW = firstCard ? firstCard.offsetWidth : (viewport ? viewport.offsetWidth : 360);
+  if(cardW < 10) cardW = 360;
+
+  track.style.transform = 'translateX(-' + (_ppIndex * cardW) + 'px)';
+
   _ppRenderDots(lib.length, _ppIndex);
   var prev = document.getElementById('ppPrev');
   var next = document.getElementById('ppNext');
   if(prev) prev.disabled = _ppIndex === 0;
-  if(next) next.disabled = _ppIndex === lib.length-1;
+  if(next) next.disabled = _ppIndex === lib.length - 1;
 }
 
 function openPassportLibrary(charIdx){
@@ -925,8 +932,22 @@ function openPassportLibrary(charIdx){
       return _ppBuildCard(entry, i, lib.length);
     }).join('');
 
-    /* Set track width = number of cards × 100% so cards don't overlap */
-    track.style.width = (lib.length * 100) + '%';
+    /* Size cards to viewport width in px after render */
+    var _sizeCards = function(){
+      var vpW = viewport ? viewport.offsetWidth : 360;
+      if(vpW < 10) vpW = 360;
+      track.querySelectorAll('.pp-card').forEach(function(card){
+        card.style.width    = vpW + 'px';
+        card.style.minWidth = vpW + 'px';
+        card.style.maxWidth = vpW + 'px';
+        card.style.flex     = '0 0 ' + vpW + 'px';
+      });
+      track.style.width = (vpW * lib.length) + 'px';
+      track.style.transform = 'translateX(0)';
+    };
+    /* Try immediately, then again after paint */
+    _sizeCards();
+    requestAnimationFrame(_sizeCards);
 
     /* Reset position */
     track.style.transition = 'none';

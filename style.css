@@ -2014,9 +2014,7 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
   will-change:transform;
 }
 .pp-card{
-  flex:0 0 100%;
-  width:100%;
-  min-width:0;
+  flex-shrink:0;
   box-sizing:border-box;
   background:rgba(17,24,39,.55);
   backdrop-filter:blur(24px) saturate(1.4);
