@@ -508,15 +508,13 @@ function csLibSave(charIdx){
   csLibrary.unshift(entry);
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
-  /* ── Sync to Firestore if logged in ── */
+  /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
   if(uid && window._fbCharLib){
-    window._fbCharLib.save(uid, entry).catch(function(e){
-      console.warn('CharLib cloud save failed:', e);
-    });
+    window._fbCharLib.save(uid, entry).catch(function(e){ console.warn('charLib save:', e); });
   }
 
-  csToast('✓ Saved "'+name+'" to library','ok');
+  csToast('✓ Saved "'+name+'"'+(uid?' ☁️':''),'ok');
   csRenderTabs();
   csRenderLibrary();
 }
@@ -537,12 +535,10 @@ function csLibDelete(id){
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
-  /* ── Sync delete to Firestore if logged in ── */
+  /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
   if(uid && window._fbCharLib){
-    window._fbCharLib.del(uid, id).catch(function(e){
-      console.warn('CharLib cloud delete failed:', e);
-    });
+    window._fbCharLib.del(uid, id).catch(function(e){ console.warn('charLib del:', e); });
   }
 
   csRenderLibrary();

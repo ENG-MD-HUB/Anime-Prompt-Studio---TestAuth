@@ -104,13 +104,13 @@ const SKINS=[
    BLUEPRINT CELLS
 ═══════════════════════════════════ */
 const BP_CELLS=[
-  {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape']},
-  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc']},
-  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids']},
+  {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape','nsfwBody']},
+  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
+  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids','nsfwPose','nsfwFluid']},
   {id:'bp-tools',  icon:'fa-sword',      lbl:'Tools',     keys:['weapons','props','electronics','otherItems']},
   {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
-  {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment']},
-  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect']},
+  {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment','nsfwEnv']},
+  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect','nsfwShot']},
   {id:'bp-quality',icon:'fa-sparkles',   lbl:'Quality',   keys:['quality','lights']}
 ];
 
@@ -292,7 +292,14 @@ function _keyToGridIds(key){
     glow:'glowGrid', smooth:'smoothGrid',
     angle:'angleGrid', shot:'shotGrid', look:'lookGrid',
     lens:'lensGrid',   lensEffect:'lensEffectGrid',
-    quality:'qualityGrid', lights:'lightGrid'
+    quality:'qualityGrid', lights:'lightGrid',
+    /* NSFW */
+    nsfwBody:'nsfwBodyGrid',
+    nsfwTop:'nsfwTopGrid',         nsfwBottom:'nsfwBottomGrid',
+    nsfwClothing:'nsfwClothingGrid',
+    nsfwPose:'nsfwPoseGrid',       nsfwFluid:'nsfwFluidGrid',
+    nsfwEnv:'nsfwEnvGrid',         nsfwShot:'nsfwShotGrid',
+    nsfwIndicator:'nsfwIndicatorGrid'
   };
   var gid = map[key];
   return gid ? [gid] : [];
@@ -1009,9 +1016,6 @@ function renderSkins(){
 ═══════════════════════════════════ */
 
 function toggleNSFW(on){
-  /* Keep button always hidden */
-  var nsfwBtnEl = document.getElementById('nsfwBtn');
-  if(nsfwBtnEl) nsfwBtnEl.style.display = 'none';
   // Body parts separator + grid (Camera tab)
   const bpSep=document.getElementById('sep-bodyparts');
   if(bpSep) bpSep.classList.toggle('vis',on);
@@ -4685,7 +4689,6 @@ attachHairEyePopups();
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
-        // Load character library from Firestore
         loadCharLibFromCloud(_uid);
       } else {
         // Skip — page reload on logout handles cleanup
@@ -4754,27 +4757,22 @@ attachHairEyePopups();
     }
   }
 
-  // ── Load character library from Firestore → merge with local ──
+  // ── Load character library from Firestore ──
   async function loadCharLibFromCloud(uid){
     if(!window._fbCharLib) return;
     try {
       const cloud = await window._fbCharLib.load(uid);
       if(!cloud.length) return;
-      // Merge: cloud entries take priority, avoid duplicates by id
-      const local = typeof csLibrary !== 'undefined' ? csLibrary : [];
-      const localIds = new Set(local.map(function(e){ return String(e.id); }));
-      const toAdd = cloud.filter(function(e){ return !localIds.has(String(e.id)); });
-      if(toAdd.length){
-        // csLibrary is defined in char-slots.js
-        if(typeof csLibrary !== 'undefined'){
-          csLibrary = cloud.concat(local.filter(function(e){
-            return !cloud.some(function(c){ return String(c.id)===String(e.id); });
-          }));
-          localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-          if(typeof csRenderLibrary === 'function') csRenderLibrary();
-        }
-        toast('☁️ Loaded ' + cloud.length + ' characters from cloud');
+      // Merge: cloud wins, skip duplicates by id
+      const local = (typeof csLibrary !== 'undefined') ? csLibrary : [];
+      const localIds = new Set(local.map(e => String(e.id)));
+      const merged = cloud.concat(local.filter(e => !cloud.some(c => String(c.id)===String(e.id))));
+      if(typeof csLibrary !== 'undefined'){
+        csLibrary = merged;
+        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+        if(typeof csRenderLibrary === 'function') csRenderLibrary();
       }
+      toast(`☁️ Loaded ${cloud.length} characters from cloud`);
     } catch(e){
       console.warn('loadCharLibFromCloud error:', e);
     }

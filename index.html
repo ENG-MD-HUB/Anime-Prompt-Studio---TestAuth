@@ -43,7 +43,7 @@
   </div>
   <div class="hdr-mid">
     <button class="btn-h" id="randomBtn"><i class="fas fa-shuffle"></i> <span data-i18n="random">Random</span></button>
-    <button class="btn-h" id="nsfwBtn" style="display:none"><i class="fas fa-fire"></i> <span data-i18n="nsfw">NSFW</span></button>
+    <button class="btn-h" id="nsfwBtn"><i class="fas fa-fire"></i> <span data-i18n="nsfw">NSFW</span></button>
   </div>
   <div class="hdr-right">
     <div class="dvd"></div>
@@ -539,7 +539,7 @@
             <li><span class="cl-cat feat">New</span> Tag weight slider for fine-tuning influence</li>
             <li><span class="cl-cat feat">New</span> Favourites system — save & reload combinations</li>
             <li><span class="cl-cat feat">New</span> One-click randomizer</li>
-            <li><span class="cl-cat feat">New</span> Age-gated mature content section</li>
+            <li><span class="cl-cat feat">New</span> NSFW mode with age gate</li>
             <li><span class="cl-cat feat">New</span> Arabic & Japanese UI translation</li>
             <li><span class="cl-cat feat">New</span> Character Blueprint overview panel</li>
             <li><span class="cl-cat feat">New</span> Image analyzer — reverse-engineer prompts from images</li>
@@ -572,6 +572,7 @@
         <div class="feat-item"><i class="fas fa-heart"></i><div><strong data-i18n="feat_favs_t">Favourites System</strong><span data-i18n="feat_favs_d">Save and reload your best prompt combinations</span></div></div>
         <div class="feat-item"><i class="fas fa-magnifying-glass-chart"></i><div><strong data-i18n="feat_img_t">Image Analyzer</strong><span data-i18n="feat_img_d">Extract and reverse-engineer prompts from images</span></div></div>
         <div class="feat-item"><i class="fas fa-shuffle"></i><div><strong data-i18n="feat_rand_t">Randomizer</strong><span data-i18n="feat_rand_d">Generate a full random character in one click</span></div></div>
+        <div class="feat-item"><i class="fas fa-fire"></i><div><strong data-i18n="feat_nsfw_t">NSFW Mode</strong><span data-i18n="feat_nsfw_d">Age-gated adult content section</span></div></div>
       </div>
 
       <div class="feat-section-lbl" style="margin-top:1rem;">✦ New in v2.0</div>
@@ -778,7 +779,7 @@
       <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-p"><i class="fas fa-bolt"></i></div><div class="wlc-feat-txt"><strong>Prompt Strength Meter</strong><span>Detects conflicts & missing elements</span></div></div>
     </div>
 
-    <div class="wlc-more-hint">+ More inside: Tag Weight · Favourites · Image Analyzer · AR & JA translation</div>
+    <div class="wlc-more-hint">+ More inside: Tag Weight · Favourites · NSFW · Image Analyzer · AR & JA translation</div>
 
     <!-- CTA -->
     <div class="wlc-cta">
@@ -921,19 +922,16 @@
   };
 
   window._fbCharLib = {
-    // Save single character entry
     save: async (uid, entry) => {
       const ref = doc(db, 'users', uid, 'charLib', String(entry.id));
       await setDoc(ref, { ...entry, updatedAt: serverTimestamp() });
     },
-    // Load all characters ordered by newest
     load: async (uid) => {
       const ref  = collection(db, 'users', uid, 'charLib');
       const q    = query(ref, orderBy('updatedAt', 'desc'));
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ ...d.data() }));
     },
-    // Delete single character
     del: async (uid, entryId) => {
       await deleteDoc(doc(db, 'users', uid, 'charLib', String(entryId)));
     },
