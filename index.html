@@ -43,7 +43,7 @@
   </div>
   <div class="hdr-mid">
     <button class="btn-h" id="randomBtn"><i class="fas fa-shuffle"></i> <span data-i18n="random">Random</span></button>
-    <button class="btn-h" id="nsfwBtn"><i class="fas fa-fire"></i> <span data-i18n="nsfw">NSFW</span></button>
+    <button class="btn-h" id="nsfwBtn" style="display:none"><i class="fas fa-fire"></i> <span data-i18n="nsfw">NSFW</span></button>
   </div>
   <div class="hdr-right">
     <div class="dvd"></div>
@@ -490,10 +490,67 @@
       <p data-i18n="about_p2">Built with a focus on anime and illustration styles, it gives you full control over character appearance, outfit, mood, scene, lighting, camera, and more — all in one place.</p>
       <p data-i18n="about_p3">No account required. No data collected. Everything runs locally in your browser.</p>
       <div class="info-sig" data-i18n="about_sig">— Made with ✦ by MD.AI SYSTEMS</div>
-      <div style="margin-top:.5rem;display:inline-flex;align-items:center;gap:.4rem;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.2);border-radius:100px;padding:.22rem .7rem;font-size:.65rem;font-family:'DM Mono',monospace;color:var(--pl);font-weight:700;">v1.0.0</div>
+
+      <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+        <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.2);border-radius:100px;padding:.22rem .7rem;font-size:.65rem;font-family:'DM Mono',monospace;color:var(--pl);font-weight:700;"><i class="fas fa-code-branch"></i> v2.0.0</div>
+        <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:100px;padding:.22rem .7rem;font-size:.65rem;font-family:'DM Mono',monospace;color:#10b981;font-weight:700;"><i class="fas fa-calendar"></i> 14 Mar 2026</div>
+      </div>
+
+      <!-- CivitAI link -->
+      <a class="wlc-details-link" href="https://civitai.com/articles/27113/anime-prompt-studio-universal-ai-prompt-builder-for-image-generation" target="_blank" rel="noopener" style="margin-top:.8rem;display:flex;">
+        <i class="fas fa-arrow-up-right-from-square"></i> Full guide & feature details on CivitAI
+      </a>
+
+      <!-- Changelog -->
+      <div class="cl-wrap">
+        <div class="cl-header"><i class="fas fa-clock-rotate-left"></i> Changelog</div>
+
+        <div class="cl-version">
+          <div class="cl-ver-header">
+            <span class="cl-ver-tag">v2.0.0</span>
+            <span class="cl-ver-date">14 Mar 2026</span>
+            <span class="cl-ver-badge new">Latest</span>
+          </div>
+          <ul class="cl-list">
+            <li><span class="cl-cat feat">New</span> <strong>Character Library</strong> — Save, browse and load characters from a passport-style card gallery with photo upload support</li>
+            <li><span class="cl-cat feat">New</span> <strong>Blueprint Lock</strong> — Long-press any Blueprint cell to freeze its values; randomize respects locked fields</li>
+            <li><span class="cl-cat feat">New</span> <strong>Dual Character System</strong> — Full independent per-slot state for each character with tab switching</li>
+            <li><span class="cl-cat feat">New</span> <strong>Character Cards v2</strong> — Redesigned header-band cards with live appearance chips and detail tags</li>
+            <li><span class="cl-cat feat">New</span> <strong>Smart Randomizer</strong> — Second character now gets a full independent randomized profile</li>
+            <li><span class="cl-cat feat">New</span> <strong>Clothing Condition</strong> — Wet, torn, dirty, burnt, wrinkled and more overlay states</li>
+            <li><span class="cl-cat feat">New</span> <strong>Liquids & Materials</strong> — Rain-soaked, body oil, sweat droplets, glistening and dripping</li>
+            <li><span class="cl-cat impr">Improved</span> <strong>Blueprint Restructured</strong> — 8 focused cells with correct key mapping for all sections</li>
+            <li><span class="cl-cat impr">Improved</span> <strong>Full AR + JA Translation</strong> — All 500+ option buttons translated in Arabic and Japanese</li>
+            <li><span class="cl-cat fix">Fixed</span> Color bars on Hairstyle / Eye Shape now show only on selected button</li>
+            <li><span class="cl-cat fix">Fixed</span> Overlays no longer block clicks when closed</li>
+            <li><span class="cl-cat fix">Fixed</span> Random button works reliably across all browsers</li>
+          </ul>
+        </div>
+
+        <div class="cl-version">
+          <div class="cl-ver-header">
+            <span class="cl-ver-tag">v1.0.0</span>
+            <span class="cl-ver-date">9 Mar 2026 — Initial Release</span>
+          </div>
+          <ul class="cl-list">
+            <li><span class="cl-cat feat">New</span> Full character builder — hair, eyes, skin, body, outfit</li>
+            <li><span class="cl-cat feat">New</span> 13 color themes with live preview</li>
+            <li><span class="cl-cat feat">New</span> Prompt strength meter with conflict detection</li>
+            <li><span class="cl-cat feat">New</span> Tag weight slider for fine-tuning influence</li>
+            <li><span class="cl-cat feat">New</span> Favourites system — save & reload combinations</li>
+            <li><span class="cl-cat feat">New</span> One-click randomizer</li>
+            <li><span class="cl-cat feat">New</span> Age-gated mature content section</li>
+            <li><span class="cl-cat feat">New</span> Arabic & Japanese UI translation</li>
+            <li><span class="cl-cat feat">New</span> Character Blueprint overview panel</li>
+            <li><span class="cl-cat feat">New</span> Image analyzer — reverse-engineer prompts from images</li>
+          </ul>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
 
 <!-- ── FEATURES MODAL ── -->
 <div class="info-overlay" id="featuresOverlay">
@@ -502,6 +559,7 @@
     <div class="info-icon"><i class="fas fa-star"></i></div>
     <div class="info-title" data-i18n="features">Features</div>
     <div class="info-body">
+      <div class="feat-section-lbl">Core</div>
       <div class="feat-grid">
         <div class="feat-item"><i class="fas fa-palette"></i><div><strong data-i18n="feat_themes_t">13 Color Themes</strong><span data-i18n="feat_themes_d">Fully themed UI that adapts to your style</span></div></div>
         <div class="feat-item"><i class="fas fa-person"></i><div><strong data-i18n="feat_char_t">Full Character Builder</strong><span data-i18n="feat_char_d">Hair, eyes, skin, body, outfit and more</span></div></div>
@@ -514,7 +572,18 @@
         <div class="feat-item"><i class="fas fa-heart"></i><div><strong data-i18n="feat_favs_t">Favourites System</strong><span data-i18n="feat_favs_d">Save and reload your best prompt combinations</span></div></div>
         <div class="feat-item"><i class="fas fa-magnifying-glass-chart"></i><div><strong data-i18n="feat_img_t">Image Analyzer</strong><span data-i18n="feat_img_d">Extract and reverse-engineer prompts from images</span></div></div>
         <div class="feat-item"><i class="fas fa-shuffle"></i><div><strong data-i18n="feat_rand_t">Randomizer</strong><span data-i18n="feat_rand_d">Generate a full random character in one click</span></div></div>
-        <div class="feat-item"><i class="fas fa-fire"></i><div><strong data-i18n="feat_nsfw_t">NSFW Mode</strong><span data-i18n="feat_nsfw_d">Age-gated adult content section</span></div></div>
+      </div>
+
+      <div class="feat-section-lbl" style="margin-top:1rem;">✦ New in v2.0</div>
+      <div class="feat-grid">
+        <div class="feat-item feat-item-new"><i class="fas fa-address-card"></i><div><strong>Character Library</strong><span>Save characters as passport cards, add a personal photo, load them into any slot instantly</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-lock"></i><div><strong>Blueprint Lock</strong><span>Long-press any Blueprint cell to freeze it — randomize skips locked fields</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-users"></i><div><strong>Dual Character Slots</strong><span>Independent attributes per character — hair, outfit, mood and more — all saved separately</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-id-card"></i><div><strong>Character Cards v2</strong><span>Redesigned cards show live appearance chips, detail tags and editing status</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-droplet"></i><div><strong>Clothing Condition</strong><span>Apply wet, torn, dirty, muddy, burnt or wrinkled overlays to any outfit</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-water"></i><div><strong>Liquids & Materials</strong><span>Rain-soaked, body oil, sweat droplets, glistening and dripping effects</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-globe"></i><div><strong>Full AR + JA Translation</strong><span>All 500+ option buttons now available in Arabic and Japanese</span></div></div>
+        <div class="feat-item feat-item-new"><i class="fas fa-dice"></i><div><strong>Smart Dual Randomizer</strong><span>Both characters get fully independent randomized profiles when rolling</span></div></div>
       </div>
     </div>
   </div>
@@ -559,6 +628,18 @@
         <div class="tip-item">
           <div class="tip-num">08</div>
           <div><strong data-i18n="tip8_t">Use Extra Tags</strong><p data-i18n="tip8_d">The Extra Positive Tags field is perfect for model-specific tokens or very niche details not covered by the builder.</p></div>
+        </div>
+        <div class="tip-item tip-item-new">
+          <div class="tip-num" style="background:linear-gradient(135deg,var(--p),var(--ac));color:#fff;border:none;">09</div>
+          <div><strong>Character Library <span class="tip-new-badge">v2</span></strong><p>Click the ★ star on any character card to save it to your library. Open the library anytime from the gender select screen. You can upload a personal photo for each saved character by clicking the photo box.</p></div>
+        </div>
+        <div class="tip-item tip-item-new">
+          <div class="tip-num" style="background:linear-gradient(135deg,var(--p),var(--ac));color:#fff;border:none;">10</div>
+          <div><strong>Blueprint Lock <span class="tip-new-badge">v2</span></strong><p>Long-press (hold 0.5s) or double-click any cell in the Character Blueprint to lock it. Locked cells turn green and show a 🔒 icon. Their values are preserved when you hit Random — perfect for keeping a style or scene while randomizing the character.</p></div>
+        </div>
+        <div class="tip-item tip-item-new">
+          <div class="tip-num" style="background:linear-gradient(135deg,var(--p),var(--ac));color:#fff;border:none;">11</div>
+          <div><strong>Dual Characters <span class="tip-new-badge">v2</span></strong><p>Each character slot has fully independent settings. Switch between Character 1 and 2 using the tabs — each gets their own hair, outfit, mood, and tools. The Smart Randomizer gives both characters different appearances automatically.</p></div>
         </div>
       </div>
     </div>
@@ -666,65 +747,53 @@
 <div class="wlc-overlay" id="wlcOverlay">
   <div class="wlc-modal">
 
-    <!-- Header glow bar -->
     <div class="wlc-bar"></div>
 
-    <!-- Logo area -->
-    <div class="wlc-top">
-      <div class="wlc-logo-ico">✦</div>
-      <div class="wlc-badge">v1.0.0</div>
+    <!-- Header -->
+    <div class="wlc-head">
+      <div class="wlc-logo">
+        <div class="wlc-logo-ico">✦</div>
+        <div class="wlc-logo-txt">
+          <div class="wlc-title">Anime Prompt Studio</div>
+          <div class="wlc-title-sub">by MD.AI SYSTEMS</div>
+        </div>
+      </div>
+      <div class="wlc-head-badges">
+        <span class="wlc-badge">v2.0.0</span>
+        <span class="wlc-badge-new"><i class="fas fa-star"></i> Updated</span>
+      </div>
     </div>
 
-    <div class="wlc-title">Anime Prompt Studio</div>
-    <div class="wlc-sub" data-i18n="wlc_sub">Your ultimate AI image prompt builder — free, fast, no account needed.</div>
+    <div class="wlc-sub">Your ultimate AI image prompt builder — free & open.</div>
 
     <div class="wlc-divider"></div>
 
-    <!-- Features grid -->
+    <!-- Features — core only -->
     <div class="wlc-features">
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-person"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat1_t">Full Character Builder</strong><span data-i18n="wlc_feat1_d">Hair, eyes, skin, body, outfit & more</span></div>
-      </div>
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-palette"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat2_t">5 Color Themes</strong><span data-i18n="wlc_feat2_d">Fully themed UI that adapts to your style</span></div>
-      </div>
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-bolt"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat3_t">Prompt Strength Meter</strong><span data-i18n="wlc_feat3_d">Detects conflicts & missing elements</span></div>
-      </div>
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-heart"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat4_t">Favourites System</strong><span data-i18n="wlc_feat4_d">Save & reload your best combinations</span></div>
-      </div>
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-shuffle"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat5_t">One-Click Randomizer</strong><span data-i18n="wlc_feat5_d">Generate a full character instantly</span></div>
-      </div>
-      <div class="wlc-feat">
-        <div class="wlc-feat-ico"><i class="fas fa-weight-hanging"></i></div>
-        <div class="wlc-feat-txt"><strong data-i18n="wlc_feat6_t">Tag Weight Slider</strong><span data-i18n="wlc_feat6_d">Fine-tune every tag's influence</span></div>
-      </div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-p"><i class="fas fa-person"></i></div><div class="wlc-feat-txt"><strong>Character Builder</strong><span>Hair, eyes, skin, body, outfit & more</span></div></div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-new"><i class="fas fa-address-card"></i></div><div class="wlc-feat-txt"><strong>Character Library <span class="wlc-v2">v2</span></strong><span>Save passport cards, add photo, load instantly</span></div></div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-new"><i class="fas fa-lock"></i></div><div class="wlc-feat-txt"><strong>Blueprint Lock <span class="wlc-v2">v2</span></strong><span>Freeze any section — respected by randomize</span></div></div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-p"><i class="fas fa-paintbrush"></i></div><div class="wlc-feat-txt"><strong>Art Style & Scene</strong><span>Studios, era, camera, lighting & color grading</span></div></div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-p"><i class="fas fa-shuffle"></i></div><div class="wlc-feat-txt"><strong>Smart Randomizer <span class="wlc-v2">v2</span></strong><span>Full dual-character independent profiles</span></div></div>
+      <div class="wlc-feat"><div class="wlc-feat-ico wlc-ico-p"><i class="fas fa-bolt"></i></div><div class="wlc-feat-txt"><strong>Prompt Strength Meter</strong><span>Detects conflicts & missing elements</span></div></div>
     </div>
 
-    <div class="wlc-divider"></div>
-
-    <!-- About project -->
-    <div class="wlc-about">
-      <div class="wlc-about-ico"><i class="fas fa-wand-magic-sparkles"></i></div>
-      <div class="wlc-about-body">
-        <strong data-i18n="wlc_about_title">About this project</strong>
-        <p data-i18n="wlc_about_body">Anime Prompt Studio is a passion project built by <span class="wlc-brand">MD.AI SYSTEMS</span> — a team focused on making AI tools accessible and enjoyable for everyone. This tool runs entirely in your browser, stores nothing on any server, and is completely free.</p>
-      </div>
-    </div>
+    <div class="wlc-more-hint">+ More inside: Tag Weight · Favourites · Image Analyzer · AR & JA translation</div>
 
     <!-- CTA -->
-    <button class="wlc-btn" id="wlcStart">
-      <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="start_building">Start Building</span>
-    </button>
-    <div class="wlc-no-show" style="padding:.8rem 1.8rem 1.4rem;text-align:center;font-size:.65rem;color:var(--tx3);">
-      <i class="fas fa-shield-halved" style="margin-right:.3rem;"></i><span data-i18n="wlc_footer">No account needed · No data collected · Runs in your browser</span>
+    <div class="wlc-cta">
+      <button class="wlc-btn" id="wlcStart">
+        <i class="fas fa-wand-magic-sparkles"></i> Start Building
+      </button>
+    </div>
+
+    <!-- Disclaimer at bottom -->
+    <div class="wlc-disclaimer">
+      <i class="fas fa-circle-info wlc-disclaimer-icon"></i>
+      <div>
+        <strong>Prompt Builder Only — Not an Image Generator</strong>
+        <span>This tool helps compose the right keywords for AI image generation. It does <em>not</em> generate images. Results depend on the AI model you use.</span>
+      </div>
     </div>
 
   </div>
@@ -848,6 +917,23 @@
       const ref  = collection(db, 'users', uid, 'favourites');
       const snap = await getDocs(ref);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    },
+    window._fbCharLib = {
+    // Save single character entry
+    save: async (uid, entry) => {
+      const ref = doc(db, 'users', uid, 'charLib', String(entry.id));
+      await setDoc(ref, { ...entry, updatedAt: serverTimestamp() });
+    },
+    // Load all characters ordered by newest
+    load: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'charLib');
+      const q    = query(ref, orderBy('updatedAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ ...d.data() }));
+    },
+    // Delete single character
+    del: async (uid, entryId) => {
+      await deleteDoc(doc(db, 'users', uid, 'charLib', String(entryId)));
     },
   };
 </script>

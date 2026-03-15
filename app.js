@@ -15,7 +15,6 @@ const S={
   nsfwBottom:null,nsfwBottomColor:null,
   nsfwClothing:null,nsfwClothingColor:null,
   expression:null,poses:[],effects:[],liquids:[],
-  /* weapons/props/electronics/otherItems moved to per-char slots */
   weapons:[],props:[],electronics:[],otherItems:[],
   environment:null,style:null,era:null,animeStudio:null,colorGrade:null,
   stroke:null,shadow:null,quality:[],lights:[],glow:null,smooth:null,
@@ -26,8 +25,8 @@ const S={
   nsfw:false,
   weights:{},
   extraPos:[],extraNeg:[],
-  favourites: [],
-
+  favourites:[],
+  locked:{},   /* bp-cell IDs that are locked → keys frozen */
 };
 
 /* ═══════════════════════════════════
@@ -105,14 +104,14 @@ const SKINS=[
    BLUEPRINT CELLS
 ═══════════════════════════════════ */
 const BP_CELLS=[
-  {id:'bp-char',   icon:'fa-users',               lbl:'Character', keys:['characters','age','skin','body']},
-  {id:'bp-outfit', icon:'fa-shirt',                lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','shoes']},
-  {id:'bp-mood',   icon:'fa-face-smile',           lbl:'Mood',      keys:['expression','poses','effects']},
-  {id:'bp-tools',  icon:'fa-sword',                lbl:'Tools',     keys:['weapons','props','electronics','otherItems']},
-  {id:'bp-style',  icon:'fa-paintbrush',           lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow']},
-  {id:'bp-scene',  icon:'fa-mountain-sun',         lbl:'Scene',     keys:['environment']},
-  {id:'bp-camera', icon:'fa-camera',               lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect']},
-  {id:'bp-quality',icon:'fa-sparkles',             lbl:'Quality',   keys:['quality','lights','glow','smooth']}
+  {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape']},
+  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc']},
+  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids']},
+  {id:'bp-tools',  icon:'fa-sword',      lbl:'Tools',     keys:['weapons','props','electronics','otherItems']},
+  {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
+  {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment']},
+  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect']},
+  {id:'bp-quality',icon:'fa-sparkles',   lbl:'Quality',   keys:['quality','lights']}
 ];
 
 /* ═══════════════════════════════════
@@ -218,16 +217,109 @@ const D={
 /* ═══════════════════════════════════
    BLUEPRINT BUILD
 ═══════════════════════════════════ */
+/* ── Lock helpers ── */
+function isLocked(bpId){
+  return !!(S.locked && S.locked[bpId]);
+}
+function isKeyLocked(key){
+  return BP_CELLS.some(function(c){
+    return c.keys.includes(key) && isLocked(c.id);
+  });
+}
+function isGridLocked(gid){
+  /* Check if any bp-cell owns this grid's key */
+  return BP_CELLS.some(function(c){
+    if(!isLocked(c.id)) return false;
+    return c.keys.some(function(k){
+      var ids = _keyToGridIds(k);
+      return ids.indexOf(gid) > -1;
+    });
+  });
+}
+function toggleLock(bpId){
+  if(!S.locked) S.locked={};
+  if(S.locked[bpId]){
+    delete S.locked[bpId];
+  } else {
+    S.locked[bpId]=true;
+  }
+  _updateLockUI(bpId);
+}
+function _updateLockUI(bpId){
+  var cell = document.getElementById(bpId);
+  if(!cell) return;
+  var locked = isLocked(bpId);
+  cell.classList.toggle('bp-locked', locked);
+  var lockEl = cell.querySelector('.bp-lock');
+  if(lockEl) lockEl.style.display = locked ? '' : 'none';
+  /* Dim/undim buttons in locked grids */
+  var bpCell = BP_CELLS.find(function(c){ return c.id===bpId; });
+  if(bpCell){
+    bpCell.keys.forEach(function(k){
+      var gids = _keyToGridIds(k);
+      gids.forEach(function(gid){
+        var g = document.getElementById(gid); if(!g) return;
+        g.querySelectorAll('.ob,.cb,.sb').forEach(function(b){
+          b.style.pointerEvents = locked ? 'none' : '';
+          b.style.opacity       = locked ? '0.35' : '';
+          b.style.cursor        = locked ? 'not-allowed' : '';
+        });
+        /* Lock indicator on the grid itself */
+        g.dataset.locked = locked ? '1' : '';
+      });
+    });
+  }
+}
+function _keyToGridIds(key){
+  var map={
+    age:'ageGrid', skin:'skinGrid', body:'bodyGrid',
+    characters:'charCardsRow',
+    hairColor1:'hairstyleGrid', hairstyle:'hairstyleGrid',
+    eyeColor:'eyeShapeGrid',    eyeShape:'eyeShapeGrid',
+    clothing:'clothingGrid',
+    clothingTop:'clothingTopGrid', clothingBottom:'clothingBottomGrid',
+    clothingAcc:'clothingAccGrid', clothingCondition:'clothingConditionGrid',
+    faceAcc:'faceAccGrid',
+    shoes:'shoesGrid',      shoeColor:'shoesGrid',
+    sockLength:'sockLengthGrid', sockColor:'sockLengthGrid',
+    expression:'expressionGrid', poses:'poseGrid',
+    effects:'effectsGrid',       liquids:'liquidsGrid',
+    weapons:'weaponGrid', props:'propsGrid',
+    electronics:'electronicsGrid', otherItems:'otherItemsGrid',
+    environment:'envGrid',
+    style:'styleGrid', animeStudio:'animeStudioGrid', colorGrade:'colorGradeGrid',
+    era:'eraGrid', stroke:'strokeGrid', shadow:'shadowGrid',
+    glow:'glowGrid', smooth:'smoothGrid',
+    angle:'angleGrid', shot:'shotGrid', look:'lookGrid',
+    lens:'lensGrid',   lensEffect:'lensEffectGrid',
+    quality:'qualityGrid', lights:'lightGrid'
+  };
+  var gid = map[key];
+  return gid ? [gid] : [];
+}
+
 function buildBlueprint(){
   const g=document.getElementById('bpGrid');
-  // Create grid wrapper
   const gridWrapper = document.createElement('div');
   gridWrapper.className='bp-grid';
   
   BP_CELLS.forEach(c=>{
     const cell=document.createElement('div');
     cell.className='bp-cell'; cell.id=c.id;
-    cell.innerHTML=`<i class="fas ${c.icon}"></i><span class="bp-lbl">${c.lbl}</span><span class="bp-tick">✓</span>`;
+    cell.innerHTML=`<i class="fas ${c.icon}"></i><span class="bp-lbl">${c.lbl}</span><span class="bp-tick">✓</span><i class="fas fa-lock bp-lock" title="Locked — click to unlock" style="display:none"></i>`;
+
+    /* Long-press or double-click → toggle lock */
+    var pressTimer=null;
+    cell.addEventListener('mousedown', function(){
+      pressTimer = setTimeout(function(){ toggleLock(c.id); }, 500);
+    });
+    cell.addEventListener('mouseup',   function(){ clearTimeout(pressTimer); });
+    cell.addEventListener('mouseleave',function(){ clearTimeout(pressTimer); });
+    cell.addEventListener('dblclick',  function(e){ e.preventDefault(); toggleLock(c.id); });
+    /* Touch support */
+    cell.addEventListener('touchstart',function(){ pressTimer=setTimeout(function(){ toggleLock(c.id); },500); },{passive:true});
+    cell.addEventListener('touchend',  function(){ clearTimeout(pressTimer); },{passive:true});
+
     gridWrapper.appendChild(cell);
   });
   
@@ -917,6 +1009,9 @@ function renderSkins(){
 ═══════════════════════════════════ */
 
 function toggleNSFW(on){
+  /* Keep button always hidden */
+  var nsfwBtnEl = document.getElementById('nsfwBtn');
+  if(nsfwBtnEl) nsfwBtnEl.style.display = 'none';
   // Body parts separator + grid (Camera tab)
   const bpSep=document.getElementById('sep-bodyparts');
   if(bpSep) bpSep.classList.toggle('vis',on);
@@ -1544,6 +1639,36 @@ function init(){
    EVENTS
 ═══════════════════════════════════ */
 function attachEvents(){
+
+  /* ── Global lock interceptor — blocks clicks on locked grids ── */
+  document.addEventListener('click', function(e){
+    if(!S.locked || !Object.keys(S.locked).length) return;
+    var btn = e.target.closest('.ob,.cb,.sb');
+    if(!btn) return;
+    /* Find the grid this button belongs to */
+    var el = btn.parentElement;
+    var gid = null;
+    while(el && el !== document.body){
+      if(el.id && (el.classList.contains('og') || el.classList.contains('skin-grid') || el.id.endsWith('Grid'))){
+        gid = el.id; break;
+      }
+      el = el.parentElement;
+    }
+    if(!gid) return;
+    if(isGridLocked(gid)){
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      /* Visual pulse on the locked bp-cell */
+      BP_CELLS.forEach(function(c){
+        if(!isLocked(c.id)) return;
+        if(c.keys.some(function(k){ return _keyToGridIds(k).indexOf(gid)>-1; })){
+          var cell = document.getElementById(c.id);
+          if(cell){ cell.classList.remove('bp-lock-pulse'); void cell.offsetWidth; cell.classList.add('bp-lock-pulse'); }
+        }
+      });
+    }
+  }, true); /* capture phase — runs before button's own handler */
+
   /* ── Main section toggle (Characters / Scene) ── */
   const CHAR_CATS = ['style','character','outfit','mood','tools'];
   const SCENE_CATS = ['scene','camera','quality','negative'];
@@ -2978,9 +3103,23 @@ function _syncGrid(gid, stateFn){
 function _syncConflictUI(){}
 
 function randomize(){
-  const wasNsfw = S.nsfw;   // preserve NSFW state
+  const wasNsfw = S.nsfw;
+
+  /* ── Save locked values before reset ── */
+  const _locked = S.locked || {};
+  const _savedLocked = {};
+  BP_CELLS.forEach(function(c){
+    if(!_locked[c.id]) return;
+    _savedLocked[c.id] = {};
+    c.keys.forEach(function(k){
+      var v = S[k];
+      _savedLocked[c.id][k] = Array.isArray(v) ? v.slice() : v;
+    });
+  });
+
   resetAll(true);
   if(wasNsfw){ S.nsfw=true; toggleNSFW(true); }
+  S.locked = _locked; /* restore lock state after reset */
 
   // ── Characters — 80% single, 20% two ──
   let chosenChars;
@@ -3221,6 +3360,17 @@ function randomize(){
 
   // ── Fix conflicts after randomizing ──
   resolveConflicts(true);
+
+  /* ── Restore locked values ── */
+  Object.keys(_savedLocked).forEach(function(bpId){
+    var vals = _savedLocked[bpId];
+    Object.keys(vals).forEach(function(k){
+      var v = vals[k];
+      S[k] = Array.isArray(v) ? v.slice() : v;
+    });
+  });
+  /* Re-apply lock UI (dims buttons, shows lock icon) */
+  BP_CELLS.forEach(function(c){ if(_locked[c.id]) _updateLockUI(c.id); });
 
   reflectUI();
   if(typeof csReflectButtons === 'function') csReflectButtons();
@@ -3515,19 +3665,25 @@ function _ar(name){
   });
 })();
 
-// ── WELCOME MODAL ──
+// ── WELCOME MODAL — always show on page load ──
 (function(){
   const overlay = document.getElementById('wlcOverlay');
   const btn     = document.getElementById('wlcStart');
   if(!overlay) return;
 
   function closeWelcome(){
-    overlay.classList.remove('open');
+    overlay.style.transition = 'opacity .5s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){
+      overlay.classList.remove('open');
+      overlay.style.opacity = '';
+      overlay.style.transition = '';
+    }, 500);
   }
 
-  btn.addEventListener('click', closeWelcome);
+  /* Only the button can close — no click-outside */
+  if(btn) btn.addEventListener('click', closeWelcome);
 
-  // Show every time
   overlay.classList.add('open');
 })();
 
@@ -3984,6 +4140,50 @@ const OPT_AR = {
   'Missionary':'وضعية ميشنري','Cowgirl':'وضعية كاوغيرل',
   'Reverse Cowgirl':'وضعية كاوغيرل معكوسة','Doggy Style':'وضعية دوغي',
   'Oral':'فموي','Anal':'شرجي','Gangbang':'جماعي','Glory Hole':'ثقب',
+  // ── Clothing Condition (missing) ──
+  'Wet':'مبلل','Soaked':'منقوع','Torn':'ممزق','Dirty':'متسخ','Muddy':'موحل',
+  'Blood-Stained':'ملطخ بالدم','Burnt':'محروق','Wrinkled':'مجعد','Disheveled':'فوضوي',
+  // ── NSFW Clothing (missing) ──
+  'Bunny Suit':'بدلة الأرنب','Nurse Outfit':'زي الممرضة','French Maid':'خادمة فرنسية',
+  'Cheerleader':'مشجعة','Police Costume':'زي الشرطة',
+  'Fishnet Top':'قميص شبكي','Fishnet Stockings':'جوارب شبكية',
+  'Cutout Top':'قميص مقطوع','Micro Crop Top':'توب قصير جداً','Exposed Midriff Top':'توب مكشوف البطن',
+  'Open Back Top':'توب مفتوح الظهر','Sheer Top':'توب شفاف','Strapless Bra Top':'بنطلون بلا حمالات',
+  'Tiny Top':'توب صغير جداً','Garter Belt':'حزام الجارتير',
+  'Thong':'ثونغ','Micro Miniskirt':'تنورة مايكرو','Slit Skirt':'تنورة بشق',
+  'Booty Shorts':'شورت قصير','Lace Shorts':'شورت دانتيل','Crotchless Shorts':'شورت مفتوح',
+  'Plaid':'مربعات',
+  // ── Colors (missing) ──
+  'Beige':'بيج','Gray':'رمادي','Light Gray':'رمادي فاتح','Dark Gray':'رمادي غامق',
+  'Crimson':'قرمزي','Maroon':'كستنائي','Orange':'برتقالي','Yellow':'أصفر',
+  'Olive':'زيتوني','Hot Pink':'وردي فاتح','Sky Blue':'أزرق سماوي','Light Blue':'أزرق فاتح',
+  'Dark Green':'أخضر غامق','Dark Brown':'بني غامق','Sandy':'رملي',
+  // ── NSFW (missing from AR) ──
+  'See-through':'شفاف','No Bra':'بلا حمالة','Swimwear':'ملابس سباحة','Micro Bikini':'بيكيني صغير',
+  'Micro Skirt':'تنورة مايكرو','Panties Visible':'ملابس داخلية ظاهرة','Panty Shot':'لقطة داخلية',
+  'Skirt Lifted':'تنورة مرفوعة','Upskirt':'تحت التنورة','Topless':'بلا قميص',
+  'Naked':'عارية','Nude':'عارٍ','Nude Macro':'تصوير كامل','Lingerie':'لانجري',
+  'Collar & Leash':'طوق وقيد','Tied Up':'مقيد','Handcuffs/BDSM':'أصفاد',
+  'Spread Legs':'أرجل مفتوحة','On All Fours':'على الأربع','Self-Touching':'لمس الذات',
+  'Fingering':'إصبع','Crotch Shot':'لقطة منتصف','Between Legs':'بين الأرجل',
+  'Erect Nipples':'حلمات منتصبة',
+  'Cum':'سائل','Cum on Face':'على الوجه','Cum on Body':'على الجسم','Cum Inside':'داخلي',
+  'Urine/Squirt':'بول','Vaginal Fluid':'سائل أنثوي','Anal Fluid':'سائل خلفي',
+  'Milk/Lactation':'حليب','Semen Stain':'بقعة','Urine Stain':'بقعة بول','Fecal Stain':'بقعة برازية',
+  'Feces (Scat)':'برازي',
+  'Shower':'دوش','Bathroom':'حمام','Onsen Bath':'حمام أونسن','Hotel Room':'غرفة فندقية',
+  'Locker Room':'غرفة تبديل','In Bed':'في السرير','Sex Dungeon':'غرفة مظلمة',
+  'Public Outdoor':'خارجي عام','Adult Club':'نادي بالغين',
+  'Closeup Breasts':'تكبير الصدر','Closeup Nipples':'تكبير الحلمات',
+  'Closeup Vagina':'تكبير أنثوي','Closeup Anus':'تكبير خلفي','Closeup Penis':'تكبير ذكوري',
+  'Naked':'عارية','Nude Macro':'تصوير كامل',
+  // ── Other missing ──
+  'None':'لا شيء','Chibi':'تشيبي',
+  'Slim Waist':'خصر رفيع','Big Butt':'مؤخرة كبيرة','Thick Thighs':'فخذان سميكتان',
+  'Curvy Hips':'وركان عريضان','Small Breasts':'صدر صغير','Large Breasts':'صدر كبير',
+  'Huge Breasts':'صدر ضخم',
+  'Hammer':'مطرقة','Fishing Rod':'قضيب صيد',
+  "Bird's Eye":'منظر علوي',
   // ── Camera Angles ──
   "Bird's Eye":'عين الطير','Side Profile':'بروفايل جانبي','Over Shoulder':'فوق الكتف',
 };
@@ -4270,7 +4470,60 @@ OPT_LABELS.ja = {
   'Penis (Male)':'男性器','Vagina':'女性器','Anus':'肛門','Female Discharge':'女性の分泌物',
   'Missionary':'正常位','Cowgirl':'騎乗位','Reverse Cowgirl':'逆騎乗位','Doggy Style':'後背位',
   'Oral':'オーラル','Anal':'アナル','Gangbang':'乱交','Glory Hole':'グローリーホール',
-  // Clothing items
+  // ── Clothing Condition ──
+  'Wet':'濡れ','Soaked':'びしょ濡れ','Torn':'破れ','Dirty':'汚れ','Muddy':'泥まみれ',
+  'Blood-Stained':'血まみれ','Burnt':'焦げ','Wrinkled':'しわ','Disheveled':'乱れ',
+  // ── NSFW Clothing ──
+  'Bunny Suit':'バニースーツ','Nurse Outfit':'ナース服','French Maid':'フレンチメイド',
+  'Cheerleader':'チアリーダー','Police Costume':'ポリス衣装',
+  'Fishnet Top':'フィッシュネットトップ','Fishnet Stockings':'フィッシュネットストッキング',
+  'Cutout Top':'カットアウトトップ','Micro Crop Top':'マイクロクロップ','Exposed Midriff Top':'へそ出しトップ',
+  'Open Back Top':'バックレストップ','Sheer Top':'シアートップ','Strapless Bra Top':'ストラップレスブラ',
+  'Tiny Top':'タイニートップ','Garter Belt':'ガーターベルト',
+  'Thong':'Tバック','Micro Miniskirt':'マイクロミニ','Slit Skirt':'スリットスカート',
+  'Booty Shorts':'ブーティーショーツ','Lace Shorts':'レースショーツ','Crotchless Shorts':'クロッチレス',
+  'Lingerie':'ランジェリー','See-through':'シースルー','No Bra':'ノーブラ',
+  'Swimwear':'水着','Micro Bikini':'マイクロビキニ','Bikini':'ビキニ',
+  'Micro Skirt':'マイクロスカート','Panties Visible':'パンツ見え','Panty Shot':'パンチラ',
+  'Skirt Lifted':'スカートめくり','Upskirt':'アップスカート','Topless':'トップレス',
+  'Naked':'裸','Nude':'ヌード','Nude Macro':'ヌードマクロ',
+  'Collar & Leash':'首輪とリード','Tied Up':'縛られ','Handcuffs/BDSM':'手錠',
+  // ── NSFW Body ──
+  'Slim Waist':'細いウエスト','Big Butt':'大きなお尻','Thick Thighs':'太もも',
+  'Curvy Hips':'丸いヒップ','Small Breasts':'小さな胸','Large Breasts':'大きな胸',
+  'Huge Breasts':'巨乳','Erect Nipples':'勃起した乳首',
+  // ── NSFW Poses ──
+  'Spread Legs':'開脚','On All Fours':'四つん這い','Self-Touching':'自己愛撫',
+  'Fingering':'指で','Crotch Shot':'クロッチショット','Between Legs':'股間',
+  // ── NSFW Fluids ──
+  'Cum':'精液','Cum on Face':'顔射','Cum on Body':'体射','Cum Inside':'中出し',
+  'Urine/Squirt':'尿/潮吹き','Vaginal Fluid':'愛液','Anal Fluid':'アナル液',
+  'Milk/Lactation':'母乳','Semen Stain':'精液染み','Urine Stain':'尿染み',
+  'Fecal Stain':'便染み','Feces (Scat)':'スカトロ',
+  // ── NSFW Environments ──
+  'Shower':'シャワー','Bathroom':'バスルーム','Onsen Bath':'温泉風呂','Hotel Room':'ホテルの部屋',
+  'Locker Room':'ロッカールーム','In Bed':'ベッドで','Sex Dungeon':'ダンジョン',
+  'Public Outdoor':'屋外公共','Adult Club':'アダルトクラブ',
+  // ── NSFW Shots ──
+  'Closeup Breasts':'胸アップ','Closeup Nipples':'乳首アップ',
+  'Closeup Vagina':'女性器アップ','Closeup Anus':'肛門アップ','Closeup Penis':'男性器アップ',
+  // ── Colors missing ──
+  'Beige':'ベージュ','Gray':'グレー','Light Gray':'ライトグレー','Dark Gray':'ダークグレー',
+  'Crimson':'クリムゾン','Maroon':'マルーン','Orange':'オレンジ','Yellow':'黄色',
+  'Olive':'オリーブ','Hot Pink':'ホットピンク','Sky Blue':'スカイブルー','Light Blue':'ライトブルー',
+  'Dark Green':'ダークグリーン','Dark Brown':'ダークブラウン','Sandy':'サンディ',
+  // ── Body (missing) ──
+  'None':'なし','Chibi':'ちびキャラ',
+  // ── Props/Other ──
+  'Hammer':'ハンマー','Fishing Rod':'釣竿',
+  'Wet/Soaked':'濡れ/びしょ濡れ',
+  // ── Clothing Condition ──
+  'Plaid':'プレイド',
+  // ── Sex Toys ──
+  'Sex Toy':'大人のおもちゃ','Dildo':'ディルド','Vibrator':'バイブ','Anal Plug':'アナルプラグ',
+  // ── Baby/Hygiene items ──
+  'Diaper (Baby)':'おむつ（赤ちゃん）','Female Diaper':'女性用おむつ','Sanitary Pad':'生理用品',
+  // ── Striped already in JA ──
   'Striped':'ストライプ',
 };
 
@@ -4432,6 +4685,8 @@ attachHairEyePopups();
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
+        // Load character library from Firestore
+        loadCharLibFromCloud(_uid);
       } else {
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
@@ -4496,6 +4751,32 @@ attachHairEyePopups();
       else if(valid.length) toast(`☁️ Loaded ${valid.length} favourites`);
     } catch(e){
       console.warn('loadFavsFromCloud error:', e);
+    }
+  }
+
+  // ── Load character library from Firestore → merge with local ──
+  async function loadCharLibFromCloud(uid){
+    if(!window._fbCharLib) return;
+    try {
+      const cloud = await window._fbCharLib.load(uid);
+      if(!cloud.length) return;
+      // Merge: cloud entries take priority, avoid duplicates by id
+      const local = typeof csLibrary !== 'undefined' ? csLibrary : [];
+      const localIds = new Set(local.map(function(e){ return String(e.id); }));
+      const toAdd = cloud.filter(function(e){ return !localIds.has(String(e.id)); });
+      if(toAdd.length){
+        // csLibrary is defined in char-slots.js
+        if(typeof csLibrary !== 'undefined'){
+          csLibrary = cloud.concat(local.filter(function(e){
+            return !cloud.some(function(c){ return String(c.id)===String(e.id); });
+          }));
+          localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+          if(typeof csRenderLibrary === 'function') csRenderLibrary();
+        }
+        toast('☁️ Loaded ' + cloud.length + ' characters from cloud');
+      }
+    } catch(e){
+      console.warn('loadCharLibFromCloud error:', e);
     }
   }
 
