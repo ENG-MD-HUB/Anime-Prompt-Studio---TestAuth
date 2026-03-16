@@ -2076,9 +2076,6 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
 .pp-load-btn:disabled{opacity:.35;cursor:not-allowed;}
 .pp-del-btn{width:36px;height:36px;border-radius:100px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#f87171;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.78rem;transition:all .18s;flex-shrink:0;}
 .pp-del-btn:hover{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);}
-.pp-sync-btn{width:36px;height:36px;border-radius:100px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.22);color:var(--p);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.82rem;transition:all .18s;flex-shrink:0;}
-.pp-sync-btn:hover{background:rgba(99,102,241,.18);border-color:rgba(99,102,241,.4);}
-.pp-sync-btn:disabled{opacity:.4;cursor:not-allowed;}
 
 /* Top accent band */
 .pp-card-band{height:5px;}

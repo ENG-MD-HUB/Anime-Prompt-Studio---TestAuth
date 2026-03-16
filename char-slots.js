@@ -564,72 +564,7 @@ function csLibDelete(id){
   csToast('Deleted','ok');
 }
 
-/* ══════════════════════════════════════════════════════════
-   CLOUD SYNC — called manually (e.g. from a sync button)
-   Pushes all local unsynced entries to Firestore.
-   On page load (after login) the cloud is pulled automatically.
-══════════════════════════════════════════════════════════ */
-window.csCloudSync = async function(){
-  if(!window._currentUser){
-    if(typeof showLoginPrompt==='function') showLoginPrompt();
-    else if(typeof toast==='function') toast('🔒 Sign in to sync your characters');
-    return;
-  }
-  if(!window._fbCharLib){
-    if(typeof toast==='function') toast('❌ Firebase not ready yet');
-    return;
-  }
 
-  var uid = window._currentUser.uid;
-  var unsynced = csLibrary.filter(function(e){ return !e._docId; });
-
-  if(!unsynced.length){
-    if(typeof toast==='function') toast('✅ All characters already synced');
-    return;
-  }
-
-  /* Show spinner state on the sync button */
-  var syncBtn = document.getElementById('csSyncBtn');
-  if(syncBtn){
-    syncBtn.disabled = true;
-    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-  }
-
-  var ok = 0, fail = 0;
-  for(var i = 0; i < unsynced.length; i++){
-    var entry = unsynced[i];
-    try {
-      /* addDoc returns a ref — we need the _docId to avoid duplicates next time */
-      var ref = await window._fbCharLib.saveAndGetRef(uid, {
-        id:       entry.id,
-        name:     entry.name,
-        gender:   entry.gender || null,
-        date:     entry.date,
-        slotData: JSON.stringify(entry.slot)
-      });
-      /* Mark local entry as synced */
-      var local = csLibrary.find(function(e){ return e.id === entry.id; });
-      if(local && ref) local._docId = ref;
-      ok++;
-    } catch(e){
-      console.error('csCloudSync entry failed:', entry.name, e);
-      fail++;
-    }
-  }
-
-  localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-  csRenderLibrary();
-
-  if(syncBtn){
-    syncBtn.disabled = false;
-    syncBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>';
-  }
-
-  if(typeof toast==='function'){
-    if(fail === 0) toast('☁️ Synced '+ok+' character'+(ok>1?'s':'')+' to cloud ✅');
-    else           toast('☁️ Synced '+ok+', failed '+fail,'warn');
-  }
-};
 
 function csRenderLibrary(){
   var list = document.getElementById('csLibList'); if(!list) return;
@@ -1114,10 +1049,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
   if(closeBtn) closeBtn.addEventListener('click', closePassportLibrary);
   if(overlay)  overlay.addEventListener('click',  function(e){ if(e.target===overlay) closePassportLibrary(); });
-
-  /* Sync button */
-  var syncBtn = document.getElementById('csSyncBtn');
-  if(syncBtn) syncBtn.addEventListener('click', function(){ window.csCloudSync && window.csCloudSync(); });
 
   if(prevBtn) prevBtn.addEventListener('click', function(){ ppGoTo(_ppIndex-1); });
   if(nextBtn) nextBtn.addEventListener('click', function(){ ppGoTo(_ppIndex+1); });
