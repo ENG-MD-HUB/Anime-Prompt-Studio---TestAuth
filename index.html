@@ -864,6 +864,44 @@
     </div>
   </div>
 </div>
+<!-- ═══ SAVE CHARACTER DIALOG ═══ -->
+<div class="sc-overlay" id="scOverlay">
+  <div class="sc-dialog">
+    <div class="sc-dialog-ttl"><i class="fas fa-star"></i> Save Character</div>
+    <div class="sc-dialog-sub">Enter a name for this character to save to your library.</div>
+    <input class="sc-dialog-inp" id="scNameInput" placeholder="e.g. Sakura, Zephyr, Unit-07…" maxlength="32" autocomplete="off">
+    <div class="sc-dialog-row">
+      <button class="sc-dialog-cancel" id="scCancel">Cancel</button>
+      <button class="sc-dialog-save" id="scSave" onclick="console.log('scSave clicked directly')"><i class="fas fa-star"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PASSPORT LIBRARY OVERLAY ═══ -->
+<div class="pp-overlay" id="ppOverlay">
+  <div class="pp-modal">
+    <div class="pp-hd">
+      <div class="pp-title"><i class="fas fa-address-card"></i> Character Library</div>
+      <button class="pp-close" id="ppClose"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="pp-empty" id="ppEmpty" style="display:none">
+      <i class="fas fa-user-slash"></i>
+      <span>No saved characters yet.<br>Build a character and click the ★ star to save.</span>
+    </div>
+    <div class="pp-viewport" id="ppViewport">
+      <div class="pp-track" id="ppTrack"></div>
+    </div>
+    <div class="pp-nav" id="ppNav">
+      <button class="pp-arr pp-prev" id="ppPrev"><i class="fas fa-chevron-left"></i></button>
+      <div class="pp-dots" id="ppDots"></div>
+      <button class="pp-arr pp-next" id="ppNext"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="pp-actions">
+      <button class="pp-load-btn" id="ppLoadBtn"><i class="fas fa-arrow-down"></i> Load Character</button>
+      <button class="pp-del-btn"  id="ppDelBtn"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>
+</div>
 
 <script type="module">
   import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
@@ -973,44 +1011,6 @@
 <script src="app.js"></script>
 <script src="char-slots.js"></script>
 
-<!-- ═══ SAVE CHARACTER DIALOG ═══ -->
-<div class="sc-overlay" id="scOverlay">
-  <div class="sc-dialog">
-    <div class="sc-dialog-ttl"><i class="fas fa-star"></i> Save Character</div>
-    <div class="sc-dialog-sub">Enter a name for this character to save to your library.</div>
-    <input class="sc-dialog-inp" id="scNameInput" placeholder="e.g. Sakura, Zephyr, Unit-07…" maxlength="32" autocomplete="off">
-    <div class="sc-dialog-row">
-      <button class="sc-dialog-cancel" id="scCancel">Cancel</button>
-      <button class="sc-dialog-save" id="scSave" onclick="console.log('scSave clicked directly')"><i class="fas fa-star"></i> Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ PASSPORT LIBRARY OVERLAY ═══ -->
-<div class="pp-overlay" id="ppOverlay">
-  <div class="pp-modal">
-    <div class="pp-hd">
-      <div class="pp-title"><i class="fas fa-address-card"></i> Character Library</div>
-      <button class="pp-close" id="ppClose"><i class="fas fa-xmark"></i></button>
-    </div>
-    <div class="pp-empty" id="ppEmpty" style="display:none">
-      <i class="fas fa-user-slash"></i>
-      <span>No saved characters yet.<br>Build a character and click the ★ star to save.</span>
-    </div>
-    <div class="pp-viewport" id="ppViewport">
-      <div class="pp-track" id="ppTrack"></div>
-    </div>
-    <div class="pp-nav" id="ppNav">
-      <button class="pp-arr pp-prev" id="ppPrev"><i class="fas fa-chevron-left"></i></button>
-      <div class="pp-dots" id="ppDots"></div>
-      <button class="pp-arr pp-next" id="ppNext"><i class="fas fa-chevron-right"></i></button>
-    </div>
-    <div class="pp-actions">
-      <button class="pp-load-btn" id="ppLoadBtn"><i class="fas fa-arrow-down"></i> Load Character</button>
-      <button class="pp-del-btn"  id="ppDelBtn"><i class="fas fa-trash"></i></button>
-    </div>
-  </div>
-</div>
 
 <div id="hcpPopup" style="display:none;position:fixed;z-index:99999;"></div>
 
