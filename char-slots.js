@@ -519,56 +519,22 @@ function csLibSave(charIdx){
   }
   if(!name){ csToast('Enter a character name first','warn'); return; }
   var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
-  if(duplicate){ csToast('Name "'+name+'" already exists in library','warn'); return; }
+  if(duplicate){ csToast('Name "'+name+'" already exists','warn'); return; }
   if(!charSlots[charIdx]) charSlots[charIdx] = csEmptySlot();
   charSlots[charIdx]._name = name;
   if(charIdx === activeChar) S._name = name;
   csSave(charIdx);
   var entry = {
-    id: Date.now(),
-    name: name,
+    id: Date.now(), name: name,
     gender: S.characters ? S.characters[charIdx] : null,
     slot: JSON.parse(JSON.stringify(charSlots[charIdx]||csEmptySlot())),
     date: new Date().toLocaleDateString()
   };
   csLibrary.unshift(entry);
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-
+  csToast('✓ Saved "'+name+'"','ok');
   csRenderTabs();
   csRenderLibrary();
-
-  /* ── Cloud sync ── */
-  var uid = window._currentUser ? window._currentUser.uid : null;
-  if(!uid){
-    csToast('✓ Saved "'+name+'" (login to sync)','ok');
-  } else {
-    /* Wait for Firebase module to finish loading (max 3s) */
-    var _attempts = 0;
-    function _trySyncCharLib(){
-      if(window._fbCharLib){
-        var cloudEntry = {
-          id:       entry.id,
-          name:     entry.name,
-          gender:   entry.gender || null,
-          date:     entry.date,
-          slotData: JSON.stringify(entry.slot)
-        };
-        window._fbCharLib.save(uid, cloudEntry).then(function(){
-          csToast('✓ Saved "'+name+'" ☁️','ok');
-        }).catch(function(e){
-          console.error('charLib cloud save:', e);
-          csToast('⚠️ Cloud sync failed: '+(e.message||e.code||'error'),'warn');
-        });
-      } else if(_attempts++ < 15){
-        setTimeout(_trySyncCharLib, 200);
-      } else {
-        csToast('✓ Saved "'+name+'" (offline)','ok');
-      }
-    }
-    _trySyncCharLib();
-    return;
-  }
-  csToast('✓ Saved "'+name+'"','ok');
 }
 
 function csLibLoad(entry, charIdx){
@@ -747,21 +713,60 @@ document.addEventListener('DOMContentLoaded', function(){
   var scSave    = document.getElementById('scSave');
   var scCancel  = document.getElementById('scCancel');
 
-  function _doSave(){
+  async function _doSave(){
     var name = scInp ? scInp.value.trim() : '';
     if(!name){ if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); } return; }
+
+    /* Check for duplicate name */
+    var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
+    if(duplicate){ csToast('Name "'+name+'" already exists','warn'); return; }
+
     /* Write name into slot */
     if(!charSlots[_scTargetIdx]) charSlots[_scTargetIdx] = csEmptySlot();
     charSlots[_scTargetIdx]._name = name;
     if(_scTargetIdx === activeChar) S._name = name;
-    /* Also update the card input so it shows immediately */
+
+    /* Update card input */
     var row = document.getElementById('charCardsRow');
     if(row){
       var card = row.querySelector('[data-card-idx="'+_scTargetIdx+'"]');
       if(card){ var cin = card.querySelector('.c-name-input'); if(cin) cin.value = name; }
     }
     closeSaveCharDialog();
-    csLibSave(_scTargetIdx);
+
+    /* Build entry */
+    csSave(_scTargetIdx);
+    var entry = {
+      id:     Date.now(),
+      name:   name,
+      gender: S.characters ? S.characters[_scTargetIdx] : null,
+      slot:   JSON.parse(JSON.stringify(charSlots[_scTargetIdx]||csEmptySlot())),
+      date:   new Date().toLocaleDateString()
+    };
+    csLibrary.unshift(entry);
+    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+    csRenderTabs();
+    csRenderLibrary();
+
+    /* ── Sync to Firestore FIRST (same pattern as Favourites) ── */
+    var user = window._currentUser;
+    if(user && window._fbCharLib){
+      try {
+        await window._fbCharLib.save(user.uid, {
+          id:       entry.id,
+          name:     entry.name,
+          gender:   entry.gender || null,
+          date:     entry.date,
+          slotData: JSON.stringify(entry.slot)
+        });
+        csToast('✓ Saved "'+name+'" ☁️','ok');
+      } catch(e){
+        console.error('charLib save:', e);
+        csToast('✓ Saved "'+name+'" (sync failed)','ok');
+      }
+    } else {
+      csToast('✓ Saved "'+name+'"'+(user?'':' — login to sync'),'ok');
+    }
   }
 
   if(scSave) scSave.addEventListener('click', _doSave);
