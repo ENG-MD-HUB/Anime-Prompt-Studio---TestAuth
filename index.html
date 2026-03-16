@@ -921,11 +921,11 @@
   };
 
   window._fbCharLib = {
-    /* Save character — photo goes to Storage, rest to Firestore */
+    /* Save character — slot serialized as string, photo goes to Storage */
     save: async (uid, entry) => {
       const docRef = doc(db, 'users', uid, 'charLib', String(entry.id));
-      /* Strip base64 photo from Firestore payload */
-      const { photo: photoBase64, ...entryNoPhoto } = entry;
+      /* Strip base64 photo — never store in Firestore */
+      const { photo: photoBase64, slot, ...rest } = entry;
       let photoURL = entry.photoURL || null;
 
       /* Upload photo to Storage if base64 present */
@@ -935,7 +935,15 @@
         photoURL = await getDownloadURL(storageRef);
       }
 
-      await setDoc(docRef, { ...entryNoPhoto, photoURL, updatedAt: serverTimestamp() });
+      /* slotData may already be a string (from char-slots), or we stringify it */
+      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
+
+      await setDoc(docRef, {
+        ...rest,
+        slotData,
+        photoURL: photoURL || null,
+        updatedAt: serverTimestamp()
+      });
       return photoURL;
     },
 
@@ -944,9 +952,11 @@
       const ref  = collection(db, 'users', uid, 'charLib');
       const q    = query(ref, orderBy('updatedAt', 'desc'));
       const snap = await getDocs(q);
-      /* photoURL replaces base64 photo on other devices */
       return snap.docs.map(d => {
         const data = d.data();
+        /* Deserialize slotData back to object */
+        try { data.slot = JSON.parse(data.slotData || '{}'); } catch(e){ data.slot = {}; }
+        /* Use Storage URL as photo */
         if(data.photoURL) data.photo = data.photoURL;
         return data;
       });
@@ -958,7 +968,7 @@
       try {
         const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
         await deleteObject(storageRef);
-      } catch(e){ /* photo may not exist — ignore */ }
+      } catch(e){ /* photo may not exist */ }
     },
 
     /* Upload/update photo for existing entry */

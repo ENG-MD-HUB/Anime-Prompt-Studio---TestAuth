@@ -511,7 +511,20 @@ function csLibSave(charIdx){
   /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
   if(uid && window._fbCharLib){
-    window._fbCharLib.save(uid, entry).catch(function(e){ console.warn('charLib save:', e); });
+    /* Serialize slot as JSON string — avoids Firestore nested object limits */
+    var cloudEntry = {
+      id: entry.id,
+      name: entry.name,
+      gender: entry.gender,
+      date: entry.date,
+      slotData: JSON.stringify(entry.slot)  /* slot as string, not nested object */
+    };
+    window._fbCharLib.save(uid, cloudEntry).then(function(){
+      /* success — toast already shown */
+    }).catch(function(e){
+      console.error('charLib save error:', e);
+      csToast('⚠️ Cloud save failed: ' + (e.message||e.code||'unknown'), 'warn');
+    });
   }
 
   csToast('✓ Saved "'+name+'"'+(uid?' ☁️':''),'ok');
