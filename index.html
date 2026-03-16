@@ -872,6 +872,8 @@
                                                     from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp }
                                                     from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+  import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
+                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey:            "AIzaSyAU0hfv8sM6PlFqeJgHh7upYSkMEm2ilpc",
@@ -887,6 +889,7 @@
   const analytics = getAnalytics(app);
   const auth      = getAuth(app);
   const db        = getFirestore(app);
+  const storage   = getStorage(app);
   const provider  = new GoogleAuthProvider();
 
   // ── Expose to window so app.js can call them ──
@@ -897,23 +900,19 @@
   };
 
   window._fbFavs = {
-    // Save single favourite to Firestore
     save: async (uid, fav) => {
       const ref = collection(db, 'users', uid, 'favourites');
       await addDoc(ref, { ...fav, createdAt: serverTimestamp() });
     },
-    // Load all favourites ordered by newest first
     load: async (uid) => {
       const ref  = collection(db, 'users', uid, 'favourites');
       const q    = query(ref, orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
     },
-    // Delete single favourite by Firestore doc id
     del: async (uid, docId) => {
       await deleteDoc(doc(db, 'users', uid, 'favourites', docId));
     },
-    // Delete all favourites
     clear: async (uid) => {
       const ref  = collection(db, 'users', uid, 'favourites');
       const snap = await getDocs(ref);
@@ -922,18 +921,54 @@
   };
 
   window._fbCharLib = {
+    /* Save character — photo goes to Storage, rest to Firestore */
     save: async (uid, entry) => {
-      const ref = doc(db, 'users', uid, 'charLib', String(entry.id));
-      await setDoc(ref, { ...entry, updatedAt: serverTimestamp() });
+      const docRef = doc(db, 'users', uid, 'charLib', String(entry.id));
+      /* Strip base64 photo from Firestore payload */
+      const { photo: photoBase64, ...entryNoPhoto } = entry;
+      let photoURL = entry.photoURL || null;
+
+      /* Upload photo to Storage if base64 present */
+      if(photoBase64 && photoBase64.startsWith('data:')){
+        const storageRef = sRef(storage, `users/${uid}/charLib/${entry.id}/photo`);
+        await uploadString(storageRef, photoBase64, 'data_url');
+        photoURL = await getDownloadURL(storageRef);
+      }
+
+      await setDoc(docRef, { ...entryNoPhoto, photoURL, updatedAt: serverTimestamp() });
+      return photoURL;
     },
+
+    /* Load all characters */
     load: async (uid) => {
       const ref  = collection(db, 'users', uid, 'charLib');
       const q    = query(ref, orderBy('updatedAt', 'desc'));
       const snap = await getDocs(q);
-      return snap.docs.map(d => ({ ...d.data() }));
+      /* photoURL replaces base64 photo on other devices */
+      return snap.docs.map(d => {
+        const data = d.data();
+        if(data.photoURL) data.photo = data.photoURL;
+        return data;
+      });
     },
+
+    /* Delete character + its photo from Storage */
     del: async (uid, entryId) => {
       await deleteDoc(doc(db, 'users', uid, 'charLib', String(entryId)));
+      try {
+        const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
+        await deleteObject(storageRef);
+      } catch(e){ /* photo may not exist — ignore */ }
+    },
+
+    /* Upload/update photo for existing entry */
+    savePhoto: async (uid, entryId, photoBase64) => {
+      const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
+      await uploadString(storageRef, photoBase64, 'data_url');
+      const photoURL = await getDownloadURL(storageRef);
+      const docRef = doc(db, 'users', uid, 'charLib', String(entryId));
+      await setDoc(docRef, { photoURL, updatedAt: serverTimestamp() }, { merge: true });
+      return photoURL;
     },
   };
 </script>

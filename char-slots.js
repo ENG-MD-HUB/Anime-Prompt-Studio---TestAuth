@@ -1020,11 +1020,22 @@ document.addEventListener('DOMContentLoaded', function(){
       reader.onload = function(ev){
         var b64 = ev.target.result;
         var entry = csLibrary.find(function(c){ return c.id === entryId; });
-        if(entry){
-          entry.photo = b64;
-          localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-          openPassportLibrary(_ppTargetChar);
-          ppGoTo(_ppIndex);
+        if(!entry) return;
+
+        /* Save base64 locally */
+        entry.photo = b64;
+        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+        openPassportLibrary(_ppTargetChar);
+        ppGoTo(_ppIndex);
+
+        /* ── Sync photo to Firebase Storage ── */
+        var uid = window._currentUser ? window._currentUser.uid : null;
+        if(uid && window._fbCharLib && window._fbCharLib.savePhoto){
+          window._fbCharLib.savePhoto(uid, entryId, b64).then(function(photoURL){
+            /* Update local entry with cloud URL so next device gets it */
+            entry.photoURL = photoURL;
+            localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+          }).catch(function(err){ console.warn('Photo sync failed:', err); });
         }
       };
       reader.readAsDataURL(file);
