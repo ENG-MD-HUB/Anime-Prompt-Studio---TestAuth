@@ -486,15 +486,22 @@ window._loadCharLibFromCloud = function(uid){
   function _tryLoad(){
     if(window._fbCharLib){
       window._fbCharLib.load(uid).then(function(cloud){
-        if(!cloud || !cloud.length) return;
         var local = csLibrary || [];
-        var merged = cloud.concat(local.filter(function(e){
-          return !cloud.some(function(c){ return String(c.id)===String(e.id); });
+        /* Cloud takes priority — local entries not in cloud are appended */
+        var merged = (cloud||[]).concat(local.filter(function(e){
+          return !(cloud||[]).some(function(c){ return String(c.id)===String(e.id); });
         }));
         csLibrary = merged;
         localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
         csRenderLibrary();
-        if(typeof toast==='function') toast('☁️ Loaded '+cloud.length+' characters');
+        /* Refresh passport overlay if it's open */
+        var ppOv = document.getElementById('ppOverlay');
+        if(ppOv && ppOv.classList.contains('open') && typeof openPassportLibrary==='function'){
+          openPassportLibrary();
+        }
+        if(cloud && cloud.length){
+          if(typeof toast==='function') toast('☁️ Loaded '+cloud.length+' character'+(cloud.length>1?'s':''));
+        }
       }).catch(function(e){
         console.error('loadCharLib:', e);
         if(typeof toast==='function') toast('❌ CharLib load failed: '+(e.message||e.code||e));
@@ -778,6 +785,12 @@ document.addEventListener('DOMContentLoaded', function(){
   document.addEventListener('click', function(e){
     var btn = e.target.closest('.idc-save-btn');
     if(!btn) return;
+    /* Require login to save to cloud */
+    if(!window._currentUser){
+      if(typeof showLoginPrompt === 'function') showLoginPrompt();
+      else if(typeof toast === 'function') toast('🔒 Sign in to save characters to your library');
+      return;
+    }
     var idx = parseInt(btn.getAttribute('data-idx'));
     if(!isNaN(idx)) openSaveCharDialog(idx);
   });

@@ -4682,6 +4682,20 @@ attachHairEyePopups();
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
+        // Load character library from Firestore
+        if(typeof window._loadCharLibFromCloud === 'function'){
+          window._loadCharLibFromCloud(_uid);
+        } else {
+          // char-slots.js may not be ready yet — wait briefly
+          var _clAttempts = 0;
+          (function _tryLoadCharLib(){
+            if(typeof window._loadCharLibFromCloud === 'function'){
+              window._loadCharLibFromCloud(_uid);
+            } else if(++_clAttempts < 20){
+              setTimeout(_tryLoadCharLib, 300);
+            }
+          })();
+        }
       } else {
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
