@@ -898,6 +898,7 @@
     </div>
     <div class="pp-actions">
       <button class="pp-load-btn" id="ppLoadBtn"><i class="fas fa-arrow-down"></i> Load Character</button>
+      <button class="pp-sync-btn" id="csSyncBtn" title="Sync all characters to cloud"><i class="fas fa-cloud-arrow-up"></i></button>
       <button class="pp-del-btn"  id="ppDelBtn"><i class="fas fa-trash"></i></button>
     </div>
   </div>
@@ -972,6 +973,21 @@
         const photoURL = await getDownloadURL(storageRef);
         await setDoc(docRef, { photoURL }, { merge: true });
       }
+    },
+
+    /* Save and return the new Firestore doc ID */
+    saveAndGetRef: async (uid, entry) => {
+      const { photo: photoBase64, slot, ...rest } = entry;
+      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
+      const ref = collection(db, 'users', uid, 'charLib');
+      const docRef = await addDoc(ref, { ...rest, slotData, photoURL: null, createdAt: serverTimestamp() });
+      if(photoBase64 && photoBase64.startsWith('data:')){
+        const storageRef = sRef(storage, `users/${uid}/charLib/${entry.id}/photo`);
+        await uploadString(storageRef, photoBase64, 'data_url');
+        const photoURL = await getDownloadURL(storageRef);
+        await setDoc(docRef, { photoURL }, { merge: true });
+      }
+      return docRef.id;
     },
 
     /* Load all — same pattern as _fbFavs */
