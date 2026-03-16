@@ -554,16 +554,82 @@ function csLibDelete(id){
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
-  /* ── Cloud sync — use _docId (Firestore doc ID) ── */
+  /* ── Cloud delete — only if entry was previously synced ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
-  if(uid && window._fbCharLib && entry){
-    var docId = entry._docId || String(id);
-    window._fbCharLib.del(uid, docId).catch(function(e){ console.warn('charLib del:', e); });
+  if(uid && window._fbCharLib && entry && entry._docId){
+    window._fbCharLib.del(uid, entry._docId).catch(function(e){ console.warn('charLib del:', e); });
   }
 
   csRenderLibrary();
   csToast('Deleted','ok');
 }
+
+/* ══════════════════════════════════════════════════════════
+   CLOUD SYNC — called manually (e.g. from a sync button)
+   Pushes all local unsynced entries to Firestore.
+   On page load (after login) the cloud is pulled automatically.
+══════════════════════════════════════════════════════════ */
+window.csCloudSync = async function(){
+  if(!window._currentUser){
+    if(typeof showLoginPrompt==='function') showLoginPrompt();
+    else if(typeof toast==='function') toast('🔒 Sign in to sync your characters');
+    return;
+  }
+  if(!window._fbCharLib){
+    if(typeof toast==='function') toast('❌ Firebase not ready yet');
+    return;
+  }
+
+  var uid = window._currentUser.uid;
+  var unsynced = csLibrary.filter(function(e){ return !e._docId; });
+
+  if(!unsynced.length){
+    if(typeof toast==='function') toast('✅ All characters already synced');
+    return;
+  }
+
+  /* Show spinner state on the sync button */
+  var syncBtn = document.getElementById('csSyncBtn');
+  if(syncBtn){
+    syncBtn.disabled = true;
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  }
+
+  var ok = 0, fail = 0;
+  for(var i = 0; i < unsynced.length; i++){
+    var entry = unsynced[i];
+    try {
+      /* addDoc returns a ref — we need the _docId to avoid duplicates next time */
+      var ref = await window._fbCharLib.saveAndGetRef(uid, {
+        id:       entry.id,
+        name:     entry.name,
+        gender:   entry.gender || null,
+        date:     entry.date,
+        slotData: JSON.stringify(entry.slot)
+      });
+      /* Mark local entry as synced */
+      var local = csLibrary.find(function(e){ return e.id === entry.id; });
+      if(local && ref) local._docId = ref;
+      ok++;
+    } catch(e){
+      console.error('csCloudSync entry failed:', entry.name, e);
+      fail++;
+    }
+  }
+
+  localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+  csRenderLibrary();
+
+  if(syncBtn){
+    syncBtn.disabled = false;
+    syncBtn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>';
+  }
+
+  if(typeof toast==='function'){
+    if(fail === 0) toast('☁️ Synced '+ok+' character'+(ok>1?'s':'')+' to cloud ✅');
+    else           toast('☁️ Synced '+ok+', failed '+fail,'warn');
+  }
+};
 
 function csRenderLibrary(){
   var list = document.getElementById('csLibList'); if(!list) return;
@@ -711,11 +777,19 @@ document.addEventListener('DOMContentLoaded', function(){
   var scCancel = document.getElementById('scCancel');
   var scOverlay= document.getElementById('scOverlay');
 
-  /* ── Main save action — mirrors saveFavBtn pattern exactly ── */
+  /* ── Main save action — saves to cloud immediately if logged in ── */
   async function _doSave(){
     var name = scInp ? scInp.value.trim() : '';
     if(!name){
       if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); }
+      return;
+    }
+
+    /* Require login */
+    if(!window._currentUser){
+      closeSaveCharDialog();
+      if(typeof showLoginPrompt==='function') showLoginPrompt();
+      else if(typeof toast==='function') toast('🔒 Sign in to save characters to your account');
       return;
     }
 
@@ -748,31 +822,30 @@ document.addEventListener('DOMContentLoaded', function(){
       date:   new Date().toLocaleDateString()
     };
 
-    /* Save locally first */
+    /* Save locally first (instant UI feedback) */
     csLibrary.unshift(entry);
     if(csLibrary.length > 50) csLibrary.pop();
     localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
     csRenderTabs();
     csRenderLibrary();
+    csToast('⭐ Saving to cloud…','ok');
 
-    /* ── Cloud sync — exactly like saveFavBtn ── */
-    if(!window._currentUser){
-      csToast('✓ Saved "'+name+'" — sign in to sync','ok');
-      return;
-    }
+    /* ── Push to Firestore immediately ── */
     try {
-      await window._fbCharLib.save(window._currentUser.uid, {
+      var docId = await window._fbCharLib.saveAndGetRef(window._currentUser.uid, {
         id:       entry.id,
         name:     entry.name,
         gender:   entry.gender || null,
         date:     entry.date,
         slotData: JSON.stringify(entry.slot)
       });
+      /* Store docId locally so delete works correctly */
+      entry._docId = docId;
       localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-      csToast('⭐ Saved & synced "'+name+'" ☁️','ok');
+      csToast('☁️ Saved "'+name+'" to your account ✅','ok');
     } catch(e){
       console.error('charLib cloud save:', e);
-      csToast('✓ Saved "'+name+'" (cloud failed)','ok');
+      csToast('⚠️ Saved locally — cloud failed','ok');
     }
   }
 
@@ -781,16 +854,10 @@ document.addEventListener('DOMContentLoaded', function(){
   if(scOverlay) scOverlay.addEventListener('click', function(e){ if(e.target===scOverlay) closeSaveCharDialog(); });
   if(scInp)     scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
 
-  /* Star button on character cards */
+  /* Star button on character cards — local save, no login required */
   document.addEventListener('click', function(e){
     var btn = e.target.closest('.idc-save-btn');
     if(!btn) return;
-    /* Require login to save to cloud */
-    if(!window._currentUser){
-      if(typeof showLoginPrompt === 'function') showLoginPrompt();
-      else if(typeof toast === 'function') toast('🔒 Sign in to save characters to your library');
-      return;
-    }
     var idx = parseInt(btn.getAttribute('data-idx'));
     if(!isNaN(idx)) openSaveCharDialog(idx);
   });
@@ -1047,6 +1114,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   if(closeBtn) closeBtn.addEventListener('click', closePassportLibrary);
   if(overlay)  overlay.addEventListener('click',  function(e){ if(e.target===overlay) closePassportLibrary(); });
+
+  /* Sync button */
+  var syncBtn = document.getElementById('csSyncBtn');
+  if(syncBtn) syncBtn.addEventListener('click', function(){ window.csCloudSync && window.csCloudSync(); });
 
   if(prevBtn) prevBtn.addEventListener('click', function(){ ppGoTo(_ppIndex-1); });
   if(nextBtn) nextBtn.addEventListener('click', function(){ ppGoTo(_ppIndex+1); });
