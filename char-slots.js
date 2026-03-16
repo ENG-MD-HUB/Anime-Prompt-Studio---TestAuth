@@ -707,11 +707,13 @@ function closeSaveCharDialog(){
 
 /* Intercept the existing idc-save-btn click — open our dialog instead */
 document.addEventListener('DOMContentLoaded', function(){
+  console.log('char-slots DOMContentLoaded fired');
   /* ── Save dialog logic ── */
   var scOverlay = document.getElementById('scOverlay');
   var scInp     = document.getElementById('scNameInput');
   var scSave    = document.getElementById('scSave');
   var scCancel  = document.getElementById('scCancel');
+  console.log('scSave element:', scSave, '| scOverlay:', scOverlay);
 
   async function _doSave(){
     var name = scInp ? scInp.value.trim() : '';
