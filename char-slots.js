@@ -482,26 +482,28 @@ var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
 /* ── Cloud load — called from app.js after login ── */
 window._loadCharLibFromCloud = function(uid){
-  if(!window._fbCharLib){ csToast('⚠️ Cloud not ready','warn'); return; }
-  window._fbCharLib.load(uid).then(function(cloud){
-    if(!cloud || !cloud.length){
-      csToast('☁️ No cloud characters found','warn');
-      return;
+  var _att = 0;
+  function _tryLoad(){
+    if(window._fbCharLib){
+      window._fbCharLib.load(uid).then(function(cloud){
+        if(!cloud || !cloud.length) return;
+        var local = csLibrary || [];
+        var merged = cloud.concat(local.filter(function(e){
+          return !cloud.some(function(c){ return String(c.id)===String(e.id); });
+        }));
+        csLibrary = merged;
+        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+        csRenderLibrary();
+        if(typeof toast==='function') toast('☁️ Loaded '+cloud.length+' characters');
+      }).catch(function(e){
+        console.error('loadCharLib:', e);
+        if(typeof toast==='function') toast('❌ CharLib load failed: '+(e.message||e.code||e));
+      });
+    } else if(_att++ < 20){
+      setTimeout(_tryLoad, 200);
     }
-    /* Merge: cloud wins, local fills gaps */
-    var local = csLibrary || [];
-    var merged = cloud.concat(local.filter(function(e){
-      return !cloud.some(function(c){ return String(c.id)===String(e.id); });
-    }));
-    csLibrary = merged;
-    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-    csRenderLibrary();
-    if(typeof toast === 'function') toast('☁️ Loaded ' + cloud.length + ' characters');
-    else csToast('☁️ Loaded ' + cloud.length + ' characters', 'ok');
-  }).catch(function(e){
-    console.error('loadCharLib error:', e);
-    if(typeof toast === 'function') toast('❌ Cloud load failed: '+(e.message||e.code||e));
-  });
+  }
+  _tryLoad();
 };
 
 function csLibSave(charIdx){
@@ -532,30 +534,41 @@ function csLibSave(charIdx){
   csLibrary.unshift(entry);
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
+  csRenderTabs();
+  csRenderLibrary();
+
   /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
   if(!uid){
-    csToast('☁️ Not logged in — saved locally only','warn');
-  } else if(!window._fbCharLib){
-    csToast('⚠️ Firebase not ready — saved locally only','warn');
+    csToast('✓ Saved "'+name+'" (login to sync)','ok');
   } else {
-    var cloudEntry = {
-      id:       entry.id,
-      name:     entry.name,
-      gender:   entry.gender || null,
-      date:     entry.date,
-      slotData: JSON.stringify(entry.slot)
-    };
-    window._fbCharLib.save(uid, cloudEntry).then(function(){
-      csToast('✓ Saved "'+name+'" ☁️','ok');
-    }).catch(function(e){
-      console.error('charLib cloud save failed:', e);
-      csToast('⚠️ Cloud sync failed: '+(e.message||e.code||JSON.stringify(e)),'warn');
-    });
+    /* Wait for Firebase module to finish loading (max 3s) */
+    var _attempts = 0;
+    function _trySyncCharLib(){
+      if(window._fbCharLib){
+        var cloudEntry = {
+          id:       entry.id,
+          name:     entry.name,
+          gender:   entry.gender || null,
+          date:     entry.date,
+          slotData: JSON.stringify(entry.slot)
+        };
+        window._fbCharLib.save(uid, cloudEntry).then(function(){
+          csToast('✓ Saved "'+name+'" ☁️','ok');
+        }).catch(function(e){
+          console.error('charLib cloud save:', e);
+          csToast('⚠️ Cloud sync failed: '+(e.message||e.code||'error'),'warn');
+        });
+      } else if(_attempts++ < 15){
+        setTimeout(_trySyncCharLib, 200);
+      } else {
+        csToast('✓ Saved "'+name+'" (offline)','ok');
+      }
+    }
+    _trySyncCharLib();
+    return;
   }
-
-  csRenderTabs();
-  csRenderLibrary();
+  csToast('✓ Saved "'+name+'"','ok');
 }
 
 function csLibLoad(entry, charIdx){
