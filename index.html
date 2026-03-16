@@ -921,63 +921,51 @@
   };
 
   window._fbCharLib = {
-    /* Save character — slot serialized as string, photo goes to Storage */
+    /* Save — same pattern as _fbFavs */
     save: async (uid, entry) => {
-      const docRef = doc(db, 'users', uid, 'charLib', String(entry.id));
-      /* Strip base64 photo — never store in Firestore */
       const { photo: photoBase64, slot, ...rest } = entry;
-      let photoURL = entry.photoURL || null;
-
-      /* Upload photo to Storage if base64 present */
+      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
+      const ref = collection(db, 'users', uid, 'charLib');
+      const docRef = await addDoc(ref, { ...rest, slotData, photoURL: null, createdAt: serverTimestamp() });
+      /* Upload photo to Storage if present */
       if(photoBase64 && photoBase64.startsWith('data:')){
         const storageRef = sRef(storage, `users/${uid}/charLib/${entry.id}/photo`);
         await uploadString(storageRef, photoBase64, 'data_url');
-        photoURL = await getDownloadURL(storageRef);
+        const photoURL = await getDownloadURL(storageRef);
+        await setDoc(docRef, { photoURL }, { merge: true });
       }
-
-      /* slotData may already be a string (from char-slots), or we stringify it */
-      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
-
-      await setDoc(docRef, {
-        ...rest,
-        slotData,
-        photoURL: photoURL || null,
-        updatedAt: serverTimestamp()
-      });
-      return photoURL;
     },
 
-    /* Load all characters */
+    /* Load all — same pattern as _fbFavs */
     load: async (uid) => {
       const ref  = collection(db, 'users', uid, 'charLib');
-      const q    = query(ref, orderBy('updatedAt', 'desc'));
+      const q    = query(ref, orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
       return snap.docs.map(d => {
-        const data = d.data();
-        /* Deserialize slotData back to object */
+        const data = { _docId: d.id, ...d.data() };
         try { data.slot = JSON.parse(data.slotData || '{}'); } catch(e){ data.slot = {}; }
-        /* Use Storage URL as photo */
         if(data.photoURL) data.photo = data.photoURL;
         return data;
       });
     },
 
-    /* Delete character + its photo from Storage */
-    del: async (uid, entryId) => {
-      await deleteDoc(doc(db, 'users', uid, 'charLib', String(entryId)));
+    /* Delete */
+    del: async (uid, docId) => {
+      /* docId here is the Firestore doc id (_docId), not entry.id */
+      if(!docId) return;
+      await deleteDoc(doc(db, 'users', uid, 'charLib', String(docId)));
       try {
-        const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
+        /* Try to delete photo — entry.id needed for Storage path */
+        const storageRef = sRef(storage, `users/${uid}/charLib/${docId}/photo`);
         await deleteObject(storageRef);
       } catch(e){ /* photo may not exist */ }
     },
 
-    /* Upload/update photo for existing entry */
+    /* Upload/update photo */
     savePhoto: async (uid, entryId, photoBase64) => {
       const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
       await uploadString(storageRef, photoBase64, 'data_url');
       const photoURL = await getDownloadURL(storageRef);
-      const docRef = doc(db, 'users', uid, 'charLib', String(entryId));
-      await setDoc(docRef, { photoURL, updatedAt: serverTimestamp() }, { merge: true });
       return photoURL;
     },
   };

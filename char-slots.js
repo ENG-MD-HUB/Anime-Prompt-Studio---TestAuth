@@ -480,6 +480,30 @@ function csBuildSaveBar(charIdx){
 /* ══ CHARACTER LIBRARY ══ */
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
+/* ── Cloud load — called from app.js after login ── */
+window._loadCharLibFromCloud = function(uid){
+  if(!window._fbCharLib){ csToast('⚠️ Cloud not ready','warn'); return; }
+  window._fbCharLib.load(uid).then(function(cloud){
+    if(!cloud || !cloud.length){
+      csToast('☁️ No cloud characters found','warn');
+      return;
+    }
+    /* Merge: cloud wins, local fills gaps */
+    var local = csLibrary || [];
+    var merged = cloud.concat(local.filter(function(e){
+      return !cloud.some(function(c){ return String(c.id)===String(e.id); });
+    }));
+    csLibrary = merged;
+    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+    csRenderLibrary();
+    if(typeof toast === 'function') toast('☁️ Loaded ' + cloud.length + ' characters');
+    else csToast('☁️ Loaded ' + cloud.length + ' characters', 'ok');
+  }).catch(function(e){
+    console.error('loadCharLib error:', e);
+    if(typeof toast === 'function') toast('❌ Cloud load failed: '+(e.message||e.code||e));
+  });
+};
+
 function csLibSave(charIdx){
   var name = '';
   if(charIdx === activeChar && S._name) name = S._name.trim();
@@ -545,13 +569,16 @@ function csLibLoad(entry, charIdx){
 }
 
 function csLibDelete(id){
+  /* Find entry to get _docId before filtering */
+  var entry = csLibrary.find(function(c){ return c.id === id; });
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
-  /* ── Cloud sync ── */
+  /* ── Cloud sync — use _docId (Firestore doc ID) ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
-  if(uid && window._fbCharLib){
-    window._fbCharLib.del(uid, id).catch(function(e){ console.warn('charLib del:', e); });
+  if(uid && window._fbCharLib && entry){
+    var docId = entry._docId || String(id);
+    window._fbCharLib.del(uid, docId).catch(function(e){ console.warn('charLib del:', e); });
   }
 
   csRenderLibrary();
