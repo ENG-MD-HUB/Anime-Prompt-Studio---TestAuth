@@ -534,24 +534,26 @@ function csLibSave(charIdx){
 
   /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
-  if(uid && window._fbCharLib){
-    /* Serialize slot as JSON string — avoids Firestore nested object limits */
+  if(!uid){
+    csToast('☁️ Not logged in — saved locally only','warn');
+  } else if(!window._fbCharLib){
+    csToast('⚠️ Firebase not ready — saved locally only','warn');
+  } else {
     var cloudEntry = {
-      id: entry.id,
-      name: entry.name,
-      gender: entry.gender,
-      date: entry.date,
-      slotData: JSON.stringify(entry.slot)  /* slot as string, not nested object */
+      id:       entry.id,
+      name:     entry.name,
+      gender:   entry.gender || null,
+      date:     entry.date,
+      slotData: JSON.stringify(entry.slot)
     };
     window._fbCharLib.save(uid, cloudEntry).then(function(){
-      /* success — toast already shown */
+      csToast('✓ Saved "'+name+'" ☁️','ok');
     }).catch(function(e){
-      console.error('charLib save error:', e);
-      csToast('⚠️ Cloud save failed: ' + (e.message||e.code||'unknown'), 'warn');
+      console.error('charLib cloud save failed:', e);
+      csToast('⚠️ Cloud sync failed: '+(e.message||e.code||JSON.stringify(e)),'warn');
     });
   }
 
-  csToast('✓ Saved "'+name+'"'+(uid?' ☁️':''),'ok');
   csRenderTabs();
   csRenderLibrary();
 }
