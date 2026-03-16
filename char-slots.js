@@ -750,21 +750,26 @@ document.addEventListener('DOMContentLoaded', function(){
 
     /* ── Sync to Firestore FIRST (same pattern as Favourites) ── */
     var user = window._currentUser;
+    console.log('CharLib save attempt:', { user: user?.uid, fbCharLib: !!window._fbCharLib });
     if(user && window._fbCharLib){
       try {
-        await window._fbCharLib.save(user.uid, {
+        var payload = {
           id:       entry.id,
           name:     entry.name,
           gender:   entry.gender || null,
           date:     entry.date,
           slotData: JSON.stringify(entry.slot)
-        });
+        };
+        console.log('Sending to Firestore:', payload.id, payload.name);
+        await window._fbCharLib.save(user.uid, payload);
+        console.log('Firestore save SUCCESS');
         csToast('✓ Saved "'+name+'" ☁️','ok');
       } catch(e){
-        console.error('charLib save:', e);
-        csToast('✓ Saved "'+name+'" (sync failed)','ok');
+        console.error('Firestore save FAILED:', e.code, e.message, e);
+        csToast('✓ Saved "'+name+'" (sync failed: '+e.code+')','ok');
       }
     } else {
+      console.log('Skip cloud:', { user: !!user, fbCharLib: !!window._fbCharLib });
       csToast('✓ Saved "'+name+'"'+(user?'':' — login to sync'),'ok');
     }
   }
