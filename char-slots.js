@@ -507,22 +507,14 @@ window._loadCharLibFromCloud = function(uid){
 };
 
 function csLibSave(charIdx){
+  /* Local-only save — used internally by randomize hook etc.
+     Cloud sync is handled by _doSave (the dialog Save button) */
   var name = '';
   if(charIdx === activeChar && S._name) name = S._name.trim();
   if(!name && charSlots[charIdx] && charSlots[charIdx]._name) name = charSlots[charIdx]._name.trim();
-  if(!name){
-    var row = document.getElementById('charCardsRow');
-    if(row){
-      var card = row.querySelector('[data-card-idx="'+charIdx+'"]');
-      if(card){ var cin = card.querySelector('.c-name-input'); if(cin) name = cin.value.trim(); }
-    }
-  }
-  if(!name){ csToast('Enter a character name first','warn'); return; }
-  var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
-  if(duplicate){ csToast('Name "'+name+'" already exists','warn'); return; }
+  if(!name) return;
+  if(csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); })) return;
   if(!charSlots[charIdx]) charSlots[charIdx] = csEmptySlot();
-  charSlots[charIdx]._name = name;
-  if(charIdx === activeChar) S._name = name;
   csSave(charIdx);
   var entry = {
     id: Date.now(), name: name,
@@ -531,8 +523,8 @@ function csLibSave(charIdx){
     date: new Date().toLocaleDateString()
   };
   csLibrary.unshift(entry);
+  if(csLibrary.length > 50) csLibrary.pop();
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-  csToast('✓ Saved "'+name+'"','ok');
   csRenderTabs();
   csRenderLibrary();
 }
@@ -691,7 +683,6 @@ function openSaveCharDialog(charIdx){
   var overlay = document.getElementById('scOverlay');
   var inp     = document.getElementById('scNameInput');
   if(!overlay || !inp) return;
-  /* Pre-fill if name already exists in slot */
   var existingName = '';
   if(charIdx === activeChar && S._name) existingName = S._name;
   else if(charSlots[charIdx] && charSlots[charIdx]._name) existingName = charSlots[charIdx]._name;
@@ -705,105 +696,100 @@ function closeSaveCharDialog(){
   if(overlay) overlay.classList.remove('open');
 }
 
-/* Intercept the existing idc-save-btn click — open our dialog instead */
+/* Wire up save dialog buttons — runs after DOM ready */
 document.addEventListener('DOMContentLoaded', function(){
-  console.log('char-slots DOMContentLoaded fired');
-  /* ── Save dialog logic ── */
-  var scOverlay = document.getElementById('scOverlay');
-  var scInp     = document.getElementById('scNameInput');
-  var scSave    = document.getElementById('scSave');
-  var scCancel  = document.getElementById('scCancel');
-  console.log('scSave element:', scSave, '| scOverlay:', scOverlay);
 
+  var scInp    = document.getElementById('scNameInput');
+  var scSave   = document.getElementById('scSave');
+  var scCancel = document.getElementById('scCancel');
+  var scOverlay= document.getElementById('scOverlay');
+
+  /* ── Main save action — mirrors saveFavBtn pattern exactly ── */
   async function _doSave(){
     var name = scInp ? scInp.value.trim() : '';
-    if(!name){ if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); } return; }
+    if(!name){
+      if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); }
+      return;
+    }
 
-    /* Check for duplicate name */
-    var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
-    if(duplicate){ csToast('Name "'+name+'" already exists','warn'); return; }
+    /* Duplicate check */
+    if(csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); })){
+      csToast('Name "'+name+'" already exists','warn'); return;
+    }
 
-    /* Write name into slot */
+    /* Update slot name */
     if(!charSlots[_scTargetIdx]) charSlots[_scTargetIdx] = csEmptySlot();
     charSlots[_scTargetIdx]._name = name;
     if(_scTargetIdx === activeChar) S._name = name;
 
-    /* Update card input */
+    /* Update card input display */
     var row = document.getElementById('charCardsRow');
     if(row){
       var card = row.querySelector('[data-card-idx="'+_scTargetIdx+'"]');
       if(card){ var cin = card.querySelector('.c-name-input'); if(cin) cin.value = name; }
     }
+
     closeSaveCharDialog();
+    csSave(_scTargetIdx);
 
     /* Build entry */
-    csSave(_scTargetIdx);
     var entry = {
       id:     Date.now(),
       name:   name,
       gender: S.characters ? S.characters[_scTargetIdx] : null,
-      slot:   JSON.parse(JSON.stringify(charSlots[_scTargetIdx]||csEmptySlot())),
+      slot:   JSON.parse(JSON.stringify(charSlots[_scTargetIdx] || csEmptySlot())),
       date:   new Date().toLocaleDateString()
     };
+
+    /* Save locally first */
     csLibrary.unshift(entry);
+    if(csLibrary.length > 50) csLibrary.pop();
     localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
     csRenderTabs();
     csRenderLibrary();
 
-    /* ── Sync to Firestore FIRST (same pattern as Favourites) ── */
-    var user = window._currentUser;
-    console.log('CharLib save attempt:', { user: user?.uid, fbCharLib: !!window._fbCharLib });
-    if(user && window._fbCharLib){
-      try {
-        var payload = {
-          id:       entry.id,
-          name:     entry.name,
-          gender:   entry.gender || null,
-          date:     entry.date,
-          slotData: JSON.stringify(entry.slot)
-        };
-        console.log('Sending to Firestore:', payload.id, payload.name);
-        await window._fbCharLib.save(user.uid, payload);
-        console.log('Firestore save SUCCESS');
-        csToast('✓ Saved "'+name+'" ☁️','ok');
-      } catch(e){
-        console.error('Firestore save FAILED:', e.code, e.message, e);
-        csToast('✓ Saved "'+name+'" (sync failed: '+e.code+')','ok');
-      }
-    } else {
-      console.log('Skip cloud:', { user: !!user, fbCharLib: !!window._fbCharLib });
-      csToast('✓ Saved "'+name+'"'+(user?'':' — login to sync'),'ok');
+    /* ── Cloud sync — exactly like saveFavBtn ── */
+    if(!window._currentUser){
+      csToast('✓ Saved "'+name+'" — sign in to sync','ok');
+      return;
+    }
+    try {
+      await window._fbCharLib.save(window._currentUser.uid, {
+        id:       entry.id,
+        name:     entry.name,
+        gender:   entry.gender || null,
+        date:     entry.date,
+        slotData: JSON.stringify(entry.slot)
+      });
+      localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+      csToast('⭐ Saved & synced "'+name+'" ☁️','ok');
+    } catch(e){
+      console.error('charLib cloud save:', e);
+      csToast('✓ Saved "'+name+'" (cloud failed)','ok');
     }
   }
 
-  if(scSave) scSave.addEventListener('click', _doSave);
-  if(scCancel) scCancel.addEventListener('click', closeSaveCharDialog);
+  if(scSave)    scSave.addEventListener('click', _doSave);
+  if(scCancel)  scCancel.addEventListener('click', closeSaveCharDialog);
   if(scOverlay) scOverlay.addEventListener('click', function(e){ if(e.target===scOverlay) closeSaveCharDialog(); });
-  if(scInp) scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
+  if(scInp)     scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
 
-  /* Override save-btn click on IDC cards to use dialog */
+  /* Star button on character cards */
   document.addEventListener('click', function(e){
     var btn = e.target.closest('.idc-save-btn');
     if(!btn) return;
-    /* Don't stopPropagation — just open the dialog */
     var idx = parseInt(btn.getAttribute('data-idx'));
-    if(isNaN(idx)) return;
-    openSaveCharDialog(idx);
+    if(!isNaN(idx)) openSaveCharDialog(idx);
   });
 
-  /* ── Gender modal "Saved Character" button ── */
+  /* Gender modal saved character button */
   var savedBtn = document.getElementById('genderModalSaved');
   if(savedBtn){
     savedBtn.addEventListener('click', function(e){
       e.stopPropagation();
-      /* Capture idx BEFORE closeGenderModal nulls _gIdx */
-      var targetIdx = (typeof window._gIdx !== 'undefined' && window._gIdx !== null)
-        ? window._gIdx
-        : activeChar;
-      /* Close gender modal */
+      var targetIdx = (typeof window._gIdx !== 'undefined' && window._gIdx !== null) ? window._gIdx : activeChar;
       var gOver = document.getElementById('genderOverlay');
       if(gOver) gOver.classList.remove('open');
-      /* Open passport library */
       openPassportLibrary(targetIdx);
     });
   }
