@@ -123,8 +123,10 @@
     <div class="tabs ms-panel ms-char-panel" id="charTabs">
       <button class="tab on" data-c="character"><i class="fas fa-user"></i> <span data-i18n="tab_character">Character</span></button>
       <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
+      <button class="tab" data-c="layers"><i class="fas fa-layer-group"></i> <span>Layers</span></button>
+      <button class="tab" data-c="look"><i class="fas fa-glasses"></i> <span>Look</span></button>
+      <button class="tab" data-c="objects"><i class="fas fa-box-open"></i> <span data-i18n="tab_tools">Objects</span></button>
       <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
-      <button class="tab" data-c="tools"><i class="fas fa-sword"></i> <span data-i18n="tab_tools">Tools</span></button>
     </div>
 
     <!-- ══ SCENE TABS ══ -->
@@ -148,6 +150,10 @@
 
   <!-- ── STYLE (NEW FIRST TAB) ── -->
   <div class="cat on" id="cat-style">
+  <div class="sfc-wrap" id="styleFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="artstyle"><span class="sfc-icon"><i class="fas fa-paintbrush"></i></span><span class="sfc-label">Art Style</span></button><button class="sfc-card" data-sf="studio"><span class="sfc-icon"><i class="fas fa-film"></i></span><span class="sfc-label">Studio</span></button><button class="sfc-card" data-sf="color"><span class="sfc-icon"><i class="fas fa-palette"></i></span><span class="sfc-label">Color</span></button><button class="sfc-card" data-sf="lines"><span class="sfc-icon"><i class="fas fa-pen-nib"></i></span><span class="sfc-label">Lines</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-palette"></i></div><span class="sec-title" data-i18n="sec_color_grading">Color Grading</span></div>
       <div class="og c3" id="colorGradeGrid"></div>
@@ -184,6 +190,10 @@
 
   <!-- ── QUALITY ── -->
   <div class="cat" id="cat-quality">
+  <div class="sfc-wrap" id="qualityFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="quality"><span class="sfc-icon"><i class="fas fa-sparkles"></i></span><span class="sfc-label">Quality</span></button><button class="sfc-card" data-sf="light"><span class="sfc-icon"><i class="fas fa-lightbulb"></i></span><span class="sfc-label">Lighting</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-sparkles"></i></div><span class="sec-title" data-i18n="sec_quality_tags">Quality Tags</span></div>
       <div class="og c3" id="qualityGrid"></div>
@@ -196,15 +206,12 @@
 
   <!-- ── CHARACTER ── -->
   <div class="cat" id="cat-character">
+  <div class="sfc-wrap" id="charFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="body"><span class="sfc-icon"><i class="fas fa-person"></i></span><span class="sfc-label">Body</span></button><button class="sfc-card" data-sf="hair"><span class="sfc-icon"><i class="fas fa-scissors"></i></span><span class="sfc-label">Hair</span></button>
+  </div>
+
     <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-users"></i></div>
-        <span class="sec-title" data-i18n="sec_characters">Characters in Scene</span>
-        <button class="sec-clr" id="charCardsClrBtn"><span data-i18n="clear">Clear</span></button>
-      </div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-cake-candles"></i></div><span class="sec-title" data-i18n="sec_age">Age Group</span><button class="sec-clr" data-k="age"><span data-i18n="clear">Clear</span></button></div>
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-cake-candles"></i></div><span class="sec-title" data-i18n="sec_age">Age Group</span><button class="sec-clr" data-k="age"><span data-i18n="clear">Clear</span></button><button class="sec-clr" id="charCardsClrBtn" style="margin-left:.3rem"><span data-i18n="clear">Clear All</span></button></div>
       <div class="og c3" id="ageGrid"></div>
     </div>
     <div class="sec">
@@ -212,7 +219,7 @@
       <div class="skin-grid" id="skinGrid"></div>
     </div>
     <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-dumbbell"></i></div><span class="sec-title" data-i18n="sec_body">Body Type</span><button class="sec-clr" data-k="body"><span data-i18n="clear">Clear</span></button></div>
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person"></i></div><span class="sec-title" data-i18n="sec_body">Body Type</span><button class="sec-clr" data-k="body"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="bodyGrid"></div>
       <div class="og c3" id="nsfwBodyGrid"></div>
     </div>
@@ -220,6 +227,7 @@
     <!-- ── LOOK (merged into Character) ── -->
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" id="clrHair"><span data-i18n="clear">Clear</span></button></div>
+      <div class="hair-gender-row" id="hairGenderRow"><button class="hgf-btn on" data-hg="all"><i class="fas fa-users"></i> All</button><button class="hgf-btn" data-hg="female"><i class="fas fa-venus"></i> Female</button><button class="hgf-btn" data-hg="male"><i class="fas fa-mars"></i> Male</button><button class="hgf-btn" data-hg="shared"><i class="fas fa-circle-half-stroke"></i> Shared</button></div>
       <div class="og c3" id="hairstyleGrid"></div>
     </div>
     <div class="sec">
@@ -230,90 +238,64 @@
 
   <!-- ── OUTFIT ── -->
   <div class="cat" id="cat-outfit">
-
-    <!-- Outfit — unified section -->
     <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-vest"></i></div>
-        <span class="sec-title" data-i18n="sec_clothing">Full Outfit</span>
-        <button class="sec-clr" data-k="clothing"><span data-i18n="clear">Clear</span></button>
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-vest"></i></div><span class="sec-title" data-i18n="sec_clothing">Clothing Type</span><button class="sec-clr" data-k="clothing"><span data-i18n="clear">Clear</span></button></div>
+      <div class="cfc-wrap" id="clothingFilterRow">
+        <button class="cfc-card on" data-cf="all"><span class="cfc-icon"><i class="fas fa-grip"></i></span><span class="cfc-label">All</span></button>
+        <button class="cfc-card" data-cf="casual"><span class="cfc-icon"><i class="fas fa-shirt"></i></span><span class="cfc-label">Casual</span></button>
+        <button class="cfc-card" data-cf="school"><span class="cfc-icon"><i class="fas fa-graduation-cap"></i></span><span class="cfc-label">School</span></button>
+        <button class="cfc-card" data-cf="uniform"><span class="cfc-icon"><i class="fas fa-shield-halved"></i></span><span class="cfc-label">Uniform</span></button>
+        <button class="cfc-card" data-cf="formal"><span class="cfc-icon"><i class="fas fa-vest"></i></span><span class="cfc-label">Formal</span></button>
+        <button class="cfc-card" data-cf="japanese"><span class="cfc-icon"><i class="fas fa-torii-gate"></i></span><span class="cfc-label">Japanese</span></button>
+        <button class="cfc-card" data-cf="animal"><span class="cfc-icon"><i class="fas fa-paw"></i></span><span class="cfc-label">Animal</span></button>
+        <button class="cfc-card" data-cf="fantasy"><span class="cfc-icon"><i class="fas fa-hat-wizard"></i></span><span class="cfc-label">Fantasy</span></button>
+        <button class="cfc-card" data-cf="swim"><span class="cfc-icon"><i class="fas fa-water"></i></span><span class="cfc-label">Swim</span></button>
+        <button class="cfc-card" data-cf="cultural"><span class="cfc-icon"><i class="fas fa-earth-asia"></i></span><span class="cfc-label">Cultural</span></button>
+        <button class="cfc-card nsfw-item" data-cf="nsfw" style="display:none"><span class="cfc-icon"><i class="fas fa-fire"></i></span><span class="cfc-label">NSFW</span></button>
       </div>
       <div class="og c3" id="clothingGrid"></div>
-      <div class="og c3 nsfw-section" id="nsfwClothingGrid"></div>
+      <div class="og c3" id="nsfwClothingGrid" style="display:none"></div>
     </div>
-
-    <!-- Tops & Bottoms -->
-    <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-shirt"></i></div>
-        <span class="sec-title">Tops &amp; Bottoms</span>
-        <button class="sec-clr" id="clrTopBottom"><span data-i18n="clear">Clear</span></button>
-      </div>
+    <div class="sec" id="secTopsBottoms">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-shirt"></i></div><span class="sec-title">Tops &amp; Bottoms</span><button class="sec-clr" id="clrTopBottom"><span data-i18n="clear">Clear</span></button></div>
       <div class="outfit-split">
-        <div class="outfit-half">
-          <div class="outfit-sub-label">Tops</div>
-          <div class="og" id="clothingTopGrid"></div>
-          <div class="og nsfw-section" id="nsfwTopGrid"></div>
-        </div>
-        <div class="outfit-half">
-          <div class="outfit-sub-label">Bottoms</div>
-          <div class="og" id="clothingBottomGrid"></div>
-          <div class="og nsfw-section" id="nsfwBottomGrid"></div>
-        </div>
+        <div class="outfit-half"><div class="outfit-sub-label">Tops</div><div class="og" id="clothingTopGrid"></div><div class="og nsfw-section" id="nsfwTopGrid"></div></div>
+        <div class="outfit-half"><div class="outfit-sub-label">Bottoms</div><div class="og" id="clothingBottomGrid"></div><div class="og nsfw-section" id="nsfwBottomGrid"></div></div>
       </div>
     </div>
-
-    <!-- Clothing Condition (new subsection) -->
-    <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-droplet"></i></div>
-        <span class="sec-title">Clothing Condition</span>
-        <button class="sec-clr" data-arr="clothingCondition"><span data-i18n="clear">Clear</span></button>
-      </div>
-      <div class="og c4" id="clothingConditionGrid"></div>
-    </div>
-
-    <!-- Clothing Accessories -->
-    <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-ring"></i></div>
-        <span class="sec-title" data-i18n="sec_clothing_acc">Accessories</span>
-      </div>
-      <div class="og c3" id="clothingAccGrid"></div>
-    </div>
-
-    <!-- Socks, Shoes (merged) -->
-    <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-socks"></i></div>
-        <span class="sec-title">Socks &amp; Shoes</span>
-      </div>
-      <div class="outfit-split" style="gap:.75rem">
-        <div class="outfit-half">
-          <div class="outfit-sub-label">Sock Length <button class="sec-clr" data-k="sockLength" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div>
-          <div class="og" id="sockLengthGrid"></div>
-        </div>
-        <div class="outfit-half">
-          <div class="outfit-sub-label">Footwear <button class="sec-clr" data-k="shoes" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div>
-          <div class="og" id="shoesGrid"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Face Accessories -->
-    <div class="sec">
-      <div class="sec-hd">
-        <div class="sec-ico"><i class="fas fa-glasses"></i></div>
-        <span class="sec-title" data-i18n="sec_face_acc">Face Accessories</span>
-      </div>
-      <div class="og c3" id="faceAccGrid"></div>
-    </div>
-
+  </div>
+  <!-- ── LAYERS ── -->
+  <div class="cat" id="cat-layers">
+  <div class="sfc-wrap" id="layersFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="condition"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Condition</span></button><button class="sfc-card" data-sf="accessories"><span class="sfc-icon"><i class="fas fa-ring"></i></span><span class="sfc-label">Acc</span></button><button class="sfc-card" data-sf="socks"><span class="sfc-icon"><i class="fas fa-socks"></i></span><span class="sfc-label">Socks</span></button><button class="sfc-card" data-sf="shoes"><span class="sfc-icon"><i class="fas fa-shoe-prints"></i></span><span class="sfc-label">Shoes</span></button>
   </div>
 
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title">Clothing Condition</span><button class="sec-clr" data-arr="clothingCondition"><span data-i18n="clear">Clear</span></button></div><div class="og c3" id="clothingConditionGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-ring"></i></div><span class="sec-title" data-i18n="sec_clothing_acc">Clothing Accessories</span></div><div class="og c3" id="clothingAccGrid"></div></div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-socks"></i></div><span class="sec-title">Socks &amp; Shoes</span></div>
+      <div class="outfit-split" style="gap:.75rem">
+        <div class="outfit-half"><div class="outfit-sub-label">Sock Length <button class="sec-clr" data-k="sockLength" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og" id="sockLengthGrid"></div></div>
+        <div class="outfit-half"><div class="outfit-sub-label">Footwear <button class="sec-clr" data-k="shoes" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og" id="shoesGrid"></div></div>
+      </div>
+    </div>
+  </div>
+  <!-- ── LOOK ── -->
+  <div class="cat" id="cat-look">
+  <div class="sfc-wrap" id="lookFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="eyes"><span class="sfc-icon"><i class="fas fa-eye"></i></span><span class="sfc-label">Eyes</span></button><button class="sfc-card" data-sf="face"><span class="sfc-icon"><i class="fas fa-glasses"></i></span><span class="sfc-label">Face Acc</span></button><button class="sfc-card" data-sf="dir"><span class="sfc-icon"><i class="fas fa-eye"></i></span><span class="sfc-label">Direction</span></button>
+  </div>
+
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-star"></i></div><span class="sec-title" data-i18n="sec_eye_shape">Eye Shape</span><button class="sec-clr" id="clrEye"><span data-i18n="clear">Clear</span></button></div><div class="og c3" id="eyeShapeGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-glasses"></i></div><span class="sec-title" data-i18n="sec_face_acc">Face Accessories</span></div><div class="og c3" id="faceAccGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-eye"></i></div><span class="sec-title" data-i18n="sec_looking">Looking Direction</span><button class="sec-clr" data-k="look"><span data-i18n="clear">Clear</span></button></div><div class="og c3" id="lookGrid"></div></div>
+  </div>
   <!-- ── MOOD ── -->
   <div class="cat" id="cat-mood">
+  <div class="sfc-wrap" id="moodFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="expression"><span class="sfc-icon"><i class="fas fa-face-smile"></i></span><span class="sfc-label">Expression</span></button><button class="sfc-card" data-sf="pose"><span class="sfc-icon"><i class="fas fa-person-walking"></i></span><span class="sfc-label">Pose</span></button><button class="sfc-card" data-sf="effects"><span class="sfc-icon"><i class="fas fa-wand-magic-sparkles"></i></span><span class="sfc-label">Effects</span></button><button class="sfc-card" data-sf="liquids"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Liquids</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-face-smile"></i></div><span class="sec-title" data-i18n="sec_expression">Expression</span><button class="sec-clr" data-k="expression"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="expressionGrid"></div>
@@ -334,25 +316,24 @@
     </div>
   </div>
 
-  <!-- ── TOOLS ── -->
-  <div class="cat" id="cat-tools">
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-sword"></i></div><span class="sec-title" data-i18n="sec_weapons">Weapons</span><span class="sec-max">max 2</span></div>
-      <div class="og c3" id="weaponGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-toolbox"></i></div><span class="sec-title" data-i18n="sec_props">Props & Objects</span><span class="sec-max">max 3</span></div>
-      <div class="og c3" id="propsGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-mobile-screen"></i></div><span class="sec-title" data-i18n="sec_electronics">Electronics</span><span class="sec-max">max 2</span></div>
-      <div class="og c3" id="electronicsGrid"></div>
-    </div>
+  <!-- ── OBJECTS ── -->
+  <div class="cat" id="cat-objects">
+  <div class="sfc-wrap" id="objectsFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="weapons"><span class="sfc-icon"><i class="fas fa-sword"></i></span><span class="sfc-label">Weapons</span></button><button class="sfc-card" data-sf="props"><span class="sfc-icon"><i class="fas fa-cube"></i></span><span class="sfc-label">Props</span></button><button class="sfc-card" data-sf="electronics"><span class="sfc-icon"><i class="fas fa-mobile-screen"></i></span><span class="sfc-label">Electronics</span></button><button class="sfc-card" data-sf="other"><span class="sfc-icon"><i class="fas fa-star-of-life"></i></span><span class="sfc-label">Other</span></button>
+  </div>
 
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-sword"></i></div><span class="sec-title" data-i18n="sec_weapons">Weapons</span><span class="sec-max">max 2</span></div><div class="og c3" id="weaponGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-cube"></i></div><span class="sec-title" data-i18n="sec_props">Props & Objects</span><span class="sec-max">max 3</span></div><div class="og c3" id="propsGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-mobile-screen"></i></div><span class="sec-title" data-i18n="sec_electronics">Electronics</span><span class="sec-max">max 2</span></div><div class="og c3" id="electronicsGrid"></div></div>
+    <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-star-of-life"></i></div><span class="sec-title">Other Items</span></div><div class="og c3" id="otherItemsGrid"></div></div>
   </div>
 
   <!-- ── SCENE ── -->
   <div class="cat" id="cat-scene">
+  <div class="sfc-wrap" id="sceneFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="environment"><span class="sfc-icon"><i class="fas fa-mountain-sun"></i></span><span class="sfc-label">Environment</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-mountain-sun"></i></div><span class="sec-title" data-i18n="sec_environment">Environment</span><button class="sec-clr" data-k="environment"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="envGrid"></div>
@@ -362,6 +343,10 @@
 
   <!-- ── CAMERA ── -->
   <div class="cat" id="cat-camera">
+  <div class="sfc-wrap" id="cameraFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="angle"><span class="sfc-icon"><i class="fas fa-camera-rotate"></i></span><span class="sfc-label">Angle</span></button><button class="sfc-card" data-sf="shot"><span class="sfc-icon"><i class="fas fa-expand"></i></span><span class="sfc-label">Shot</span></button><button class="sfc-card" data-sf="lens"><span class="sfc-icon"><i class="fas fa-camera"></i></span><span class="sfc-label">Lens</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-camera-rotate"></i></div><span class="sec-title" data-i18n="sec_camera_angle">Camera Angle</span><button class="sec-clr" data-k="angle"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="angleGrid"></div>
@@ -370,10 +355,6 @@
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-expand"></i></div><span class="sec-title" data-i18n="sec_shot_range">Shot Range</span><button class="sec-clr" data-k="shot"><span data-i18n="clear">Clear</span></button></div>
       <div class="og" id="shotGrid"></div>
       <div class="og c3" id="nsfwShotGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-eye"></i></div><span class="sec-title" data-i18n="sec_looking">Looking Direction</span><button class="sec-clr" data-k="look"><span data-i18n="clear">Clear</span></button></div>
-      <div class="og c3" id="lookGrid"></div>
     </div>
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-camera"></i></div><span class="sec-title" data-i18n="sec_lens_type">Lens Type</span><button class="sec-clr" data-k="lens"><span data-i18n="clear">Clear</span></button></div>
@@ -392,6 +373,10 @@
 
   <!-- ── NEGATIVE ── -->
   <div class="cat" id="cat-negative">
+  <div class="sfc-wrap" id="negativeFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="body"><span class="sfc-icon"><i class="fas fa-person"></i></span><span class="sfc-label">Body</span></button><button class="sfc-card" data-sf="quality"><span class="sfc-icon"><i class="fas fa-image"></i></span><span class="sfc-label">Quality</span></button>
+  </div>
+
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico" style="color:#f87171;border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08);"><i class="fas fa-ban"></i></div><span class="sec-title" style="color:#f87171;" data-i18n="what_to_avoid">What To Avoid</span></div>
       <p style="font-size:.76rem;color:var(--tx3);margin-bottom:.7rem;" data-i18n="avoid_desc">Select anything you want excluded from the final image.</p>
@@ -864,6 +849,82 @@
     </div>
   </div>
 </div>
+
+<script type="module">
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getAnalytics }                           from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp }
+                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAU0hfv8sM6PlFqeJgHh7upYSkMEm2ilpc",
+    authDomain:        "anime-prompt-studio-main.firebaseapp.com",
+    projectId:         "anime-prompt-studio-main",
+    storageBucket:     "anime-prompt-studio-main.firebasestorage.app",
+    messagingSenderId: "617164431718",
+    appId:             "1:617164431718:web:3dcb036700a52ec83ba8a7",
+    measurementId:     "G-X01T4B2E1B"
+  };
+
+  const app       = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth      = getAuth(app);
+  const db        = getFirestore(app);
+  const provider  = new GoogleAuthProvider();
+
+  // ── Expose to window so app.js can call them ──
+  window._fbAuth = {
+    signIn:  () => signInWithPopup(auth, provider),
+    signOut: () => signOut(auth),
+    onAuth:  (cb) => onAuthStateChanged(auth, cb),
+  };
+
+  window._fbFavs = {
+    // Save single favourite to Firestore
+    save: async (uid, fav) => {
+      const ref = collection(db, 'users', uid, 'favourites');
+      await addDoc(ref, { ...fav, createdAt: serverTimestamp() });
+    },
+    // Load all favourites ordered by newest first
+    load: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'favourites');
+      const q    = query(ref, orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+    },
+    // Delete single favourite by Firestore doc id
+    del: async (uid, docId) => {
+      await deleteDoc(doc(db, 'users', uid, 'favourites', docId));
+    },
+    // Delete all favourites
+    clear: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'favourites');
+      const snap = await getDocs(ref);
+      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    },
+  };
+
+  window._fbCharLib = {
+    save: async (uid, entry) => {
+      const ref = doc(db, 'users', uid, 'charLib', String(entry.id));
+      await setDoc(ref, { ...entry, updatedAt: serverTimestamp() });
+    },
+    load: async (uid) => {
+      const ref  = collection(db, 'users', uid, 'charLib');
+      const q    = query(ref, orderBy('updatedAt', 'desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ ...d.data() }));
+    },
+    del: async (uid, entryId) => {
+      await deleteDoc(doc(db, 'users', uid, 'charLib', String(entryId)));
+    },
+  };
+</script>
+<script src="app.js"></script>
+<script src="char-slots.js"></script>
+
 <!-- ═══ SAVE CHARACTER DIALOG ═══ -->
 <div class="sc-overlay" id="scOverlay">
   <div class="sc-dialog">
@@ -872,7 +933,7 @@
     <input class="sc-dialog-inp" id="scNameInput" placeholder="e.g. Sakura, Zephyr, Unit-07…" maxlength="32" autocomplete="off">
     <div class="sc-dialog-row">
       <button class="sc-dialog-cancel" id="scCancel">Cancel</button>
-      <button class="sc-dialog-save" id="scSave" onclick="console.log('scSave clicked directly')"><i class="fas fa-star"></i> Save</button>
+      <button class="sc-dialog-save" id="scSave"><i class="fas fa-star"></i> Save</button>
     </div>
   </div>
 </div>
@@ -902,130 +963,6 @@
     </div>
   </div>
 </div>
-
-<script type="module">
-  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getAnalytics }                           from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp }
-                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-  import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
-                                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey:            "AIzaSyAU0hfv8sM6PlFqeJgHh7upYSkMEm2ilpc",
-    authDomain:        "anime-prompt-studio-main.firebaseapp.com",
-    projectId:         "anime-prompt-studio-main",
-    storageBucket:     "anime-prompt-studio-main.firebasestorage.app",
-    messagingSenderId: "617164431718",
-    appId:             "1:617164431718:web:3dcb036700a52ec83ba8a7",
-    measurementId:     "G-X01T4B2E1B"
-  };
-
-  const app       = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth      = getAuth(app);
-  const db        = getFirestore(app);
-  const storage   = getStorage(app);
-  const provider  = new GoogleAuthProvider();
-
-  // ── Expose to window so app.js can call them ──
-  window._fbAuth = {
-    signIn:  () => signInWithPopup(auth, provider),
-    signOut: () => signOut(auth),
-    onAuth:  (cb) => onAuthStateChanged(auth, cb),
-  };
-
-  window._fbFavs = {
-    save: async (uid, fav) => {
-      const ref = collection(db, 'users', uid, 'favourites');
-      await addDoc(ref, { ...fav, createdAt: serverTimestamp() });
-    },
-    load: async (uid) => {
-      const ref  = collection(db, 'users', uid, 'favourites');
-      const q    = query(ref, orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
-    },
-    del: async (uid, docId) => {
-      await deleteDoc(doc(db, 'users', uid, 'favourites', docId));
-    },
-    clear: async (uid) => {
-      const ref  = collection(db, 'users', uid, 'favourites');
-      const snap = await getDocs(ref);
-      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-    },
-  };
-
-  window._fbCharLib = {
-    /* Save — same pattern as _fbFavs */
-    save: async (uid, entry) => {
-      const { photo: photoBase64, slot, ...rest } = entry;
-      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
-      const ref = collection(db, 'users', uid, 'charLib');
-      const docRef = await addDoc(ref, { ...rest, slotData, photoURL: null, createdAt: serverTimestamp() });
-      /* Upload photo to Storage if present */
-      if(photoBase64 && photoBase64.startsWith('data:')){
-        const storageRef = sRef(storage, `users/${uid}/charLib/${entry.id}/photo`);
-        await uploadString(storageRef, photoBase64, 'data_url');
-        const photoURL = await getDownloadURL(storageRef);
-        await setDoc(docRef, { photoURL }, { merge: true });
-      }
-    },
-
-    /* Save and return the new Firestore doc ID */
-    saveAndGetRef: async (uid, entry) => {
-      const { photo: photoBase64, slot, ...rest } = entry;
-      const slotData = rest.slotData || (slot ? JSON.stringify(slot) : '{}');
-      const ref = collection(db, 'users', uid, 'charLib');
-      const docRef = await addDoc(ref, { ...rest, slotData, photoURL: null, createdAt: serverTimestamp() });
-      if(photoBase64 && photoBase64.startsWith('data:')){
-        const storageRef = sRef(storage, `users/${uid}/charLib/${entry.id}/photo`);
-        await uploadString(storageRef, photoBase64, 'data_url');
-        const photoURL = await getDownloadURL(storageRef);
-        await setDoc(docRef, { photoURL }, { merge: true });
-      }
-      return docRef.id;
-    },
-
-    /* Load all — same pattern as _fbFavs */
-    load: async (uid) => {
-      const ref  = collection(db, 'users', uid, 'charLib');
-      const q    = query(ref, orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => {
-        const data = { _docId: d.id, ...d.data() };
-        try { data.slot = JSON.parse(data.slotData || '{}'); } catch(e){ data.slot = {}; }
-        if(data.photoURL) data.photo = data.photoURL;
-        return data;
-      });
-    },
-
-    /* Delete */
-    del: async (uid, docId) => {
-      /* docId here is the Firestore doc id (_docId), not entry.id */
-      if(!docId) return;
-      await deleteDoc(doc(db, 'users', uid, 'charLib', String(docId)));
-      try {
-        /* Try to delete photo — entry.id needed for Storage path */
-        const storageRef = sRef(storage, `users/${uid}/charLib/${docId}/photo`);
-        await deleteObject(storageRef);
-      } catch(e){ /* photo may not exist */ }
-    },
-
-    /* Upload/update photo */
-    savePhoto: async (uid, entryId, photoBase64) => {
-      const storageRef = sRef(storage, `users/${uid}/charLib/${entryId}/photo`);
-      await uploadString(storageRef, photoBase64, 'data_url');
-      const photoURL = await getDownloadURL(storageRef);
-      return photoURL;
-    },
-  };
-</script>
-<script src="app.js"></script>
-<script src="char-slots.js"></script>
-
 
 <div id="hcpPopup" style="display:none;position:fixed;z-index:99999;"></div>
 

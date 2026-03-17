@@ -104,13 +104,13 @@ const SKINS=[
    BLUEPRINT CELLS
 ═══════════════════════════════════ */
 const BP_CELLS=[
-  {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape']},
-  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc']},
-  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids']},
-  {id:'bp-tools',  icon:'fa-sword',      lbl:'Tools',     keys:['weapons','props','electronics','otherItems']},
+  {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape','nsfwBody']},
+  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
+  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids','nsfwPose','nsfwFluid']},
+  {id:'bp-tools',  icon:'fa-box-open',   lbl:'Objects',   keys:['weapons','props','electronics','otherItems']},
   {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
-  {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment']},
-  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect']},
+  {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment','nsfwEnv']},
+  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect','nsfwShot']},
   {id:'bp-quality',icon:'fa-sparkles',   lbl:'Quality',   keys:['quality','lights']}
 ];
 
@@ -118,6 +118,20 @@ const BP_CELLS=[
    OPTION DATA
    nsfw:true → hidden until NSFW on, shown red
 ═══════════════════════════════════ */
+
+const CLOTHING_ITEMS=[
+{label:'Casual Streetwear',gender:'fm',cat:'casual'},{label:'Sporty Outfit',gender:'fm',cat:'casual'},{label:'Athleisure',gender:'fm',cat:'casual'},{label:'Tracksuit',gender:'fm',cat:'casual'},{label:'Sleepwear / Pajamas',gender:'fm',cat:'casual'},{label:'Y2K Outfit',gender:'f',cat:'casual'},{label:'E-girl Outfit',gender:'f',cat:'casual'},{label:'Cottagecore Dress',gender:'f',cat:'casual'},{label:'Sundress',gender:'f',cat:'casual'},{label:'Bodycon Dress',gender:'f',cat:'casual'},{label:'Dark Academia',gender:'fm',cat:'casual'},{label:'Gothic Outfit',gender:'fm',cat:'casual'},{label:'Harajuku Style',gender:'fm',cat:'casual'},{label:'Streetwear Set',gender:'m',cat:'casual'},
+{label:'School Uniform',gender:'fm',cat:'school'},{label:'Sailor Uniform',gender:'f',cat:'school'},{label:'Blazer School Uniform',gender:'fm',cat:'school'},{label:'Seifuku',gender:'f',cat:'school'},{label:'Pleated Mini Skirt Uniform',gender:'f',cat:'school'},{label:'Very Short School Skirt',gender:'f',cat:'school'},{label:'Exposed Midriff School Uniform',gender:'f',cat:'school'},
+{label:'Business Office Suit',gender:'fm',cat:'uniform'},{label:'Flight Attendant Uniform',gender:'fm',cat:'uniform'},{label:'Pilot Uniform',gender:'fm',cat:'uniform'},{label:'Chef Uniform',gender:'fm',cat:'uniform'},{label:'Doctor Coat',gender:'fm',cat:'uniform'},{label:'Nurse Uniform',gender:'f',cat:'uniform'},{label:'Police Uniform',gender:'fm',cat:'uniform'},{label:'Military Uniform',gender:'fm',cat:'uniform'},{label:'Security Guard Uniform',gender:'fm',cat:'uniform'},{label:'Firefighter Gear',gender:'fm',cat:'uniform'},{label:'Sports Jersey',gender:'fm',cat:'uniform'},
+{label:'Little Black Dress',gender:'f',cat:'formal'},{label:'Evening Gown',gender:'f',cat:'formal'},{label:'Ball Gown',gender:'f',cat:'formal'},{label:'Wedding Dress',gender:'f',cat:'formal'},{label:'Qipao / Cheongsam',gender:'f',cat:'formal'},{label:'Business Suit',gender:'m',cat:'formal'},{label:'Formal Tuxedo',gender:'m',cat:'formal'},{label:'Three-Piece Suit',gender:'m',cat:'formal'},{label:'Black Tie Formal',gender:'fm',cat:'formal'},{label:'Gala Outfit',gender:'fm',cat:'formal'},
+{label:'Magical Girl',gender:'f',cat:'japanese'},{label:'Idol Outfit',gender:'f',cat:'japanese'},{label:'Gothic Lolita',gender:'f',cat:'japanese'},{label:'Sweet Lolita',gender:'f',cat:'japanese'},{label:'Maid Outfit',gender:'f',cat:'japanese'},{label:'Shrine Maiden / Miko',gender:'f',cat:'japanese'},{label:'Kimono',gender:'fm',cat:'japanese'},{label:'Yukata',gender:'fm',cat:'japanese'},{label:'Ninja Outfit',gender:'fm',cat:'japanese'},
+{label:'Fantasy Armor',gender:'fm',cat:'fantasy'},{label:'Witch Costume',gender:'f',cat:'fantasy'},{label:'Fairy Outfit',gender:'f',cat:'fantasy'},{label:'Vampire Dress',gender:'f',cat:'fantasy'},{label:'Princess Dress',gender:'f',cat:'fantasy'},{label:'Warrior Costume',gender:'fm',cat:'fantasy'},{label:'Knight Armor',gender:'m',cat:'fantasy'},{label:'Wizard Robe',gender:'fm',cat:'fantasy'},{label:'Cyberpunk Outfit',gender:'fm',cat:'fantasy'},{label:'Steampunk Outfit',gender:'fm',cat:'fantasy'},
+{label:'Cat Girl Outfit',gender:'f',cat:'animal'},{label:'Fox Girl Outfit',gender:'f',cat:'animal'},{label:'Bunny Girl Suit',gender:'f',cat:'animal'},{label:'Wolf Girl Outfit',gender:'f',cat:'animal'},{label:'Bear Kigurumi',gender:'fm',cat:'animal'},{label:'Panda Kigurumi',gender:'fm',cat:'animal'},{label:'Animal Hoodie Onesie',gender:'fm',cat:'animal'},
+{label:'One-Piece Swimsuit',gender:'f',cat:'swim'},{label:'Bikini',gender:'f',cat:'swim'},{label:'String Bikini',gender:'f',cat:'swim'},{label:'Sports Swimwear',gender:'fm',cat:'swim'},{label:'Swim Trunks',gender:'m',cat:'swim'},
+{label:'Hanbok (Korean)',gender:'fm',cat:'cultural'},{label:'Ao Dai (Vietnamese)',gender:'f',cat:'cultural'},{label:'Sari (Indian)',gender:'f',cat:'cultural'},{label:'Abaya',gender:'f',cat:'cultural'},{label:'Kilt (Scottish)',gender:'m',cat:'cultural'},
+{label:'Bunny Suit',gender:'f',cat:'nsfw',nsfw:true},{label:'Nurse Outfit',gender:'f',cat:'nsfw',nsfw:true},{label:'French Maid',gender:'f',cat:'nsfw',nsfw:true},{label:'Cheerleader',gender:'f',cat:'nsfw',nsfw:true},{label:'Micro Bikini',gender:'f',cat:'nsfw',nsfw:true},{label:'Lingerie',gender:'f',cat:'nsfw',nsfw:true},{label:'Bra & Panties',gender:'f',cat:'nsfw',nsfw:true},{label:'Pasties Only',gender:'f',cat:'nsfw',nsfw:true},{label:'See-through',gender:'fm',cat:'nsfw',nsfw:true},{label:'Latex Bodysuit',gender:'fm',cat:'nsfw',nsfw:true},{label:'Bondage Outfit',gender:'fm',cat:'nsfw',nsfw:true},{label:'Catsuit',gender:'fm',cat:'nsfw',nsfw:true},
+];
+
 const D={
   charCount:{
     lbl:['1 Girl','1 Man','2 Girls','2 Men','1 Girl + 1 Man','3+ Girls','3+ Men','Mixed Group'],
@@ -148,17 +162,12 @@ const D={
   },
   nsfwTop:{lbl:['Tiny Top','Strapless Bra Top','Micro Crop Top','Open Back Top','Sheer Top','Fishnet Top','Cutout Top','Exposed Midriff Top'],k:'nsfwTop',nsfw:true},
   nsfwBottom:{lbl:['Micro Miniskirt','Booty Shorts','Thong','Garter Belt','Slit Skirt','Fishnet Stockings','Lace Shorts','Crotchless Shorts'],k:'nsfwBottom',nsfw:true},
-  clothing:{
-    female:['Magical Girl','Maid Outfit','Gothic Lolita','Idol Outfit','Little Black Dress','Evening Gown','Wedding Dress','One-Piece Swimsuit','Sailor Uniform'],
-    male:  ['Business Suit','Formal Tuxedo','Dress Shirt & Tie','Tank Top & Shorts'],
-    shared:['School Uniform','Tracksuit','Casual Streetwear','Sporty Outfit','Sleepwear / Pajamas','Swimsuit','Blazer & Pants','Cyberpunk Outfit','Kimono','Yukata','Fantasy Armor','Ninja Outfit','Military Uniform'],
-    k:'clothing'
-  },
-  clothingAcc:{lbl:['Ribbon Bow','Belt','Choker','Backpack','Suspenders','Gloves','Scarf','Cape','Apron','Tie'],arr:'clothingAcc'},
+  clothing:{ female:[], male:[], shared:[], k:'clothing' },
+  clothingAcc:{lbl:['— Belts & Waist —','Belt','Chain Belt','Obi Sash','Suspenders','— Neckwear —','Choker','Necklace','Collar','Neck Ribbon','Bow Tie','Necktie','— Arms —','Cape','Shawl','Arm Warmers','Elbow Gloves','Short Gloves','Fingerless Gloves','Wrist Cuffs','— Bags —','Backpack','Crossbody Bag','Handbag','— Misc —','Ribbon Bow','Apron','Brooch','Scarf','Bandana'],arr:'clothingAcc'},
   bodyParts:{lbl:['Penis (Male)','Vagina','Anus','Nipples','Breasts','Cleavage','Bare Legs','Bare Midriff'],arr:'bodyParts',nsfw:true},
   sockColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Maroon','Peach','Orange','Yellow','Gold','Mint','Green','Dark Green','Olive','Teal','Cyan','Sky Blue','Light Blue','Blue','Navy','Indigo','Lavender','Purple','Violet','Magenta','Beige','Brown','Dark Brown','Silver','Striped','Plaid','Sheer'],k:'sockColor'},
-  sockLength:{lbl:['Ankle','Knee-High','Thigh-High','Over-Knee'],k:'sockLength'},
-  shoes:{lbl:['School Shoes','Sneakers','Loafers','Heels','Boots','Sandals','Barefoot','Platform'],k:'shoes'},
+  sockLength:{lbl:['No Socks','Ankle Socks','Knee-High Socks','Thigh-High Socks','Over-Knee Socks','Tights / Pantyhose','Fishnet Tights'],k:'sockLength'},
+  shoes:{lbl:['— Casual —','Sneakers','Slip-On Shoes','Loafers','Canvas Shoes','— Formal —','School Shoes','Oxford Shoes','Mary Janes','Ballet Flats','— Heels —','Low Heels','Kitten Heels','Stiletto Heels','Wedge Heels','Platform Heels','— Boots —','Ankle Boots','Chelsea Boots','Knee-High Boots','Over-Knee Boots','Combat Boots','Rain Boots','— Open —','Sandals','Flip Flops','Slides','Gladiator Sandals','— Other —','Barefoot'],k:'shoes'},
   shoeColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Maroon','Orange','Yellow','Gold','Green','Dark Green','Olive','Teal','Sky Blue','Light Blue','Blue','Navy','Indigo','Lavender','Purple','Violet','Magenta','Beige','Brown','Dark Brown','Silver'],k:'shoeColor'},
   clothingColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Maroon','Peach','Orange','Yellow','Gold','Mint','Green','Dark Green','Olive','Teal','Cyan','Sky Blue','Light Blue','Blue','Navy','Indigo','Lavender','Purple','Violet','Magenta','Beige','Brown','Dark Brown','Silver','Striped','Plaid','Sheer'],k:'clothingColor'},
   clothingTopColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Maroon','Peach','Orange','Yellow','Gold','Mint','Green','Dark Green','Olive','Teal','Cyan','Sky Blue','Light Blue','Blue','Navy','Indigo','Lavender','Purple','Violet','Magenta','Beige','Brown','Dark Brown','Silver','Striped','Plaid','Sheer'],k:'clothingTopColor'},
@@ -166,11 +175,11 @@ const D={
   nsfwTopColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Peach','Orange','Yellow','Gold','Mint','Green','Teal','Sky Blue','Light Blue','Blue','Navy','Lavender','Purple','Violet','Magenta','Beige','Brown','Silver','Striped','Sheer'],k:'nsfwTopColor'},
   nsfwBottomColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Peach','Orange','Yellow','Gold','Mint','Green','Teal','Sky Blue','Light Blue','Blue','Navy','Lavender','Purple','Violet','Magenta','Beige','Brown','Silver','Striped','Sheer'],k:'nsfwBottomColor'},
   nsfwClothingColor:{lbl:['White','Light Gray','Gray','Dark Gray','Black','Pink','Hot Pink','Red','Crimson','Peach','Orange','Yellow','Gold','Mint','Green','Teal','Sky Blue','Light Blue','Blue','Navy','Lavender','Purple','Violet','Magenta','Beige','Brown','Silver','Striped','Sheer'],k:'nsfwClothingColor'},
-  faceAcc:{lbl:['Glasses','Sunglasses','Round Glasses','Headband','Flower Crown','Hair Clip','Halo','Animal Ears','Horns','Veil','Eye Patch'],arr:'faceAcc'},
+  faceAcc:{lbl:['— Glasses —','Glasses','Sunglasses','Round Glasses','Cat-Eye Glasses','Monocle','Goggles','— Head —','Headband','Flower Crown','Tiara','Crown','Halo','Hair Clip','Hair Pin','Cat Ears Headband','— Face —','Eye Patch','Blindfold','Face Mask','Masquerade Mask','Face Paint','Beauty Mark','— Fantasy —','Animal Ears','Fox Ears','Cat Ears','Dog Ears','Elf Ears','Demon Horns','Horns','Antlers','— Veils —','Veil','Wedding Veil'],arr:'faceAcc'},
   expression:{lbl:['Happy','Gentle Smile','Shy','Confident','Sad','Crying','Angry','Shocked','Tired','Dreamy','Mysterious','Seductive','Scared','Laughing','Stoic','Playful'],k:'expression'},
   pose:{lbl:['Standing','Sitting','Lying Down','Crouching','Kneeling','Dancing','Jumping','Running','Floating','Stretching','Fighting Stance','Eating','Drinking','Reading','Sleeping'],arr:'poses'},
   effects:{lbl:['Sparkles','Electricity','Fire','Water Splash','Ice Crystals','Smoke','Magical Aura','Particles','Cherry Blossoms','Stars','Lightning','Energy Orbs'],arr:'effects'},
-  liquids:{lbl:['Sweat','Tears','Rain-Soaked','Glistening','Dew Drops','Wet Hair'],arr:'liquids'},
+  liquids:{lbl:['Sweat','Tears','Rain-Soaked','Glistening','Dew Drops','Wet Hair','Body Oil','Dripping Water','Blood','Glitter'],arr:'liquids'},
   weapons:{lbl:['Sword','Katana','Dagger','Axe','Spear','Bow & Arrow','Crossbow','Pistol','Rifle','Shotgun','Sniper','Machine Gun','Magic Staff','Magic Wand','Scythe','Hammer','Shield','Grenade','Bazooka','Twin Blades'],arr:'weapons'},
   props:{lbl:['Guitar','Microphone','Violin','Book','Briefcase','Umbrella','Rose','Lantern','Camera','Medical Kit','Potion Bottle','Treasure Chest','Rope','Candle','Teddy Bear','Lollipop','Fan','Broom','Fishing Rod','Letter/Envelope'],arr:'props'},
   electronics:{lbl:['Smartphone','Tablet','Laptop','Gaming Controller','Headphones','Digital Camera','TV Remote','Smart Watch','VR Headset','Drone'],arr:'electronics'},
@@ -200,7 +209,7 @@ const D={
   negQuality:{lbl:['Blurry','Low Quality','JPEG Artifacts','Artifacts','Noise/Grain','Overexposed','Underexposed','Watermark/Text','Cropped','Out of Frame','Flat Colors','Washed Out'],arr:'negQuality'},
   /* NSFW — inline with SFW, hidden until nsfw active */
   nsfwBody:{lbl:['Large Breasts','Small Breasts','Huge Breasts','Big Butt','Slim Waist','Thick Thighs','Curvy Hips','Topless','Nude','Naked','Visible Areolas','Erect Nipples'],arr:'nsfwBody',nsfw:true},
-  clothingCondition:{lbl:['Wet','Muddy','Torn','Dirty','Sandy','Blood-Stained','Burnt','Wrinkled','Disheveled','Soaked'],arr:'clothingCondition'},
+  clothingCondition:{lbl:['— Damage —','Torn','Ripped','Burned','Battle-Damaged','— Dirty —','Dirty','Muddy','Sandy','Blood-Stained','— Wet —','Wet','Soaked','Rain-Drenched','Sweat-Drenched','— NSFW Stains —','Semen-Stained','Cum-Covered','Urine-Stained','Fecal-Stained','— Other —','Wrinkled','Disheveled','Loosened'],arr:'clothingCondition'},
   nsfwClothing:{lbl:[
     'Bunny Suit','Nurse Outfit','Police Costume','French Maid','Cheerleader',
     'Swimwear','Bikini','Micro Bikini',
@@ -292,7 +301,14 @@ function _keyToGridIds(key){
     glow:'glowGrid', smooth:'smoothGrid',
     angle:'angleGrid', shot:'shotGrid', look:'lookGrid',
     lens:'lensGrid',   lensEffect:'lensEffectGrid',
-    quality:'qualityGrid', lights:'lightGrid'
+    quality:'qualityGrid', lights:'lightGrid',
+    /* NSFW */
+    nsfwBody:'nsfwBodyGrid',
+    nsfwTop:'nsfwTopGrid',         nsfwBottom:'nsfwBottomGrid',
+    nsfwClothing:'nsfwClothingGrid',
+    nsfwPose:'nsfwPoseGrid',       nsfwFluid:'nsfwFluidGrid',
+    nsfwEnv:'nsfwEnvGrid',         nsfwShot:'nsfwShotGrid',
+    nsfwIndicator:'nsfwIndicatorGrid'
   };
   var gid = map[key];
   return gid ? [gid] : [];
@@ -328,6 +344,116 @@ function buildBlueprint(){
 /* ═══════════════════════════════════
    RENDER HELPERS
 ═══════════════════════════════════ */
+function buildClothingGrid(){var grid=document.getElementById('clothingGrid');if(!grid)return;grid.innerHTML='';var gender=S.characters?(S.characters[typeof activeChar!=='undefined'?activeChar:0]||'fm'):'fm';CLOTHING_ITEMS.forEach(function(item){if(item.nsfw)return;if(gender==='female'&&item.gender==='m')return;if(gender==='male'&&item.gender==='f')return;var v=item.label.toLowerCase();var b=document.createElement('button');b.className='ob'+(S.clothing===v?' on':'');b.setAttribute('data-en',item.label);b.setAttribute('data-val',v);b.setAttribute('data-cat',item.cat);b.innerHTML='<span>'+item.label+'</span>';b.addEventListener('click',function(){if(S.clothing===v){S.clothing=null;b.classList.remove('on');}else{grid.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});b.classList.add('on');S.clothing=v;if(S.clothingTop||S.clothingBottom){S.clothingTop=null;S.clothingBottom=null;_syncGrid('clothingTopGrid',function(){return false;});_syncGrid('clothingBottomGrid',function(){return false;});}}rebuild();});grid.appendChild(b);});}
+function refreshClothingGrid(){buildClothingGrid();if(window._applyClothingFilter){var a=document.querySelector('.cfc-card.on');window._applyClothingFilter(a?a.dataset.cf:'all');}if(typeof attachAllTriggers==='function')attachAllTriggers();}
+function initClothingFilter(){var row=document.getElementById('clothingFilterRow');if(!row)return;function applyFilter(cat){row.querySelectorAll('.cfc-card').forEach(function(b){b.classList.toggle('on',b.dataset.cf===cat);});var grid=document.getElementById('clothingGrid');var nsfwGrid=document.getElementById('nsfwClothingGrid');var topsBot=document.getElementById('secTopsBottoms');if(topsBot)topsBot.style.display=(cat==='all'||cat==='casual')?'':'none';if(!grid)return;if(cat==='all'){grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='';});if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';return;}if(cat==='nsfw'){grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';return;}if(nsfwGrid)nsfwGrid.style.display='none';grid.querySelectorAll('.og-sep').forEach(function(el){el.style.display='none';});grid.querySelectorAll('.ob').forEach(function(b){b.style.display=(b.getAttribute('data-cat')===cat)?'':'none';});}row.querySelectorAll('.cfc-card').forEach(function(btn){btn.addEventListener('click',function(){applyFilter(btn.dataset.cf);});});window._applyClothingFilter=applyFilter;}
+function initNsfwStainsVisibility(){var stains=['semen-stained','cum-covered','urine-stained','fecal-stained'];var g=document.getElementById('clothingConditionGrid');if(!g)return;g.querySelectorAll('.ob').forEach(function(b){var v=(b.getAttribute('data-val')||'').toLowerCase();if(stains.some(function(s){return v===s||v.includes(s);})){b.classList.add('nsfw-stain');b.style.display='none';}});g.querySelectorAll('.og-sep').forEach(function(sep){if(sep.textContent.toUpperCase().includes('NSFW')){sep.classList.add('nsfw-stain');sep.style.display='none';}});}
+function initHairGenderFilter(){var row=document.getElementById('hairGenderRow');if(!row)return;row.querySelectorAll('.hgf-btn').forEach(function(btn){btn.addEventListener('click',function(){row.querySelectorAll('.hgf-btn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');var hg=btn.getAttribute('data-hg');var grid=document.getElementById('hairstyleGrid');if(!grid||!grid._dataObj)return;var female=grid._dataObj.female||[],male=grid._dataObj.male||[],shared=grid._dataObj.shared||[];grid.querySelectorAll('.ob').forEach(function(b){var lbl=b.getAttribute('data-en')||'';var inF=female.includes(lbl),inM=male.includes(lbl),inS=shared.includes(lbl);var show=false;if(hg==='all')show=true;else if(hg==='female')show=inF&&!inS;else if(hg==='male')show=inM&&!inS;else if(hg==='shared')show=inS;b.style.display=show?'':'none';});});});}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION FILTER SYSTEM (sfc-wrap / sfc-card)
+   Generic per-section filter bars for all tabs.
+═══════════════════════════════════════════════════════════════ */
+const SFC_CONFIG = {
+  charFilterRow: {
+    all:  ['ageGrid','skinGrid','bodyGrid','nsfwBodyGrid','hairstyleGrid'],
+    body: ['ageGrid','skinGrid','bodyGrid','nsfwBodyGrid'],
+    hair: ['hairstyleGrid'],
+  },
+  layersFilterRow: {
+    all:         ['clothingConditionGrid','clothingAccGrid','sockLengthGrid','shoesGrid'],
+    condition:   ['clothingConditionGrid'],
+    accessories: ['clothingAccGrid'],
+    socks:       ['sockLengthGrid'],
+    shoes:       ['shoesGrid'],
+  },
+  lookFilterRow: {
+    all:  ['eyeShapeGrid','faceAccGrid','lookGrid'],
+    eyes: ['eyeShapeGrid'],
+    face: ['faceAccGrid'],
+    dir:  ['lookGrid'],
+  },
+  moodFilterRow: {
+    all:        ['expressionGrid','poseGrid','nsfwPoseGrid','effectsGrid','liquidsGrid','nsfwFluidGrid'],
+    expression: ['expressionGrid'],
+    pose:       ['poseGrid','nsfwPoseGrid'],
+    effects:    ['effectsGrid'],
+    liquids:    ['liquidsGrid','nsfwFluidGrid'],
+  },
+  objectsFilterRow: {
+    all:         ['weaponGrid','propsGrid','electronicsGrid','otherItemsGrid'],
+    weapons:     ['weaponGrid'],
+    props:       ['propsGrid'],
+    electronics: ['electronicsGrid'],
+    other:       ['otherItemsGrid'],
+  },
+  styleFilterRow: {
+    all:      ['colorGradeGrid','animeStudioGrid','styleGrid','eraGrid','strokeGrid','shadowGrid','glowGrid','smoothGrid'],
+    artstyle: ['styleGrid','eraGrid'],
+    studio:   ['animeStudioGrid'],
+    color:    ['colorGradeGrid'],
+    lines:    ['strokeGrid','shadowGrid','glowGrid','smoothGrid'],
+  },
+  qualityFilterRow: {
+    all:     ['qualityGrid','lightGrid'],
+    quality: ['qualityGrid'],
+    light:   ['lightGrid'],
+  },
+  sceneFilterRow: {
+    all:         ['envGrid','nsfwEnvGrid'],
+    environment: ['envGrid','nsfwEnvGrid'],
+  },
+  cameraFilterRow: {
+    all:   ['angleGrid','shotGrid','nsfwShotGrid','lensGrid','lensEffectGrid','bodyPartsGrid'],
+    angle: ['angleGrid'],
+    shot:  ['shotGrid','nsfwShotGrid'],
+    lens:  ['lensGrid','lensEffectGrid'],
+  },
+  negativeFilterRow: {
+    all:     ['negBodyGrid','negQualityGrid'],
+    body:    ['negBodyGrid'],
+    quality: ['negQualityGrid'],
+  },
+};
+
+function _secContaining(gridId){
+  var el=document.getElementById(gridId); if(!el) return null;
+  var p=el.parentElement;
+  while(p){ if(p.classList&&p.classList.contains('sec')) return p; p=p.parentElement; }
+  return null;
+}
+
+function initSectionFilters(){
+  Object.keys(SFC_CONFIG).forEach(function(rowId){
+    var row=document.getElementById(rowId); if(!row) return;
+    var map=SFC_CONFIG[rowId];
+    var allGridIds=[];
+    Object.keys(map).forEach(function(k){
+      if(k!=='all') map[k].forEach(function(g){ if(allGridIds.indexOf(g)===-1) allGridIds.push(g); });
+    });
+
+    function applyFilter(key){
+      row.querySelectorAll('.sfc-card').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-sf')===key); });
+      if(key==='all'){
+        allGridIds.forEach(function(gid){ var s=_secContaining(gid); if(s) s.style.display=''; });
+        return;
+      }
+      var show=map[key]||[];
+      allGridIds.forEach(function(gid){
+        var sec=_secContaining(gid); if(!sec) return;
+        var shouldShow=show.some(function(sg){ return sec.querySelector('#'+sg)!==null; });
+        sec.style.display=shouldShow?'':'none';
+      });
+    }
+
+    row.querySelectorAll('.sfc-card').forEach(function(btn){
+      btn.addEventListener('click',function(){ applyFilter(btn.getAttribute('data-sf')); });
+    });
+  });
+}
+
+
 function makeSingle(gid,lbl,val,k,nsfw=false){
   const g=document.getElementById(gid);if(!g)return;
   lbl.forEach((l,i)=>{
@@ -405,7 +531,7 @@ function makeGenderSingle(gid, dataObj, k){
 
 /* Re-render all gender-aware grids when active char's gender changes */
 function refreshGenderGrids(){
-  ['hairstyleGrid','clothingTopGrid','clothingBottomGrid','clothingGrid'].forEach(function(gid){
+  ['hairstyleGrid','clothingTopGrid','clothingBottomGrid'].forEach(function(gid){
     var g = document.getElementById(gid); if(!g||!g._dataObj) return;
     var cur = S[g._k]; // preserve selection
     makeGenderSingle(gid, g._dataObj, g._k);
@@ -415,11 +541,13 @@ function refreshGenderGrids(){
   // Also re-run color-picker triggers for rebuilt grids
   if(typeof attachAllTriggers==='function') attachAllTriggers();
   if(typeof attachHairEyePopups==='function') attachHairEyePopups();
+  if(typeof refreshClothingGrid==='function') refreshClothingGrid();
 }
 
 function makeMulti(gid,lbl,arr,nsfw=false,inlineHide=false){
   const g=document.getElementById(gid);if(!g)return;
   lbl.forEach(l=>{
+    if(l.startsWith('—')){const sep=document.createElement('div');sep.className='og-sep';sep.textContent=l.replace(/—/g,'').trim();g.appendChild(sep);return;}
     const v=l.toLowerCase();
     const b=document.createElement('button');
     b.className='ob'+(nsfw?' rb':'')+(inlineHide?' nsfw-item':'')+(S[arr].includes(v)?' on':'');
@@ -1014,8 +1142,10 @@ function toggleNSFW(on){
   if(bpSep) bpSep.classList.toggle('vis',on);
   const bpGrid=document.getElementById('bodyPartsGrid');
   if(bpGrid) bpGrid.style.display=on?'grid':'none';
-  // Show/hide .nsfw-item buttons
-  document.querySelectorAll('.nsfw-item').forEach(b=>b.style.display=on?'block':'none');
+  document.querySelectorAll('.nsfw-item:not(.nsfw-stain)').forEach(b=>b.style.display=on?'':'none');
+  document.querySelectorAll('.nsfw-stain').forEach(b=>b.style.display=on?'':'none');
+  const _nC=document.querySelector('.cfc-card[data-cf="nsfw"]');if(_nC)_nC.style.display=on?'':'none';
+  if(!on&&window._applyClothingFilter)window._applyClothingFilter('all');
   // Show/hide NSFW grids
   ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwPoseGrid',
    'nsfwFluidGrid','nsfwIndicatorGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
@@ -1564,6 +1694,7 @@ function init(){
   makeMulti('nsfwBodyGrid',D.nsfwBody.lbl,'nsfwBody',true,false);
   /* Appearance */
   makeGenderSingle('hairstyleGrid',D.hairstyle,'hairstyle');
+  initHairGenderFilter();
   makeSingle('eyeShapeGrid',D.eyeShape.lbl,null,'eyeShape');
   setTimeout(function(){ if(typeof attachHairEyePopups==='function') attachHairEyePopups(); },200);
   /* Outfit */
@@ -1571,9 +1702,13 @@ function init(){
   makeSingle('nsfwTopGrid',        D.nsfwTop.lbl,        null, 'nsfwTop',    true);
   makeGenderSingle('clothingBottomGrid', D.clothingBottom, 'clothingBottom');
   makeSingle('nsfwBottomGrid',     D.nsfwBottom.lbl,     null, 'nsfwBottom', true);
-  makeGenderSingle('clothingGrid', D.clothing, 'clothing');
-  // Mutual exclusion: selecting a Full Outfit clears Top+Bottom, and vice versa
+  buildClothingGrid();
   _initClothingMutualExclusion();
+  initClothingFilter();
+  makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
+  makeMulti('clothingConditionGrid',D.clothingCondition.lbl,'clothingCondition');
+  initNsfwStainsVisibility();
+  (function(){var f=[],m=[],s=[];CLOTHING_ITEMS.forEach(function(it){if(it.nsfw)return;if(it.gender==='f')f.push(it.label);else if(it.gender==='m')m.push(it.label);else s.push(it.label);});D.clothing.female=f;D.clothing.male=m;D.clothing.shared=s;})();
   makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
   makeMulti('clothingConditionGrid', D.clothingCondition.lbl, 'clothingCondition');
   makeMulti('bodyPartsGrid',   D.bodyParts.lbl,   'bodyParts',   true, true);
@@ -1622,6 +1757,7 @@ function init(){
 
   buildCounterDots();
   attachEvents();
+  initSectionFilters();
   renderFavList();
   // Hide all NSFW items and grids initially
   document.querySelectorAll('.nsfw-item').forEach(b=>b.style.display='none');
@@ -1667,7 +1803,7 @@ function attachEvents(){
   }, true); /* capture phase — runs before button's own handler */
 
   /* ── Main section toggle (Characters / Scene) ── */
-  const CHAR_CATS = ['style','character','outfit','mood','tools'];
+  const CHAR_CATS = ['style','character','outfit','layers','look','objects','mood'];
   const SCENE_CATS = ['scene','camera','quality','negative'];
 
   var _activeSection = 'char';
@@ -1943,7 +2079,7 @@ function buildPosText(){
     S.nsfwClothing.forEach(c => wearParts.push(S.nsfwClothingColor ? `${S.nsfwClothingColor} ${c}` : c));
   }
   if(wearParts.length)p.push('wearing '+wearParts.join(', '));
-  if(S.clothingCondition.length)p.push(S.clothingCondition.map(c=>c+' clothes').join(', '));
+  if(S.clothingCondition.length){var _rc=S.clothingCondition.filter(c=>!c.startsWith('—')&&c.trim());if(_rc.length)p.push(_rc.join(', ')+' clothing');}
   if(S.clothingAcc.length)p.push(S.clothingAcc.join(', '));
   if(S.nsfw&&S.bodyParts.length)p.push(S.bodyParts.join(', '));
   if(S.sockColor&&S.sockLength)p.push(`${S.sockColor} ${S.sockLength} socks`);
@@ -3145,7 +3281,7 @@ function randomize(){
   const _gender0   = S.characters ? (S.characters[0]||'female') : 'female';
   const sfwTops    = (_gender0==='male') ? (D.clothingTop.male||[]).concat(D.clothingTop.shared||[]) : (D.clothingTop.female||[]).concat(D.clothingTop.shared||[]);
   const sfwBottoms = (_gender0==='male') ? (D.clothingBottom.male||[]).concat(D.clothingBottom.shared||[]) : (D.clothingBottom.female||[]).concat(D.clothingBottom.shared||[]);
-  const sfwFull    = (D.clothing.shared||[]).concat(D.clothing.female||[]).concat(D.clothing.male||[]).filter(x=>!x.startsWith('—'));
+  const sfwFull    = CLOTHING_ITEMS.filter(it=>!it.nsfw&&(it.gender==='fm'||(it.gender==='f'&&_gender0!=='male')||(it.gender==='m'&&_gender0!=='female'))).map(it=>it.label);
   if(maybe(.60)){
     if(maybe(.75)) S.clothingTop    = pick(sfwTops).toLowerCase();
     if(maybe(.75)) S.clothingBottom = pick(sfwBottoms).toLowerCase();
@@ -3695,7 +3831,7 @@ const UI = {
     random:'Random', nsfw:'NSFW', saved:'Saved', ms_characters:'Characters', ms_scene:'Scene',
     tab_style:'Style', tab_mood:'Mood', tab_scene:'Scene', tab_look:'Look', tab_outfit:'Outfit',
     tab_camera:'Camera', tab_quality:'Quality', tab_character:'Character',
-    tab_tools:'Tools', tab_avoid:'Avoid',
+    tab_tools:'Objects', tab_avoid:'Avoid',
     /* ── Prompts ── */
     positive_prompt:'Positive Prompt', negative_prompt:'Negative Prompt',
     copy_full:'Copy Full Prompt', copy_pos:'Positive', copy_neg:'Negative',
@@ -3736,7 +3872,7 @@ const UI = {
     sec_shot_range:'Shot Range', sec_camera_angle:'Camera Angle',
     sec_looking:'Looking Direction', sec_lens_type:'Lens Type',
     sec_lens_effect:'Lens Effect', sec_body_parts:'Body Parts Focus',
-    sec_neg_prompt:'Negative Prompt', sec_tools:'Tools', sec_look:'Look', sec_outfit:'Outfit',
+    sec_neg_prompt:'Negative Prompt', sec_tools:'Objects', sec_look:'Look', sec_outfit:'Outfit',
     /* ── Negative tab ── */
     what_to_avoid:'What To Avoid',
     avoid_desc:'Select anything you want excluded from the final image.',
@@ -4682,20 +4818,7 @@ attachHairEyePopups();
         authEmail.textContent = user.email || '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
-        // Load character library from Firestore
-        if(typeof window._loadCharLibFromCloud === 'function'){
-          window._loadCharLibFromCloud(_uid);
-        } else {
-          // char-slots.js may not be ready yet — wait briefly
-          var _clAttempts = 0;
-          (function _tryLoadCharLib(){
-            if(typeof window._loadCharLibFromCloud === 'function'){
-              window._loadCharLibFromCloud(_uid);
-            } else if(++_clAttempts < 20){
-              setTimeout(_tryLoadCharLib, 300);
-            }
-          })();
-        }
+        loadCharLibFromCloud(_uid);
       } else {
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
@@ -4760,6 +4883,27 @@ attachHairEyePopups();
       else if(valid.length) toast(`☁️ Loaded ${valid.length} favourites`);
     } catch(e){
       console.warn('loadFavsFromCloud error:', e);
+    }
+  }
+
+  // ── Load character library from Firestore ──
+  async function loadCharLibFromCloud(uid){
+    if(!window._fbCharLib) return;
+    try {
+      const cloud = await window._fbCharLib.load(uid);
+      if(!cloud.length) return;
+      // Merge: cloud wins, skip duplicates by id
+      const local = (typeof csLibrary !== 'undefined') ? csLibrary : [];
+      const localIds = new Set(local.map(e => String(e.id)));
+      const merged = cloud.concat(local.filter(e => !cloud.some(c => String(c.id)===String(e.id))));
+      if(typeof csLibrary !== 'undefined'){
+        csLibrary = merged;
+        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+        if(typeof csRenderLibrary === 'function') csRenderLibrary();
+      }
+      toast(`☁️ Loaded ${cloud.length} characters from cloud`);
+    } catch(e){
+      console.warn('loadCharLibFromCloud error:', e);
     }
   }
 

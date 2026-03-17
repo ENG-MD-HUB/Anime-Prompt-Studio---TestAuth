@@ -480,58 +480,41 @@ function csBuildSaveBar(charIdx){
 /* ══ CHARACTER LIBRARY ══ */
 var csLibrary = JSON.parse(localStorage.getItem('aps_charLib') || '[]');
 
-/* ── Cloud load — called from app.js after login ── */
-window._loadCharLibFromCloud = function(uid){
-  var _att = 0;
-  function _tryLoad(){
-    if(window._fbCharLib){
-      window._fbCharLib.load(uid).then(function(cloud){
-        var local = csLibrary || [];
-        /* Cloud takes priority — local entries not in cloud are appended */
-        var merged = (cloud||[]).concat(local.filter(function(e){
-          return !(cloud||[]).some(function(c){ return String(c.id)===String(e.id); });
-        }));
-        csLibrary = merged;
-        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-        csRenderLibrary();
-        /* Refresh passport overlay if it's open */
-        var ppOv = document.getElementById('ppOverlay');
-        if(ppOv && ppOv.classList.contains('open') && typeof openPassportLibrary==='function'){
-          openPassportLibrary();
-        }
-        if(cloud && cloud.length){
-          if(typeof toast==='function') toast('☁️ Loaded '+cloud.length+' character'+(cloud.length>1?'s':''));
-        }
-      }).catch(function(e){
-        console.error('loadCharLib:', e);
-        if(typeof toast==='function') toast('❌ CharLib load failed: '+(e.message||e.code||e));
-      });
-    } else if(_att++ < 20){
-      setTimeout(_tryLoad, 200);
-    }
-  }
-  _tryLoad();
-};
-
 function csLibSave(charIdx){
-  /* Local-only save — used internally by randomize hook etc.
-     Cloud sync is handled by _doSave (the dialog Save button) */
   var name = '';
   if(charIdx === activeChar && S._name) name = S._name.trim();
   if(!name && charSlots[charIdx] && charSlots[charIdx]._name) name = charSlots[charIdx]._name.trim();
-  if(!name) return;
-  if(csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); })) return;
+  if(!name){
+    var row = document.getElementById('charCardsRow');
+    if(row){
+      var card = row.querySelector('[data-card-idx="'+charIdx+'"]');
+      if(card){ var cin = card.querySelector('.c-name-input'); if(cin) name = cin.value.trim(); }
+    }
+  }
+  if(!name){ csToast('Enter a character name first','warn'); return; }
+  var duplicate = csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); });
+  if(duplicate){ csToast('Name "'+name+'" already exists in library','warn'); return; }
   if(!charSlots[charIdx]) charSlots[charIdx] = csEmptySlot();
+  charSlots[charIdx]._name = name;
+  if(charIdx === activeChar) S._name = name;
   csSave(charIdx);
   var entry = {
-    id: Date.now(), name: name,
+    id: Date.now(),
+    name: name,
     gender: S.characters ? S.characters[charIdx] : null,
     slot: JSON.parse(JSON.stringify(charSlots[charIdx]||csEmptySlot())),
     date: new Date().toLocaleDateString()
   };
   csLibrary.unshift(entry);
-  if(csLibrary.length > 50) csLibrary.pop();
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+
+  /* ── Cloud sync ── */
+  var uid = window._currentUser ? window._currentUser.uid : null;
+  if(uid && window._fbCharLib){
+    window._fbCharLib.save(uid, entry).catch(function(e){ console.warn('charLib save:', e); });
+  }
+
+  csToast('✓ Saved "'+name+'"'+(uid?' ☁️':''),'ok');
   csRenderTabs();
   csRenderLibrary();
 }
@@ -549,22 +532,18 @@ function csLibLoad(entry, charIdx){
 }
 
 function csLibDelete(id){
-  /* Find entry to get _docId before filtering */
-  var entry = csLibrary.find(function(c){ return c.id === id; });
   csLibrary = csLibrary.filter(function(c){ return c.id!==id; });
   localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
 
-  /* ── Cloud delete — only if entry was previously synced ── */
+  /* ── Cloud sync ── */
   var uid = window._currentUser ? window._currentUser.uid : null;
-  if(uid && window._fbCharLib && entry && entry._docId){
-    window._fbCharLib.del(uid, entry._docId).catch(function(e){ console.warn('charLib del:', e); });
+  if(uid && window._fbCharLib){
+    window._fbCharLib.del(uid, id).catch(function(e){ console.warn('charLib del:', e); });
   }
 
   csRenderLibrary();
   csToast('Deleted','ok');
 }
-
-
 
 function csRenderLibrary(){
   var list = document.getElementById('csLibList'); if(!list) return;
@@ -691,6 +670,7 @@ function openSaveCharDialog(charIdx){
   var overlay = document.getElementById('scOverlay');
   var inp     = document.getElementById('scNameInput');
   if(!overlay || !inp) return;
+  /* Pre-fill if name already exists in slot */
   var existingName = '';
   if(charIdx === activeChar && S._name) existingName = S._name;
   else if(charSlots[charIdx] && charSlots[charIdx]._name) existingName = charSlots[charIdx]._name;
@@ -704,107 +684,59 @@ function closeSaveCharDialog(){
   if(overlay) overlay.classList.remove('open');
 }
 
-/* Wire up save dialog buttons — runs after DOM ready */
+/* Intercept the existing idc-save-btn click — open our dialog instead */
 document.addEventListener('DOMContentLoaded', function(){
+  /* ── Save dialog logic ── */
+  var scOverlay = document.getElementById('scOverlay');
+  var scInp     = document.getElementById('scNameInput');
+  var scSave    = document.getElementById('scSave');
+  var scCancel  = document.getElementById('scCancel');
 
-  var scInp    = document.getElementById('scNameInput');
-  var scSave   = document.getElementById('scSave');
-  var scCancel = document.getElementById('scCancel');
-  var scOverlay= document.getElementById('scOverlay');
-
-  /* ── Main save action — saves to cloud immediately if logged in ── */
-  async function _doSave(){
+  function _doSave(){
     var name = scInp ? scInp.value.trim() : '';
-    if(!name){
-      if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); }
-      return;
-    }
-
-    /* Require login */
-    if(!window._currentUser){
-      closeSaveCharDialog();
-      if(typeof showLoginPrompt==='function') showLoginPrompt();
-      else if(typeof toast==='function') toast('🔒 Sign in to save characters to your account');
-      return;
-    }
-
-    /* Duplicate check */
-    if(csLibrary.find(function(c){ return c.name.toLowerCase()===name.toLowerCase(); })){
-      csToast('Name "'+name+'" already exists','warn'); return;
-    }
-
-    /* Update slot name */
+    if(!name){ if(scInp){ scInp.focus(); scInp.style.borderColor='rgba(239,68,68,.6)'; setTimeout(function(){ scInp.style.borderColor=''; },1200); } return; }
+    /* Write name into slot */
     if(!charSlots[_scTargetIdx]) charSlots[_scTargetIdx] = csEmptySlot();
     charSlots[_scTargetIdx]._name = name;
     if(_scTargetIdx === activeChar) S._name = name;
-
-    /* Update card input display */
+    /* Also update the card input so it shows immediately */
     var row = document.getElementById('charCardsRow');
     if(row){
       var card = row.querySelector('[data-card-idx="'+_scTargetIdx+'"]');
       if(card){ var cin = card.querySelector('.c-name-input'); if(cin) cin.value = name; }
     }
-
     closeSaveCharDialog();
-    csSave(_scTargetIdx);
-
-    /* Build entry */
-    var entry = {
-      id:     Date.now(),
-      name:   name,
-      gender: S.characters ? S.characters[_scTargetIdx] : null,
-      slot:   JSON.parse(JSON.stringify(charSlots[_scTargetIdx] || csEmptySlot())),
-      date:   new Date().toLocaleDateString()
-    };
-
-    /* Save locally first (instant UI feedback) */
-    csLibrary.unshift(entry);
-    if(csLibrary.length > 50) csLibrary.pop();
-    localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-    csRenderTabs();
-    csRenderLibrary();
-    csToast('⭐ Saving to cloud…','ok');
-
-    /* ── Push to Firestore immediately ── */
-    try {
-      var docId = await window._fbCharLib.saveAndGetRef(window._currentUser.uid, {
-        id:       entry.id,
-        name:     entry.name,
-        gender:   entry.gender || null,
-        date:     entry.date,
-        slotData: JSON.stringify(entry.slot)
-      });
-      /* Store docId locally so delete works correctly */
-      entry._docId = docId;
-      localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-      csToast('☁️ Saved "'+name+'" to your account ✅','ok');
-    } catch(e){
-      console.error('charLib cloud save:', e);
-      csToast('⚠️ Saved locally — cloud failed','ok');
-    }
+    csLibSave(_scTargetIdx);
   }
 
-  if(scSave)    scSave.addEventListener('click', _doSave);
-  if(scCancel)  scCancel.addEventListener('click', closeSaveCharDialog);
+  if(scSave) scSave.addEventListener('click', _doSave);
+  if(scCancel) scCancel.addEventListener('click', closeSaveCharDialog);
   if(scOverlay) scOverlay.addEventListener('click', function(e){ if(e.target===scOverlay) closeSaveCharDialog(); });
-  if(scInp)     scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
+  if(scInp) scInp.addEventListener('keydown', function(e){ if(e.key==='Enter') _doSave(); if(e.key==='Escape') closeSaveCharDialog(); });
 
-  /* Star button on character cards — local save, no login required */
+  /* Override save-btn click on IDC cards to use dialog */
   document.addEventListener('click', function(e){
     var btn = e.target.closest('.idc-save-btn');
     if(!btn) return;
+    /* Don't stopPropagation — just open the dialog */
     var idx = parseInt(btn.getAttribute('data-idx'));
-    if(!isNaN(idx)) openSaveCharDialog(idx);
+    if(isNaN(idx)) return;
+    openSaveCharDialog(idx);
   });
 
-  /* Gender modal saved character button */
+  /* ── Gender modal "Saved Character" button ── */
   var savedBtn = document.getElementById('genderModalSaved');
   if(savedBtn){
     savedBtn.addEventListener('click', function(e){
       e.stopPropagation();
-      var targetIdx = (typeof window._gIdx !== 'undefined' && window._gIdx !== null) ? window._gIdx : activeChar;
+      /* Capture idx BEFORE closeGenderModal nulls _gIdx */
+      var targetIdx = (typeof window._gIdx !== 'undefined' && window._gIdx !== null)
+        ? window._gIdx
+        : activeChar;
+      /* Close gender modal */
       var gOver = document.getElementById('genderOverlay');
       if(gOver) gOver.classList.remove('open');
+      /* Open passport library */
       openPassportLibrary(targetIdx);
     });
   }
@@ -1088,22 +1020,11 @@ document.addEventListener('DOMContentLoaded', function(){
       reader.onload = function(ev){
         var b64 = ev.target.result;
         var entry = csLibrary.find(function(c){ return c.id === entryId; });
-        if(!entry) return;
-
-        /* Save base64 locally */
-        entry.photo = b64;
-        localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-        openPassportLibrary(_ppTargetChar);
-        ppGoTo(_ppIndex);
-
-        /* ── Sync photo to Firebase Storage ── */
-        var uid = window._currentUser ? window._currentUser.uid : null;
-        if(uid && window._fbCharLib && window._fbCharLib.savePhoto){
-          window._fbCharLib.savePhoto(uid, entryId, b64).then(function(photoURL){
-            /* Update local entry with cloud URL so next device gets it */
-            entry.photoURL = photoURL;
-            localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
-          }).catch(function(err){ console.warn('Photo sync failed:', err); });
+        if(entry){
+          entry.photo = b64;
+          localStorage.setItem('aps_charLib', JSON.stringify(csLibrary));
+          openPassportLibrary(_ppTargetChar);
+          ppGoTo(_ppIndex);
         }
       };
       reader.readAsDataURL(file);
