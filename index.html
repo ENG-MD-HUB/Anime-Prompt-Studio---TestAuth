@@ -125,6 +125,7 @@
       <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
       <button class="tab" data-c="layers"><i class="fas fa-layer-group"></i> <span>Layers</span></button>
       <button class="tab" data-c="look"><i class="fas fa-glasses"></i> <span>Look</span></button>
+      <button class="tab" data-c="pose"><i class="fas fa-person-running"></i> <span>Pose</span></button>
       <button class="tab" data-c="objects"><i class="fas fa-box-open"></i> <span data-i18n="tab_tools">Objects</span></button>
       <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
     </div>
@@ -289,16 +290,30 @@
   <!-- ── MOOD ── -->
   <div class="cat" id="cat-mood">
   <div class="sfc-wrap" id="moodFilterRow">
-    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="expression"><span class="sfc-icon"><i class="fas fa-face-smile"></i></span><span class="sfc-label">Expression</span></button><button class="sfc-card" data-sf="pose"><span class="sfc-icon"><i class="fas fa-person-walking"></i></span><span class="sfc-label">Pose</span></button><button class="sfc-card" data-sf="effects"><span class="sfc-icon"><i class="fas fa-wand-magic-sparkles"></i></span><span class="sfc-label">Effects</span></button><button class="sfc-card" data-sf="liquids"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Liquids</span></button>
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="expression"><span class="sfc-icon"><i class="fas fa-face-smile"></i></span><span class="sfc-label">Expression</span></button><button class="sfc-card" data-sf="effects"><span class="sfc-icon"><i class="fas fa-wand-magic-sparkles"></i></span><span class="sfc-label">Effects</span></button><button class="sfc-card" data-sf="liquids"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Liquids</span></button>
   </div>
 
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-face-smile"></i></div><span class="sec-title" data-i18n="sec_expression">Expression</span><button class="sec-clr" data-k="expression"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="expressionGrid"></div>
     </div>
-    <div class="sec" id="secPoseAction">
+
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title" data-i18n="sec_effects">Special Effects</span></div>
+      <div class="og c3" id="effectsGrid"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title" data-i18n="sec_liquids">Liquids & Materials</span></div>
+      <div class="og c3" id="liquidsGrid"></div>
+      <div class="og c3" id="nsfwFluidGrid"></div>
+      <div class="og c3" id="nsfwIndicatorGrid" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── POSE ── -->
+  <div class="cat" id="cat-pose">
+    <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-running"></i></div><span class="sec-title">Pose &amp; Action</span><span class="sec-max">max 3</span></div>
-      <!-- Pose/Action sub-filter -->
       <div class="cfc-wrap" id="poseActionFilterRow">
         <button class="cfc-card on" data-paf="all"><span class="cfc-icon"><i class="fas fa-grip"></i></span><span class="cfc-label">All</span></button>
         <button class="cfc-card" data-paf="pose"><span class="cfc-icon"><i class="fas fa-person-walking"></i></span><span class="cfc-label">Pose</span></button>
@@ -312,17 +327,6 @@
       <div class="og c3" id="nsfwPoseGrid"></div>
       <div class="og c3" id="actionsGrid"></div>
     </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title" data-i18n="sec_effects">Special Effects</span></div>
-      <div class="og c3" id="effectsGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title" data-i18n="sec_liquids">Liquids & Materials</span></div>
-      <div class="og c3" id="liquidsGrid"></div>
-      <div class="og c3" id="nsfwFluidGrid"></div>
-      <div class="og c3" id="nsfwIndicatorGrid" style="display:none"></div>
-      <div class="og c3" id="nsfwObjectsGrid" style="display:none"></div>
-    </div>
   </div>
 
   <!-- ── OBJECTS ── -->
@@ -335,6 +339,10 @@
     <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-cube"></i></div><span class="sec-title" data-i18n="sec_props">Props & Objects</span><span class="sec-max">max 3</span></div><div class="og c3" id="propsGrid"></div></div>
     <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-mobile-screen"></i></div><span class="sec-title" data-i18n="sec_electronics">Electronics</span><span class="sec-max">max 2</span></div><div class="og c3" id="electronicsGrid"></div></div>
     <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-star-of-life"></i></div><span class="sec-title">Other Items</span></div><div class="og c3" id="otherItemsGrid"></div></div>
+    <div class="sec nsfw-only-sec" id="secNsfwObjects">
+      <div class="sec-hd"><div class="sec-ico" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:#f87171;"><i class="fas fa-fire"></i></div><span class="sec-title" style="color:#f87171;">NSFW Objects</span></div>
+      <div class="og c3" id="nsfwObjectsGrid" style="display:none"></div>
+    </div>
   </div>
 
   <!-- ── SCENE ── -->

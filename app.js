@@ -2091,7 +2091,7 @@ function attachEvents(){
   }, true); /* capture phase — runs before button's own handler */
 
   /* ── Main section toggle (Characters / Scene) ── */
-  const CHAR_CATS = ['style','character','outfit','layers','look','objects','mood'];
+  const CHAR_CATS = ['style','character','outfit','layers','look','pose','objects','mood'];
   const SCENE_CATS = ['scene','camera','quality','negative'];
 
   var _activeSection = 'char';
@@ -2126,6 +2126,21 @@ function attachEvents(){
     t.classList.add('on');
     const catEl=document.getElementById('cat-'+t.dataset.c);
     if(catEl) catEl.classList.add('on');
+    // Re-apply NSFW visibility after tab switch
+    if(S.nsfw){
+      ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwPoseGrid',
+       'nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el) el.style.display='grid';
+      });
+      document.querySelectorAll('.nsfw-item:not(.nsfw-stain)').forEach(function(b){b.style.display='';});
+      document.querySelectorAll('.nsfw-stain').forEach(function(b){b.style.display='';});
+    }
+    // Re-apply clothing filter state
+    if(window._applyClothingFilter){
+      var activeCard=document.querySelector('#clothingFilterRow .cfc-card.on');
+      window._applyClothingFilter(activeCard?activeCard.dataset.cf:'all');
+    }
   }));
 
   /* theme */
