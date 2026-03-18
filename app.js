@@ -106,12 +106,11 @@ const SKINS=[
 const BP_CELLS=[
   {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape','nsfwBody']},
   {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
-  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids','nsfwPose','nsfwFluid']},
-  {id:'bp-action', icon:'fa-person-running', lbl:'Action', keys:['actions']},
-  {id:'bp-tools',  icon:'fa-box-open',   lbl:'Objects',   keys:['weapons','props','electronics','otherItems']},
+  {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','actions','effects','liquids','nsfwPose','nsfwFluid','nsfwIndicator']},
+  {id:'bp-tools',  icon:'fa-box-open',   lbl:'Objects',   keys:['weapons','props','electronics','otherItems','nsfwObjects']},
   {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
   {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment','nsfwEnv']},
-  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect','nsfwShot']},
+  {id:'bp-camera', icon:'fa-camera',     lbl:'Camera',    keys:['angle','shot','look','lens','lensEffect','nsfwShot','bodyParts']},
   {id:'bp-quality',icon:'fa-sparkles',   lbl:'Quality',   keys:['quality','lights']}
 ];
 
@@ -384,10 +383,18 @@ const D={
   nsfwBody:{lbl:['Large Breasts','Small Breasts','Huge Breasts','Big Butt','Slim Waist','Thick Thighs','Curvy Hips','Topless','Nude','Naked','Visible Areolas','Erect Nipples'],arr:'nsfwBody',nsfw:true},
   clothingCondition:{lbl:['— Damage —','Torn','Ripped','Burned','Battle-Damaged','— Dirty —','Dirty','Muddy','Sandy','Blood-Stained','— Wet —','Wet','Soaked','Rain-Drenched','Sweat-Drenched','— NSFW Stains —','Semen-Stained','Cum-Covered','Urine-Stained','Fecal-Stained','— Other —','Wrinkled','Disheveled','Loosened'],arr:'clothingCondition'},
   nsfwClothing:{lbl:[
+    '— Role-Play —',
     'Bunny Suit','Nurse Outfit','Police Costume','French Maid','Cheerleader',
-    'Swimwear','Bikini','Micro Bikini',
-    'Lingerie','Pasties Only',
-    'See-through','No Bra','Panties Visible','Unbuttoned','Skirt Lifted','Micro Skirt'
+    'Schoolgirl Costume','Stewardess Costume','Secretary Outfit','Cat Maid',
+    '— Swimwear —',
+    'Micro Bikini','Brazilian Bikini','Thong Bikini','Wet Bikini',
+    '— Lingerie —',
+    'Lingerie','Babydoll','Lace Lingerie','Bra & Panties',
+    'Corset & Stockings','Pasties Only','Body Stocking',
+    '— Revealing —',
+    'See-through','No Bra','Panties Visible','Skirt Lifted','Micro Skirt','Crotchless Outfit',
+    '— Fetish —',
+    'Latex Bodysuit','PVC Outfit','Harness','Bondage Outfit','Catsuit'
   ],arr:'nsfwClothing',nsfw:true},
   actions:{lbl:[
     '— Daily Life —','Eating food','Drinking coffee','Reading a book','Typing on laptop','Talking on phone','Listening to music','Cooking','Shopping','Studying','Playing video games','Watching TV',
@@ -396,7 +403,23 @@ const D={
     '— Action & Combat —','Drawing a sword','Casting a spell','Aiming a bow','Throwing a shuriken','Blocking an attack','Leaping into battle','Firing a gun','Running from danger',
     '— Other —','Injecting with syringe','Holding umbrella in rain','Picking flowers','Sitting by window','Looking at the sky','Sleeping','Waking up','Bathing'
   ],arr:'actions'},
-  nsfwPose:{lbl:['On All Fours','Doggy Style','Missionary','Cowgirl','Reverse Cowgirl','Oral','Anal','Gangbang','Tied Up','Spread Legs','Fingering','Self-Touching','Riding','Mating Press'],arr:'nsfwPose',nsfw:true},
+  nsfwPose:{lbl:[
+    '— Positions —',
+    'On All Fours','Doggy Style','Missionary','Cowgirl','Reverse Cowgirl',
+    'Mating Press','Prone Bone','Standing','Against Wall','Lotus Position',
+    'Spoon Position','Pile Driver','Leg Lock','Suspended Congress',
+    '— Acts —',
+    'Oral','Blowjob','Cunnilingus','Anal','Riding','Double Penetration',
+    'Gangbang','Threesome','Facial','Creampie',
+    '— Poses —',
+    'Spread Legs','Spread Eagle','Legs Up','Bent Over','Kneeling',
+    'Sitting On Face','Squatting','On Back Legs Open',
+    '— BDSM —',
+    'Tied Up','Tied Spread Eagle','Suspended','Collared & Leashed',
+    'Blindfolded','Gagged','Spanked',
+    '— Self ——',
+    'Fingering','Self-Touching','Masturbating','Inserting Toy','Using Vibrator'
+  ],arr:'nsfwPose',nsfw:true},
   nsfwFluid:{lbl:['Cum','Cum on Face','Cum on Body','Cum Inside','Dripping','Wet/Soaked','Body Oil','Sweat Droplets','Vaginal Fluid','Urine/Squirt','Feces (Scat)','Anal Fluid','Milk/Lactation'],arr:'nsfwFluid',nsfw:true},
   nsfwEnv:{lbl:['In Bed','Bathroom','Shower','Locker Room','Sex Dungeon','Glory Hole','Public Outdoor','Hotel Room','Adult Club','Onsen Bath'],arr:'nsfwEnv',nsfw:true},
   nsfwIndicator:{lbl:['Diaper (Baby)','Female Diaper','Semen Stain','Urine Stain','Fecal Stain','Sanitary Pad','Female Discharge','Anal Plug','Vibrator','Dildo','Sex Toy','Collar & Leash','Handcuffs/BDSM'],arr:'nsfwIndicator',nsfw:true},
@@ -531,7 +554,41 @@ function buildBlueprint(){
 /* ═══════════════════════════════════
    RENDER HELPERS
 ═══════════════════════════════════ */
-function buildClothingGrid(){var grid=document.getElementById('clothingGrid');if(!grid)return;grid.innerHTML='';var gender=S.characters?(S.characters[typeof activeChar!=='undefined'?activeChar:0]||'fm'):'fm';CLOTHING_ITEMS.forEach(function(item){if(item.nsfw)return;if(gender==='female'&&item.gender==='m')return;if(gender==='male'&&item.gender==='f')return;var v=item.label.toLowerCase();var b=document.createElement('button');b.className='ob'+(S.clothing===v?' on':'');b.setAttribute('data-en',item.label);b.setAttribute('data-val',v);b.setAttribute('data-cat',item.cat);b.innerHTML='<span>'+item.label+'</span>';b.addEventListener('click',function(){if(S.clothing===v){S.clothing=null;b.classList.remove('on');}else{grid.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});b.classList.add('on');S.clothing=v;if(S.clothingTop||S.clothingBottom){S.clothingTop=null;S.clothingBottom=null;_syncGrid('clothingTopGrid',function(){return false;});_syncGrid('clothingBottomGrid',function(){return false;});}}rebuild();});grid.appendChild(b);});}
+function buildClothingGrid(){
+  var grid=document.getElementById('clothingGrid');if(!grid)return;
+  grid.innerHTML='';
+  var gender=S.characters?(S.characters[typeof activeChar!=='undefined'?activeChar:0]||'fm'):'fm';
+  CLOTHING_ITEMS.forEach(function(item){
+    // Skip nsfw items — they show in nsfwClothingGrid separately
+    if(item.nsfw) return;
+    if(gender==='female'&&item.gender==='m') return;
+    if(gender==='male'  &&item.gender==='f') return;
+    var v=item.label.toLowerCase();
+    var b=document.createElement('button');
+    b.className='ob'+(S.clothing===v?' on':'');
+    b.setAttribute('data-en',item.label);
+    b.setAttribute('data-val',v);
+    b.setAttribute('data-cat',item.cat);
+    b.innerHTML='<span>'+item.label+'</span>';
+    b.addEventListener('click',function(){
+      if(S.clothing===v){S.clothing=null;b.classList.remove('on');}
+      else{
+        grid.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});
+        // Also clear nsfwClothingGrid selection
+        var ng=document.getElementById('nsfwClothingGrid');
+        if(ng) ng.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});
+        b.classList.add('on');S.clothing=v;
+        if(S.clothingTop||S.clothingBottom){
+          S.clothingTop=null;S.clothingBottom=null;
+          _syncGrid('clothingTopGrid',function(){return false;});
+          _syncGrid('clothingBottomGrid',function(){return false;});
+        }
+      }
+      rebuild();
+    });
+    grid.appendChild(b);
+  });
+}
 function refreshClothingGrid(){buildClothingGrid();if(window._applyClothingFilter){var a=document.querySelector('.cfc-card.on');window._applyClothingFilter(a?a.dataset.cf:'all');}if(typeof attachAllTriggers==='function')attachAllTriggers();}
 function initClothingFilter(){
   var row=document.getElementById('clothingFilterRow'); if(!row)return;
