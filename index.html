@@ -227,12 +227,8 @@
     <!-- ── LOOK (merged into Character) ── -->
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-scissors"></i></div><span class="sec-title" data-i18n="sec_hairstyle">Hairstyle</span><button class="sec-clr" id="clrHair"><span data-i18n="clear">Clear</span></button></div>
-      <div class="hair-gender-row" id="hairGenderRow"><button class="hgf-btn on" data-hg="all"><i class="fas fa-users"></i> All</button><button class="hgf-btn" data-hg="female"><i class="fas fa-venus"></i> Female</button><button class="hgf-btn" data-hg="male"><i class="fas fa-mars"></i> Male</button><button class="hgf-btn" data-hg="shared"><i class="fas fa-circle-half-stroke"></i> Shared</button></div>
+      <div class="hair-gender-row" id="hairGenderRow"><button class="hgf-btn on" data-hg="all"><i class="fas fa-users"></i> All</button><button class="hgf-btn" data-hg="female"><i class="fas fa-venus"></i> Female</button><button class="hgf-btn" data-hg="male"><i class="fas fa-mars"></i> Male</button></div>
       <div class="og c3" id="hairstyleGrid"></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-star"></i></div><span class="sec-title" data-i18n="sec_eye_shape">Eye Shape</span><button class="sec-clr" id="clrEye"><span data-i18n="clear">Clear</span></button></div>
-      <div class="og c3" id="eyeShapeGrid"></div>
     </div>
   </div>
 
@@ -251,10 +247,17 @@
         <button class="cfc-card" data-cf="fantasy"><span class="cfc-icon"><i class="fas fa-hat-wizard"></i></span><span class="cfc-label">Fantasy</span></button>
         <button class="cfc-card" data-cf="swim"><span class="cfc-icon"><i class="fas fa-water"></i></span><span class="cfc-label">Swim</span></button>
         <button class="cfc-card" data-cf="cultural"><span class="cfc-icon"><i class="fas fa-earth-asia"></i></span><span class="cfc-label">Cultural</span></button>
-        <button class="cfc-card nsfw-item" data-cf="nsfw" style="display:none"><span class="cfc-icon"><i class="fas fa-fire"></i></span><span class="cfc-label">NSFW</span></button>
+        <button class="cfc-card" data-cf="socks"><span class="cfc-icon"><i class="fas fa-socks"></i></span><span class="cfc-label">Socks</span></button>
       </div>
       <div class="og c3" id="clothingGrid"></div>
       <div class="og c3" id="nsfwClothingGrid" style="display:none"></div>
+    </div>
+    <div class="sec" id="secSocksShoes" style="display:none">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-socks"></i></div><span class="sec-title">Socks &amp; Shoes</span></div>
+      <div class="outfit-split" style="gap:.75rem">
+        <div class="outfit-half"><div class="outfit-sub-label">Sock Length <button class="sec-clr" data-k="sockLength" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og c3" id="sockLengthGrid"></div></div>
+        <div class="outfit-half"><div class="outfit-sub-label">Footwear <button class="sec-clr" data-k="shoes" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og" id="shoesGrid"></div></div>
+      </div>
     </div>
     <div class="sec" id="secTopsBottoms">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-shirt"></i></div><span class="sec-title">Tops &amp; Bottoms</span><button class="sec-clr" id="clrTopBottom"><span data-i18n="clear">Clear</span></button></div>
@@ -267,18 +270,11 @@
   <!-- ── LAYERS ── -->
   <div class="cat" id="cat-layers">
   <div class="sfc-wrap" id="layersFilterRow">
-    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="condition"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Condition</span></button><button class="sfc-card" data-sf="accessories"><span class="sfc-icon"><i class="fas fa-ring"></i></span><span class="sfc-label">Acc</span></button><button class="sfc-card" data-sf="socks"><span class="sfc-icon"><i class="fas fa-socks"></i></span><span class="sfc-label">Socks</span></button><button class="sfc-card" data-sf="shoes"><span class="sfc-icon"><i class="fas fa-shoe-prints"></i></span><span class="sfc-label">Shoes</span></button>
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button><button class="sfc-card" data-sf="condition"><span class="sfc-icon"><i class="fas fa-droplet"></i></span><span class="sfc-label">Condition</span></button><button class="sfc-card" data-sf="accessories"><span class="sfc-icon"><i class="fas fa-ring"></i></span><span class="sfc-label">Acc</span></button>
   </div>
 
     <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title">Clothing Condition</span><button class="sec-clr" data-arr="clothingCondition"><span data-i18n="clear">Clear</span></button></div><div class="og c3" id="clothingConditionGrid"></div></div>
     <div class="sec"><div class="sec-hd"><div class="sec-ico"><i class="fas fa-ring"></i></div><span class="sec-title" data-i18n="sec_clothing_acc">Clothing Accessories</span></div><div class="og c3" id="clothingAccGrid"></div></div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-socks"></i></div><span class="sec-title">Socks &amp; Shoes</span></div>
-      <div class="outfit-split" style="gap:.75rem">
-        <div class="outfit-half"><div class="outfit-sub-label">Sock Length <button class="sec-clr" data-k="sockLength" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og" id="sockLengthGrid"></div></div>
-        <div class="outfit-half"><div class="outfit-sub-label">Footwear <button class="sec-clr" data-k="shoes" style="margin-left:auto"><span data-i18n="clear">Clear</span></button></div><div class="og" id="shoesGrid"></div></div>
-      </div>
-    </div>
   </div>
   <!-- ── LOOK ── -->
   <div class="cat" id="cat-look">

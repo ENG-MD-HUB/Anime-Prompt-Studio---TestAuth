@@ -120,16 +120,151 @@ const BP_CELLS=[
 ═══════════════════════════════════ */
 
 const CLOTHING_ITEMS=[
-{label:'Casual Streetwear',gender:'fm',cat:'casual'},{label:'Sporty Outfit',gender:'fm',cat:'casual'},{label:'Athleisure',gender:'fm',cat:'casual'},{label:'Tracksuit',gender:'fm',cat:'casual'},{label:'Sleepwear / Pajamas',gender:'fm',cat:'casual'},{label:'Y2K Outfit',gender:'f',cat:'casual'},{label:'E-girl Outfit',gender:'f',cat:'casual'},{label:'Cottagecore Dress',gender:'f',cat:'casual'},{label:'Sundress',gender:'f',cat:'casual'},{label:'Bodycon Dress',gender:'f',cat:'casual'},{label:'Dark Academia',gender:'fm',cat:'casual'},{label:'Gothic Outfit',gender:'fm',cat:'casual'},{label:'Harajuku Style',gender:'fm',cat:'casual'},{label:'Streetwear Set',gender:'m',cat:'casual'},
-{label:'School Uniform',gender:'fm',cat:'school'},{label:'Sailor Uniform',gender:'f',cat:'school'},{label:'Blazer School Uniform',gender:'fm',cat:'school'},{label:'Seifuku',gender:'f',cat:'school'},{label:'Pleated Mini Skirt Uniform',gender:'f',cat:'school'},{label:'Very Short School Skirt',gender:'f',cat:'school'},{label:'Exposed Midriff School Uniform',gender:'f',cat:'school'},
-{label:'Business Office Suit',gender:'fm',cat:'uniform'},{label:'Flight Attendant Uniform',gender:'fm',cat:'uniform'},{label:'Pilot Uniform',gender:'fm',cat:'uniform'},{label:'Chef Uniform',gender:'fm',cat:'uniform'},{label:'Doctor Coat',gender:'fm',cat:'uniform'},{label:'Nurse Uniform',gender:'f',cat:'uniform'},{label:'Police Uniform',gender:'fm',cat:'uniform'},{label:'Military Uniform',gender:'fm',cat:'uniform'},{label:'Security Guard Uniform',gender:'fm',cat:'uniform'},{label:'Firefighter Gear',gender:'fm',cat:'uniform'},{label:'Sports Jersey',gender:'fm',cat:'uniform'},
-{label:'Little Black Dress',gender:'f',cat:'formal'},{label:'Evening Gown',gender:'f',cat:'formal'},{label:'Ball Gown',gender:'f',cat:'formal'},{label:'Wedding Dress',gender:'f',cat:'formal'},{label:'Qipao / Cheongsam',gender:'f',cat:'formal'},{label:'Business Suit',gender:'m',cat:'formal'},{label:'Formal Tuxedo',gender:'m',cat:'formal'},{label:'Three-Piece Suit',gender:'m',cat:'formal'},{label:'Black Tie Formal',gender:'fm',cat:'formal'},{label:'Gala Outfit',gender:'fm',cat:'formal'},
-{label:'Magical Girl',gender:'f',cat:'japanese'},{label:'Idol Outfit',gender:'f',cat:'japanese'},{label:'Gothic Lolita',gender:'f',cat:'japanese'},{label:'Sweet Lolita',gender:'f',cat:'japanese'},{label:'Maid Outfit',gender:'f',cat:'japanese'},{label:'Shrine Maiden / Miko',gender:'f',cat:'japanese'},{label:'Kimono',gender:'fm',cat:'japanese'},{label:'Yukata',gender:'fm',cat:'japanese'},{label:'Ninja Outfit',gender:'fm',cat:'japanese'},
-{label:'Fantasy Armor',gender:'fm',cat:'fantasy'},{label:'Witch Costume',gender:'f',cat:'fantasy'},{label:'Fairy Outfit',gender:'f',cat:'fantasy'},{label:'Vampire Dress',gender:'f',cat:'fantasy'},{label:'Princess Dress',gender:'f',cat:'fantasy'},{label:'Warrior Costume',gender:'fm',cat:'fantasy'},{label:'Knight Armor',gender:'m',cat:'fantasy'},{label:'Wizard Robe',gender:'fm',cat:'fantasy'},{label:'Cyberpunk Outfit',gender:'fm',cat:'fantasy'},{label:'Steampunk Outfit',gender:'fm',cat:'fantasy'},
-{label:'Cat Girl Outfit',gender:'f',cat:'animal'},{label:'Fox Girl Outfit',gender:'f',cat:'animal'},{label:'Bunny Girl Suit',gender:'f',cat:'animal'},{label:'Wolf Girl Outfit',gender:'f',cat:'animal'},{label:'Bear Kigurumi',gender:'fm',cat:'animal'},{label:'Panda Kigurumi',gender:'fm',cat:'animal'},{label:'Animal Hoodie Onesie',gender:'fm',cat:'animal'},
-{label:'One-Piece Swimsuit',gender:'f',cat:'swim'},{label:'Bikini',gender:'f',cat:'swim'},{label:'String Bikini',gender:'f',cat:'swim'},{label:'Sports Swimwear',gender:'fm',cat:'swim'},{label:'Swim Trunks',gender:'m',cat:'swim'},
-{label:'Hanbok (Korean)',gender:'fm',cat:'cultural'},{label:'Ao Dai (Vietnamese)',gender:'f',cat:'cultural'},{label:'Sari (Indian)',gender:'f',cat:'cultural'},{label:'Abaya',gender:'f',cat:'cultural'},{label:'Kilt (Scottish)',gender:'m',cat:'cultural'},
-{label:'Bunny Suit',gender:'f',cat:'nsfw',nsfw:true},{label:'Nurse Outfit',gender:'f',cat:'nsfw',nsfw:true},{label:'French Maid',gender:'f',cat:'nsfw',nsfw:true},{label:'Cheerleader',gender:'f',cat:'nsfw',nsfw:true},{label:'Micro Bikini',gender:'f',cat:'nsfw',nsfw:true},{label:'Lingerie',gender:'f',cat:'nsfw',nsfw:true},{label:'Bra & Panties',gender:'f',cat:'nsfw',nsfw:true},{label:'Pasties Only',gender:'f',cat:'nsfw',nsfw:true},{label:'See-through',gender:'fm',cat:'nsfw',nsfw:true},{label:'Latex Bodysuit',gender:'fm',cat:'nsfw',nsfw:true},{label:'Bondage Outfit',gender:'fm',cat:'nsfw',nsfw:true},{label:'Catsuit',gender:'fm',cat:'nsfw',nsfw:true},
+  // ── CASUAL ──
+  {label:'Casual Streetwear',               gender:'fm', cat:'casual'},
+  {label:'Sporty Outfit',                   gender:'fm', cat:'casual'},
+  {label:'Athleisure',                      gender:'fm', cat:'casual'},
+  {label:'Tracksuit',                       gender:'fm', cat:'casual'},
+  {label:'Sleepwear / Pajamas',             gender:'fm', cat:'casual'},
+  {label:'Y2K Outfit',                      gender:'f',  cat:'casual'},
+  {label:'E-girl Outfit',                   gender:'f',  cat:'casual'},
+  {label:'Cottagecore Dress',               gender:'f',  cat:'casual'},
+  {label:'Sundress',                        gender:'f',  cat:'casual'},
+  {label:'Shirt Dress',                     gender:'f',  cat:'casual'},
+  {label:'Wrap Dress',                      gender:'f',  cat:'casual'},
+  {label:'Bodycon Dress',                   gender:'f',  cat:'casual'},
+  {label:'Dark Academia',                   gender:'fm', cat:'casual'},
+  {label:'Gothic Outfit',                   gender:'fm', cat:'casual'},
+  {label:'Punk Outfit',                     gender:'fm', cat:'casual'},
+  {label:'Harajuku Style',                  gender:'fm', cat:'casual'},
+  {label:'Streetwear Set',                  gender:'m',  cat:'casual'},
+  {label:'Tank Top & Shorts',               gender:'m',  cat:'casual'},
+  // ── SCHOOL ──
+  {label:'School Uniform',                  gender:'fm', cat:'school'},
+  {label:'Sailor Uniform',                  gender:'f',  cat:'school'},
+  {label:'Blazer School Uniform',           gender:'fm', cat:'school'},
+  {label:'Seifuku',                         gender:'f',  cat:'school'},
+  {label:'Pleated Mini Skirt Uniform',      gender:'f',  cat:'school'},
+  {label:'Very Short School Skirt',         gender:'f',  cat:'school'},
+  {label:'Exposed Midriff School Uniform',  gender:'f',  cat:'school'},
+  // ── UNIFORM ──
+  {label:'Business Office Suit',            gender:'fm', cat:'uniform'},
+  {label:'Corporate Blazer Set',            gender:'fm', cat:'uniform'},
+  {label:'Bank Teller Uniform',             gender:'fm', cat:'uniform'},
+  {label:'Hotel Staff Uniform',             gender:'fm', cat:'uniform'},
+  {label:'Flight Attendant Uniform',        gender:'fm', cat:'uniform'},
+  {label:'Pilot Uniform',                   gender:'fm', cat:'uniform'},
+  {label:'Chef Uniform',                    gender:'fm', cat:'uniform'},
+  {label:'Doctor Coat',                     gender:'fm', cat:'uniform'},
+  {label:'Nurse Uniform',                   gender:'f',  cat:'uniform'},
+  {label:'Police Uniform',                  gender:'fm', cat:'uniform'},
+  {label:'Military Uniform',                gender:'fm', cat:'uniform'},
+  {label:'Security Guard Uniform',          gender:'fm', cat:'uniform'},
+  {label:'Firefighter Gear',                gender:'fm', cat:'uniform'},
+  {label:'Postal Worker Uniform',           gender:'fm', cat:'uniform'},
+  {label:'Sports Jersey',                   gender:'fm', cat:'uniform'},
+  // ── FORMAL ──
+  {label:'Little Black Dress',              gender:'f',  cat:'formal'},
+  {label:'Cocktail Dress',                  gender:'f',  cat:'formal'},
+  {label:'Evening Gown',                    gender:'f',  cat:'formal'},
+  {label:'Ball Gown',                       gender:'f',  cat:'formal'},
+  {label:'Prom Dress',                      gender:'f',  cat:'formal'},
+  {label:'Wedding Dress',                   gender:'f',  cat:'formal'},
+  {label:'Bridesmaid Dress',                gender:'f',  cat:'formal'},
+  {label:'Qipao / Cheongsam',               gender:'f',  cat:'formal'},
+  {label:'Red Carpet Gown',                 gender:'f',  cat:'formal'},
+  {label:'Business Suit',                   gender:'m',  cat:'formal'},
+  {label:'Formal Tuxedo',                   gender:'m',  cat:'formal'},
+  {label:'Dress Shirt & Tie',               gender:'m',  cat:'formal'},
+  {label:'Three-Piece Suit',                gender:'m',  cat:'formal'},
+  {label:'Black Tie Formal',                gender:'fm', cat:'formal'},
+  {label:'Gala Outfit',                     gender:'fm', cat:'formal'},
+  {label:'Diplomatic Attire',               gender:'fm', cat:'formal'},
+  {label:'Wedding Guest Outfit',            gender:'fm', cat:'formal'},
+  // ── JAPANESE ──
+  {label:'Magical Girl',                    gender:'f',  cat:'japanese'},
+  {label:'Idol Outfit',                     gender:'f',  cat:'japanese'},
+  {label:'Gothic Lolita',                   gender:'f',  cat:'japanese'},
+  {label:'Sweet Lolita',                    gender:'f',  cat:'japanese'},
+  {label:'Classic Lolita',                  gender:'f',  cat:'japanese'},
+  {label:'Maid Outfit',                     gender:'f',  cat:'japanese'},
+  {label:'Shrine Maiden / Miko',            gender:'f',  cat:'japanese'},
+  {label:'Kimono',                          gender:'fm', cat:'japanese'},
+  {label:'Furisode Kimono',                 gender:'f',  cat:'japanese'},
+  {label:'Yukata',                          gender:'fm', cat:'japanese'},
+  {label:'Haori',                           gender:'fm', cat:'japanese'},
+  {label:'Ninja Outfit',                    gender:'fm', cat:'japanese'},
+  // ── FANTASY ──
+  {label:'Fantasy Armor',                   gender:'fm', cat:'fantasy'},
+  {label:'Elven Outfit',                    gender:'f',  cat:'fantasy'},
+  {label:'Witch Costume',                   gender:'f',  cat:'fantasy'},
+  {label:'Fairy Outfit',                    gender:'f',  cat:'fantasy'},
+  {label:'Vampire Dress',                   gender:'f',  cat:'fantasy'},
+  {label:'Princess Dress',                  gender:'f',  cat:'fantasy'},
+  {label:'Warrior Costume',                 gender:'fm', cat:'fantasy'},
+  {label:'Knight Armor',                    gender:'m',  cat:'fantasy'},
+  {label:'Wizard Robe',                     gender:'fm', cat:'fantasy'},
+  {label:'Cyberpunk Outfit',                gender:'fm', cat:'fantasy'},
+  {label:'Steampunk Outfit',                gender:'fm', cat:'fantasy'},
+  // ── ANIMAL ──
+  {label:'Cat Girl Outfit',                 gender:'f',  cat:'animal'},
+  {label:'Fox Girl Outfit',                 gender:'f',  cat:'animal'},
+  {label:'Bunny Girl Suit',                 gender:'f',  cat:'animal'},
+  {label:'Wolf Girl Outfit',                gender:'f',  cat:'animal'},
+  {label:'Dog Girl Outfit',                 gender:'f',  cat:'animal'},
+  {label:'Horse Girl Outfit',               gender:'f',  cat:'animal'},
+  {label:'Cow Girl Costume',                gender:'f',  cat:'animal'},
+  {label:'Bear Kigurumi',                   gender:'fm', cat:'animal'},
+  {label:'Panda Kigurumi',                  gender:'fm', cat:'animal'},
+  {label:'Rabbit Kigurumi',                 gender:'fm', cat:'animal'},
+  {label:'Wolf Costume',                    gender:'m',  cat:'animal'},
+  {label:'Animal Hoodie Onesie',            gender:'fm', cat:'animal'},
+  // ── SWIM ──
+  {label:'One-Piece Swimsuit',              gender:'f',  cat:'swim'},
+  {label:'High-Cut Swimsuit',               gender:'f',  cat:'swim'},
+  {label:'Bikini',                          gender:'f',  cat:'swim'},
+  {label:'String Bikini',                   gender:'f',  cat:'swim'},
+  {label:'Sports Swimwear',                 gender:'fm', cat:'swim'},
+  {label:'Rash Guard',                      gender:'fm', cat:'swim'},
+  {label:'Swim Trunks',                     gender:'m',  cat:'swim'},
+  // ── CULTURAL ──
+  {label:'Hanbok (Korean)',                  gender:'fm', cat:'cultural'},
+  {label:'Ao Dai (Vietnamese)',              gender:'f',  cat:'cultural'},
+  {label:'Sari (Indian)',                    gender:'f',  cat:'cultural'},
+  {label:'Abaya',                            gender:'f',  cat:'cultural'},
+  {label:'Dirndl (German)',                  gender:'f',  cat:'cultural'},
+  {label:'Kilt (Scottish)',                  gender:'m',  cat:'cultural'},
+  // ── NSFW (hidden until NSFW mode) ──
+  {label:'Bunny Suit',                      gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Nurse Outfit',                    gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'French Maid',                     gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Cheerleader',                     gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Schoolgirl Costume',              gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Stewardess Costume',              gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Secretary Outfit',                gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Cat Maid',                        gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Micro Bikini',                    gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Brazilian Bikini',                gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Thong Bikini',                    gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Wet Bikini',                      gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Lingerie',                        gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Babydoll',                        gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Lace Lingerie',                   gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Bra & Panties',                   gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Corset & Stockings',              gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Pasties Only',                    gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Body Stocking',                   gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'See-through',                     gender:'fm', cat:'nsfw', nsfw:true},
+  {label:'No Bra',                          gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Panties Visible',                 gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Skirt Lifted',                    gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Micro Skirt',                     gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Crotchless Outfit',               gender:'f',  cat:'nsfw', nsfw:true},
+  {label:'Latex Bodysuit',                  gender:'fm', cat:'nsfw', nsfw:true},
+  {label:'PVC Outfit',                      gender:'fm', cat:'nsfw', nsfw:true},
+  {label:'Harness',                         gender:'fm', cat:'nsfw', nsfw:true},
+  {label:'Bondage Outfit',                  gender:'fm', cat:'nsfw', nsfw:true},
+  {label:'Catsuit',                         gender:'fm', cat:'nsfw', nsfw:true},
 ];
 
 const D={
@@ -346,7 +481,45 @@ function buildBlueprint(){
 ═══════════════════════════════════ */
 function buildClothingGrid(){var grid=document.getElementById('clothingGrid');if(!grid)return;grid.innerHTML='';var gender=S.characters?(S.characters[typeof activeChar!=='undefined'?activeChar:0]||'fm'):'fm';CLOTHING_ITEMS.forEach(function(item){if(item.nsfw)return;if(gender==='female'&&item.gender==='m')return;if(gender==='male'&&item.gender==='f')return;var v=item.label.toLowerCase();var b=document.createElement('button');b.className='ob'+(S.clothing===v?' on':'');b.setAttribute('data-en',item.label);b.setAttribute('data-val',v);b.setAttribute('data-cat',item.cat);b.innerHTML='<span>'+item.label+'</span>';b.addEventListener('click',function(){if(S.clothing===v){S.clothing=null;b.classList.remove('on');}else{grid.querySelectorAll('.ob').forEach(function(x){x.classList.remove('on');});b.classList.add('on');S.clothing=v;if(S.clothingTop||S.clothingBottom){S.clothingTop=null;S.clothingBottom=null;_syncGrid('clothingTopGrid',function(){return false;});_syncGrid('clothingBottomGrid',function(){return false;});}}rebuild();});grid.appendChild(b);});}
 function refreshClothingGrid(){buildClothingGrid();if(window._applyClothingFilter){var a=document.querySelector('.cfc-card.on');window._applyClothingFilter(a?a.dataset.cf:'all');}if(typeof attachAllTriggers==='function')attachAllTriggers();}
-function initClothingFilter(){var row=document.getElementById('clothingFilterRow');if(!row)return;function applyFilter(cat){row.querySelectorAll('.cfc-card').forEach(function(b){b.classList.toggle('on',b.dataset.cf===cat);});var grid=document.getElementById('clothingGrid');var nsfwGrid=document.getElementById('nsfwClothingGrid');var topsBot=document.getElementById('secTopsBottoms');if(topsBot)topsBot.style.display=(cat==='all'||cat==='casual')?'':'none';if(!grid)return;if(cat==='all'){grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='';});if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';return;}if(cat==='nsfw'){grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';return;}if(nsfwGrid)nsfwGrid.style.display='none';grid.querySelectorAll('.og-sep').forEach(function(el){el.style.display='none';});grid.querySelectorAll('.ob').forEach(function(b){b.style.display=(b.getAttribute('data-cat')===cat)?'':'none';});}row.querySelectorAll('.cfc-card').forEach(function(btn){btn.addEventListener('click',function(){applyFilter(btn.dataset.cf);});});window._applyClothingFilter=applyFilter;}
+function initClothingFilter(){
+  var row=document.getElementById('clothingFilterRow'); if(!row)return;
+  function applyFilter(cat){
+    row.querySelectorAll('.cfc-card').forEach(function(b){b.classList.toggle('on',b.dataset.cf===cat);});
+    var grid=document.getElementById('clothingGrid');
+    var nsfwGrid=document.getElementById('nsfwClothingGrid');
+    var topsBot=document.getElementById('secTopsBottoms');
+    var socksSec=document.getElementById('secSocksShoes');
+    // Socks & Shoes: show only when socks card active
+    if(socksSec) socksSec.style.display=(cat==='socks')?'':'none';
+    // Tops & Bottoms: show on all/casual but not socks
+    if(topsBot) topsBot.style.display=(cat==='all'||cat==='casual')?'':'none';
+    if(!grid)return;
+    if(cat==='socks'){
+      grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});
+      if(nsfwGrid)nsfwGrid.style.display='none';
+      return;
+    }
+    if(cat==='all'){
+      grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='';});
+      if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';
+      return;
+    }
+    if(cat==='nsfw'){
+      grid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});
+      if(nsfwGrid&&S.nsfw)nsfwGrid.style.display='';
+      return;
+    }
+    if(nsfwGrid)nsfwGrid.style.display='none';
+    grid.querySelectorAll('.og-sep').forEach(function(el){el.style.display='none';});
+    grid.querySelectorAll('.ob').forEach(function(b){
+      b.style.display=(b.getAttribute('data-cat')===cat)?'':'none';
+    });
+  }
+  row.querySelectorAll('.cfc-card').forEach(function(btn){
+    btn.addEventListener('click',function(){applyFilter(btn.dataset.cf);});
+  });
+  window._applyClothingFilter=applyFilter;
+}
 function initNsfwStainsVisibility(){var stains=['semen-stained','cum-covered','urine-stained','fecal-stained'];var g=document.getElementById('clothingConditionGrid');if(!g)return;g.querySelectorAll('.ob').forEach(function(b){var v=(b.getAttribute('data-val')||'').toLowerCase();if(stains.some(function(s){return v===s||v.includes(s);})){b.classList.add('nsfw-stain');b.style.display='none';}});g.querySelectorAll('.og-sep').forEach(function(sep){if(sep.textContent.toUpperCase().includes('NSFW')){sep.classList.add('nsfw-stain');sep.style.display='none';}});}
 function initHairGenderFilter(){var row=document.getElementById('hairGenderRow');if(!row)return;row.querySelectorAll('.hgf-btn').forEach(function(btn){btn.addEventListener('click',function(){row.querySelectorAll('.hgf-btn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');var hg=btn.getAttribute('data-hg');var grid=document.getElementById('hairstyleGrid');if(!grid||!grid._dataObj)return;var female=grid._dataObj.female||[],male=grid._dataObj.male||[],shared=grid._dataObj.shared||[];grid.querySelectorAll('.ob').forEach(function(b){var lbl=b.getAttribute('data-en')||'';var inF=female.includes(lbl),inM=male.includes(lbl),inS=shared.includes(lbl);var show=false;if(hg==='all')show=true;else if(hg==='female')show=inF&&!inS;else if(hg==='male')show=inM&&!inS;else if(hg==='shared')show=inS;b.style.display=show?'':'none';});});});}
 
@@ -362,11 +535,9 @@ const SFC_CONFIG = {
     hair: ['hairstyleGrid'],
   },
   layersFilterRow: {
-    all:         ['clothingConditionGrid','clothingAccGrid','sockLengthGrid','shoesGrid'],
+    all:         ['clothingConditionGrid','clothingAccGrid'],
     condition:   ['clothingConditionGrid'],
     accessories: ['clothingAccGrid'],
-    socks:       ['sockLengthGrid'],
-    shoes:       ['shoesGrid'],
   },
   lookFilterRow: {
     all:  ['eyeShapeGrid','faceAccGrid','lookGrid'],
@@ -1144,7 +1315,6 @@ function toggleNSFW(on){
   if(bpGrid) bpGrid.style.display=on?'grid':'none';
   document.querySelectorAll('.nsfw-item:not(.nsfw-stain)').forEach(b=>b.style.display=on?'':'none');
   document.querySelectorAll('.nsfw-stain').forEach(b=>b.style.display=on?'':'none');
-  const _nC=document.querySelector('.cfc-card[data-cf="nsfw"]');if(_nC)_nC.style.display=on?'':'none';
   if(!on&&window._applyClothingFilter)window._applyClothingFilter('all');
   // Show/hide NSFW grids
   ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwPoseGrid',
