@@ -2787,3 +2787,10 @@ label.pp-card-photo{
 .sfc-card:hover::before{opacity:.08;}.sfc-card:hover .sfc-icon{color:var(--pl);transform:scale(1.1);}.sfc-card:hover .sfc-label{color:var(--tx2);}
 .sfc-card.on{border-color:var(--p);box-shadow:0 0 8px var(--glow),0 3px 12px var(--glow);}
 .sfc-card.on::before{opacity:1;}.sfc-card.on .sfc-icon{color:#fff;transform:scale(1.08);}.sfc-card.on .sfc-label{color:rgba(255,255,255,.8);}
+
+/* ══ POSE & ACTION SUB-FILTER (paf) ══ */
+.pa-filter-row{display:flex;gap:.28rem;margin:.5rem 0 .6rem;flex-wrap:wrap;}
+.paf-btn{display:flex;align-items:center;gap:.25rem;padding:.26rem .6rem;border-radius:100px;border:1.5px solid var(--brd2);background:var(--surf);color:var(--tx2);font-size:.64rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;white-space:nowrap;}
+.paf-btn i{font-size:.58rem;}
+.paf-btn:hover{border-color:var(--p);color:var(--tx);}
+.paf-btn.on{background:linear-gradient(135deg,var(--p),var(--ac));color:#fff;border-color:transparent;box-shadow:0 2px 8px var(--glow);}

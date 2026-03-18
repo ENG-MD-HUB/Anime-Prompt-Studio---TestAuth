@@ -597,14 +597,6 @@ const SFC_CONFIG = {
     face: ['faceAccGrid'],
     dir:  ['lookGrid'],
   },
-  actionFilterRow: {
-    all:     ['actionsGrid'],
-    daily:   ['actionsGrid'],
-    sports:  ['actionsGrid'],
-    social:  ['actionsGrid'],
-    combat:  ['actionsGrid'],
-    other:   ['actionsGrid'],
-  },
   moodFilterRow: {
     all:        ['expressionGrid','poseGrid','nsfwPoseGrid','effectsGrid','liquidsGrid','nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid'],
     expression: ['expressionGrid'],
@@ -681,6 +673,63 @@ function initSectionFilters(){
     row.querySelectorAll('.sfc-card').forEach(function(btn){
       btn.addEventListener('click',function(){ applyFilter(btn.getAttribute('data-sf')); });
     });
+  });
+}
+
+
+
+/* ── Pose & Action combined filter ── */
+function initPoseActionFilter(){
+  var row = document.getElementById('poseActionFilterRow');
+  if(!row) return;
+
+  // Action category map (label → cat)
+  var ACTION_CATS = {
+    'daily':  ['Eating food','Drinking coffee','Reading a book','Typing on laptop','Talking on phone',
+               'Listening to music','Cooking','Shopping','Studying','Playing video games','Watching TV'],
+    'sports': ['Running','Jumping','Kicking a ball','Riding a bicycle','Skateboarding','Swimming',
+               'Stretching','Doing yoga','Training at gym','Playing tennis'],
+    'social': ['Walking a dog','Taking a selfie','Dancing','Singing','Playing guitar','Painting',
+               'Writing in journal','Hugging','Waving hello','Having a picnic'],
+    'combat': ['Drawing a sword','Casting a spell','Aiming a bow','Throwing a shuriken',
+               'Blocking an attack','Leaping into battle','Firing a gun','Running from danger'],
+    'other':  ['Injecting with syringe','Holding umbrella in rain','Picking flowers',
+               'Sitting by window','Looking at the sky','Sleeping','Waking up','Bathing']
+  };
+
+  function applyPAF(cat){
+    row.querySelectorAll('.paf-btn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-paf')===cat); });
+    var poseGrid = document.getElementById('poseGrid');
+    var nsfwPoseGrid = document.getElementById('nsfwPoseGrid');
+    var actionsGrid = document.getElementById('actionsGrid');
+    if(!actionsGrid) return;
+
+    if(cat === 'all'){
+      if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      actionsGrid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='';});
+      return;
+    }
+    if(cat === 'pose'){
+      // Show only pose grids, hide actions
+      if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      actionsGrid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});
+      return;
+    }
+    // Action category: hide pose, show only matching actions
+    if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='none';});
+    if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='none';});
+    var allowed = ACTION_CATS[cat] || [];
+    actionsGrid.querySelectorAll('.og-sep').forEach(function(el){el.style.display='none';});
+    actionsGrid.querySelectorAll('.ob').forEach(function(b){
+      var lbl = b.getAttribute('data-en') || b.textContent.trim();
+      b.style.display = allowed.indexOf(lbl) > -1 ? '' : 'none';
+    });
+  }
+
+  row.querySelectorAll('.paf-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ applyPAF(btn.getAttribute('data-paf')); });
   });
 }
 
@@ -1951,6 +2000,7 @@ function init(){
   makeSingle('expressionGrid', D.expression.lbl,null,'expression');
   makeMulti('poseGrid',   D.pose.lbl,   'poses');
   makeMulti('actionsGrid', D.actions.lbl,'actions');
+  initPoseActionFilter();
   makeMulti('nsfwPoseGrid',D.nsfwPose.lbl,'nsfwPose',true,false);
   makeMulti('effectsGrid',D.effects.lbl,'effects');
   makeMulti('liquidsGrid',D.liquids.lbl,'liquids');
@@ -2035,7 +2085,7 @@ function attachEvents(){
   }, true); /* capture phase — runs before button's own handler */
 
   /* ── Main section toggle (Characters / Scene) ── */
-  const CHAR_CATS = ['style','character','outfit','layers','look','action','objects','mood'];
+  const CHAR_CATS = ['style','character','outfit','layers','look','objects','mood'];
   const SCENE_CATS = ['scene','camera','quality','negative'];
 
   var _activeSection = 'char';

@@ -125,7 +125,6 @@
       <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
       <button class="tab" data-c="layers"><i class="fas fa-layer-group"></i> <span>Layers</span></button>
       <button class="tab" data-c="look"><i class="fas fa-glasses"></i> <span>Look</span></button>
-      <button class="tab" data-c="action"><i class="fas fa-person-running"></i> <span>Action</span></button>
       <button class="tab" data-c="objects"><i class="fas fa-box-open"></i> <span data-i18n="tab_tools">Objects</span></button>
       <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
     </div>
@@ -297,10 +296,21 @@
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-face-smile"></i></div><span class="sec-title" data-i18n="sec_expression">Expression</span><button class="sec-clr" data-k="expression"><span data-i18n="clear">Clear</span></button></div>
       <div class="og c3" id="expressionGrid"></div>
     </div>
-    <div class="sec">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-walking"></i></div><span class="sec-title" data-i18n="sec_pose">Pose & Action</span><span class="sec-max">max 2</span></div>
+    <div class="sec" id="secPoseAction">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-running"></i></div><span class="sec-title">Pose &amp; Action</span><span class="sec-max">max 3</span></div>
+      <!-- Pose/Action sub-filter -->
+      <div class="pa-filter-row" id="poseActionFilterRow">
+        <button class="paf-btn on" data-paf="all"><i class="fas fa-grip"></i> All</button>
+        <button class="paf-btn" data-paf="pose"><i class="fas fa-person-walking"></i> Pose</button>
+        <button class="paf-btn" data-paf="daily"><i class="fas fa-mug-hot"></i> Daily</button>
+        <button class="paf-btn" data-paf="sports"><i class="fas fa-futbol"></i> Sports</button>
+        <button class="paf-btn" data-paf="social"><i class="fas fa-users"></i> Social</button>
+        <button class="paf-btn" data-paf="combat"><i class="fas fa-sword"></i> Combat</button>
+        <button class="paf-btn" data-paf="other"><i class="fas fa-ellipsis"></i> Other</button>
+      </div>
       <div class="og c3" id="poseGrid"></div>
       <div class="og c3" id="nsfwPoseGrid"></div>
+      <div class="og c3" id="actionsGrid"></div>
     </div>
     <div class="sec">
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-wand-magic-sparkles"></i></div><span class="sec-title" data-i18n="sec_effects">Special Effects</span></div>
@@ -312,22 +322,6 @@
       <div class="og c3" id="nsfwFluidGrid"></div>
       <div class="og c3" id="nsfwIndicatorGrid" style="display:none"></div>
       <div class="og c3" id="nsfwObjectsGrid" style="display:none"></div>
-    </div>
-  </div>
-
-  <!-- ── ACTION ── -->
-  <div class="cat" id="cat-action">
-  <div class="sfc-wrap" id="actionFilterRow">
-    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button>
-    <button class="sfc-card" data-sf="daily"><span class="sfc-icon"><i class="fas fa-mug-hot"></i></span><span class="sfc-label">Daily</span></button>
-    <button class="sfc-card" data-sf="sports"><span class="sfc-icon"><i class="fas fa-futbol"></i></span><span class="sfc-label">Sports</span></button>
-    <button class="sfc-card" data-sf="social"><span class="sfc-icon"><i class="fas fa-users"></i></span><span class="sfc-label">Social</span></button>
-    <button class="sfc-card" data-sf="combat"><span class="sfc-icon"><i class="fas fa-sword"></i></span><span class="sfc-label">Combat</span></button>
-    <button class="sfc-card" data-sf="other"><span class="sfc-icon"><i class="fas fa-ellipsis"></i></span><span class="sfc-label">Other</span></button>
-  </div>
-    <div class="sec" id="secActionAll">
-      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-running"></i></div><span class="sec-title">Activity &amp; Action</span><span class="sec-max">max 3</span></div>
-      <div class="og c3" id="actionsGrid"></div>
     </div>
   </div>
 
