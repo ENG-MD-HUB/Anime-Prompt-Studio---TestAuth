@@ -5292,31 +5292,25 @@ attachHairEyePopups();
     // ── Auth state listener ──
     window._fbAuth.onAuth(user => {
       _uid = user ? user.uid : null;
-      window._currentUser = user || null; // always up to date
-      const nsfwBtn = document.getElementById('nsfwBtn');
+      window._currentUser = user || null;
       if(user){
         _firstAuthCall = false;
-        // Show avatar button instead of login
         loginBtn.innerHTML = `<img src="${user.photoURL||''}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.6);" onerror="this.style.display='none'"><span>${user.displayName?.split(' ')[0]||'User'}</span>`;
         loginBtn.style.padding = '.28rem .65rem';
         authAvatar.src   = user.photoURL || '';
         authName.textContent  = user.displayName || '';
         authEmail.textContent = user.email || '';
-        // Show NSFW button
-        if(nsfwBtn) nsfwBtn.style.display = '';
-        // Load favs from Firestore
         loadFavsFromCloud(_uid);
         loadCharLibFromCloud(_uid);
       } else {
-        // Hide NSFW button and disable NSFW if active
-        if(nsfwBtn){ nsfwBtn.style.display = 'none'; }
+        // Disable NSFW on logout
         if(S && S.nsfw){
           S.nsfw = false;
-          if(nsfwBtn) nsfwBtn.classList.remove('on');
+          const nb = document.getElementById('nsfwBtn');
+          if(nb) nb.classList.remove('on');
           if(typeof toggleNSFW === 'function') toggleNSFW(false);
           if(typeof rebuild === 'function') rebuild();
         }
-        // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
       }
     });

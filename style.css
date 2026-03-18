@@ -1981,6 +1981,10 @@ body.light .conflict-notif-hint{ color:rgba(120,53,15,.4); }
 .auth-menu-item:hover{background:rgba(99,102,241,.1);color:var(--tx);}
 .auth-menu-item.danger{color:#f87171;}
 .auth-menu-item.danger:hover{background:rgba(239,68,68,.1);color:#f87171;}
+.auth-menu-item.nsfw-menu-item{color:#f97316;}
+.auth-menu-item.nsfw-menu-item:hover{background:rgba(249,115,22,.1);color:#fb923c;}
+.auth-menu-item.nsfw-menu-item.on{color:#ef4444;background:rgba(239,68,68,.08);}
+.auth-menu-item.nsfw-menu-item.on i{color:#ef4444;}
 .auth-menu-item i{width:16px;text-align:center;font-size:.8rem;}
 
 /* Sync badge on fav button */
