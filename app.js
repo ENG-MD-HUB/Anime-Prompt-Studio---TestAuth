@@ -14,13 +14,13 @@ const S={
   nsfwTop:null,nsfwTopColor:null,
   nsfwBottom:null,nsfwBottomColor:null,
   nsfwClothing:null,nsfwClothingColor:null,
-  expression:null,poses:[],effects:[],liquids:[],
+  expression:null,poses:[],actions:[],effects:[],liquids:[],
   weapons:[],props:[],electronics:[],otherItems:[],
   environment:null,style:null,era:null,animeStudio:null,colorGrade:null,
   stroke:null,shadow:null,quality:[],lights:[],glow:null,smooth:null,
   angle:null,shot:null,look:null,lens:null,lensEffect:null,
   negatives:[],negBody:[],negQuality:[],
-  nsfwBody:[],nsfwTop:null,nsfwBottom:null,nsfwClothing:[],nsfwPose:[],nsfwFluid:[],
+  nsfwBody:[],nsfwTop:null,nsfwBottom:null,nsfwClothing:[],nsfwPose:[],nsfwFluid:[],nsfwObjects:[],
   nsfwEnv:[],nsfwIndicator:[],nsfwShot:[],
   nsfw:false,
   weights:{},
@@ -107,6 +107,7 @@ const BP_CELLS=[
   {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape','nsfwBody']},
   {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
   {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','effects','liquids','nsfwPose','nsfwFluid']},
+  {id:'bp-action', icon:'fa-person-running', lbl:'Action', keys:['actions']},
   {id:'bp-tools',  icon:'fa-box-open',   lbl:'Objects',   keys:['weapons','props','electronics','otherItems']},
   {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
   {id:'bp-scene',  icon:'fa-mountain-sun',lbl:'Scene',    keys:['environment','nsfwEnv']},
@@ -267,6 +268,43 @@ const CLOTHING_ITEMS=[
   {label:'Catsuit',                         gender:'fm', cat:'nsfw', nsfw:true},
 ];
 
+/* ── NSFW Clothing Enhanced Prompts ──
+   label → prompt مُحسَّن يُرسل للموديل بدلاً من الـ label العادي ── */
+const NSFW_CLOTHING_PROMPTS = {
+  'bunny suit':         'sexy bunny suit, strapless leotard, fishnet stockings, bunny ears, revealing outfit',
+  'nurse outfit':       'sexy nurse costume, micro mini skirt nurse uniform, cleavage, revealing slutty nurse',
+  'police costume':     'sexy police costume, micro mini skirt, tight low-cut uniform, revealing slutty cop outfit',
+  'french maid':        'sexy french maid dress, micro mini skirt, lace apron, fishnet stockings, revealing maid outfit',
+  'cheerleader':        'sexy cheerleader outfit, tiny pleated skirt, tight midriff top, revealing cheerleader uniform',
+  'schoolgirl costume': 'sexy schoolgirl costume, micro plaid mini skirt, thigh-high stockings, unbuttoned blouse, revealing uniform',
+  'stewardess costume': 'sexy flight attendant costume, micro mini skirt, tight low-cut blouse, revealing stewardess outfit',
+  'secretary outfit':   'sexy secretary outfit, tight micro pencil skirt, low-cut blouse, revealing office wear',
+  'cat maid':           'sexy cat maid outfit, micro mini skirt, cat ears, fishnet stockings, revealing maid dress',
+  'micro bikini':       'micro bikini, barely covering nipples and crotch, string ties, extremely revealing swimwear',
+  'brazilian bikini':   'brazilian cut bikini, bare buttocks exposed, thong back, revealing swimwear',
+  'thong bikini':       'thong bikini bottom, bare buttocks, string thong, extremely revealing',
+  'wet bikini':         'soaking wet bikini, see-through wet fabric, clinging to body, wet look',
+  'lingerie':           'sexy lace lingerie, revealing intimate wear, see-through fabric, underwear only',
+  'babydoll':           'babydoll lingerie, sheer transparent fabric, revealing short nightgown',
+  'lace lingerie':      'sheer lace lingerie, see-through lace, revealing delicate intimate wear',
+  'bra & panties':      'matching lace bra and panties, revealing underwear set',
+  'corset & stockings': 'tight corset, thigh-high stockings with garter belt, revealing lingerie set',
+  'pasties only':       'nipple pasties only, bare body, only pasties covering nipples, exposed',
+  'body stocking':      'sheer mesh body stocking, see-through full body suit, transparent',
+  'see-through':        'see-through sheer clothing, transparent fabric, visible nipples, sheer material',
+  'no bra':             'braless, no bra, nipples visible through shirt, free-breasted under clothing',
+  'panties visible':    'panties clearly visible, upskirt view, exposed underwear, skirt lifted',
+  'skirt lifted':       'skirt lifted up high, exposed panties, upskirt, revealing underneath',
+  'micro skirt':        'extremely micro mini skirt, barely covers crotch, maximum thigh exposure',
+  'crotchless outfit':  'crotchless panties, open crotch, exposed genitals, crotchless design',
+  'latex bodysuit':     'skintight latex bodysuit, shiny rubber second skin, form-fitting latex',
+  'pvc outfit':         'shiny PVC outfit, wet-look vinyl, glossy tight plastic clothing',
+  'harness':            'leather body harness, straps across breasts and body, BDSM harness',
+  'bondage outfit':     'BDSM bondage outfit, leather restraint straps, bondage clothing',
+  'catsuit':            'skin-tight catsuit, form-fitting spandex bodysuit, second skin suit',
+};
+
+
 const D={
   charCount:{
     lbl:['1 Girl','1 Man','2 Girls','2 Men','1 Girl + 1 Man','3+ Girls','3+ Men','Mixed Group'],
@@ -351,10 +389,24 @@ const D={
     'Lingerie','Pasties Only',
     'See-through','No Bra','Panties Visible','Unbuttoned','Skirt Lifted','Micro Skirt'
   ],arr:'nsfwClothing',nsfw:true},
-  nsfwPose:{lbl:['On All Fours','Doggy Style','Missionary','Cowgirl','Reverse Cowgirl','Oral','Anal','Gangbang','Tied Up','Spread Legs','Fingering','Self-Touching'],arr:'nsfwPose',nsfw:true},
+  actions:{lbl:[
+    '— Daily Life —','Eating food','Drinking coffee','Reading a book','Typing on laptop','Talking on phone','Listening to music','Cooking','Shopping','Studying','Playing video games','Watching TV',
+    '— Outdoors —','Running','Jumping','Kicking a ball','Riding a bicycle','Skateboarding','Swimming','Stretching','Doing yoga','Training at gym','Playing tennis',
+    '— Social —','Walking a dog','Taking a selfie','Dancing','Singing','Playing guitar','Painting','Writing in journal','Hugging','Waving hello','Having a picnic',
+    '— Action & Combat —','Drawing a sword','Casting a spell','Aiming a bow','Throwing a shuriken','Blocking an attack','Leaping into battle','Firing a gun','Running from danger',
+    '— Other —','Injecting with syringe','Holding umbrella in rain','Picking flowers','Sitting by window','Looking at the sky','Sleeping','Waking up','Bathing'
+  ],arr:'actions'},
+  nsfwPose:{lbl:['On All Fours','Doggy Style','Missionary','Cowgirl','Reverse Cowgirl','Oral','Anal','Gangbang','Tied Up','Spread Legs','Fingering','Self-Touching','Riding','Mating Press'],arr:'nsfwPose',nsfw:true},
   nsfwFluid:{lbl:['Cum','Cum on Face','Cum on Body','Cum Inside','Dripping','Wet/Soaked','Body Oil','Sweat Droplets','Vaginal Fluid','Urine/Squirt','Feces (Scat)','Anal Fluid','Milk/Lactation'],arr:'nsfwFluid',nsfw:true},
   nsfwEnv:{lbl:['In Bed','Bathroom','Shower','Locker Room','Sex Dungeon','Glory Hole','Public Outdoor','Hotel Room','Adult Club','Onsen Bath'],arr:'nsfwEnv',nsfw:true},
   nsfwIndicator:{lbl:['Diaper (Baby)','Female Diaper','Semen Stain','Urine Stain','Fecal Stain','Sanitary Pad','Female Discharge','Anal Plug','Vibrator','Dildo','Sex Toy','Collar & Leash','Handcuffs/BDSM'],arr:'nsfwIndicator',nsfw:true},
+  nsfwObjects:{lbl:[
+    '— Body Parts —','Finger','Two Fingers','Three Fingers','Whole Hand','Fist',
+    '— Toys —','Dildo','Strap-On','Vibrator','Wand Vibrator','Anal Plug','Cock Ring','Double-Ended Dildo',
+    '— Restraint —','Rope / Bondage Rope','Handcuffs','Spreader Bar','Collar & Leash','Nipple Clamps','Blindfold','Gag Ball',
+    '— Medical —','Syringe / Injection','Enema',
+    '— Misc —','Condom','Lube Bottle','Whipped Cream','Honey','Sex Toy'
+  ],arr:'nsfwObjects',nsfw:true},
   nsfwShot:{lbl:['Crotch Shot','Upskirt','Closeup Vagina','Closeup Penis','Closeup Anus','Closeup Nipples','Closeup Breasts','Between Legs','Panty Shot','Nude Macro'],arr:'nsfwShot',nsfw:true}
 };
 
@@ -545,8 +597,16 @@ const SFC_CONFIG = {
     face: ['faceAccGrid'],
     dir:  ['lookGrid'],
   },
+  actionFilterRow: {
+    all:     ['actionsGrid'],
+    daily:   ['actionsGrid'],
+    sports:  ['actionsGrid'],
+    social:  ['actionsGrid'],
+    combat:  ['actionsGrid'],
+    other:   ['actionsGrid'],
+  },
   moodFilterRow: {
-    all:        ['expressionGrid','poseGrid','nsfwPoseGrid','effectsGrid','liquidsGrid','nsfwFluidGrid'],
+    all:        ['expressionGrid','poseGrid','nsfwPoseGrid','effectsGrid','liquidsGrid','nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid'],
     expression: ['expressionGrid'],
     pose:       ['poseGrid','nsfwPoseGrid'],
     effects:    ['effectsGrid'],
@@ -1318,7 +1378,7 @@ function toggleNSFW(on){
   if(!on&&window._applyClothingFilter)window._applyClothingFilter('all');
   // Show/hide NSFW grids
   ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwPoseGrid',
-   'nsfwFluidGrid','nsfwIndicatorGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
+   'nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display=on?'grid':'none';
   });
@@ -1890,6 +1950,7 @@ function init(){
   /* Mood */
   makeSingle('expressionGrid', D.expression.lbl,null,'expression');
   makeMulti('poseGrid',   D.pose.lbl,   'poses');
+  makeMulti('actionsGrid', D.actions.lbl,'actions');
   makeMulti('nsfwPoseGrid',D.nsfwPose.lbl,'nsfwPose',true,false);
   makeMulti('effectsGrid',D.effects.lbl,'effects');
   makeMulti('liquidsGrid',D.liquids.lbl,'liquids');
@@ -1900,6 +1961,7 @@ function init(){
   makeMulti('electronicsGrid', D.electronics.lbl, 'electronics');
   makeMulti('otherItemsGrid',  D.otherItems.lbl,  'otherItems');
   makeMulti('nsfwIndicatorGrid',D.nsfwIndicator.lbl,'nsfwIndicator',true,false);
+  makeMulti('nsfwObjectsGrid',D.nsfwObjects.lbl,'nsfwObjects',true,false);
   /* Scene */
   makeSingle('envGrid',  D.environment.lbl,null,'environment');
   makeMulti('nsfwEnvGrid',D.nsfwEnv.lbl,'nsfwEnv',true,false);
@@ -1932,7 +1994,7 @@ function init(){
   // Hide all NSFW items and grids initially
   document.querySelectorAll('.nsfw-item').forEach(b=>b.style.display='none');
   ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','bodyPartsGrid','nsfwPoseGrid',
-   'nsfwFluidGrid','nsfwIndicatorGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
+   'nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='none';
   });
@@ -1973,7 +2035,7 @@ function attachEvents(){
   }, true); /* capture phase — runs before button's own handler */
 
   /* ── Main section toggle (Characters / Scene) ── */
-  const CHAR_CATS = ['style','character','outfit','layers','look','objects','mood'];
+  const CHAR_CATS = ['style','character','outfit','layers','look','action','objects','mood'];
   const SCENE_CATS = ['scene','camera','quality','negative'];
 
   var _activeSection = 'char';
@@ -2259,12 +2321,20 @@ function buildPosText(){
   if(S.expression)p.push(`${S.expression} expression`);
   const poses=[...S.poses,...(S.nsfw?S.nsfwPose:[])];
   if(poses.length)p.push(poses.join(', '));
+  if((S.actions||[]).length){
+    var _acts=S.actions.filter(function(a){return !a.startsWith('—');});
+    if(_acts.length) p.push(_acts.join(', '));
+  }
   if(S.effects.length)p.push(S.effects.join(', '));
   const fluids=[...S.liquids,...(S.nsfw?S.nsfwFluid:[])];
   if(fluids.length)p.push(fluids.join(', '));
   const items=[...(S.weapons||[]),...(S.props||[]),...(S.electronics||[]),...(S.otherItems||[])];
   if(items.length)p.push('holding '+items.join(', '));
   if(S.nsfw&&S.nsfwIndicator.length)p.push(S.nsfwIndicator.join(', '));
+  if(S.nsfw&&(S.nsfwObjects||[]).length){
+    var _nobj=S.nsfwObjects.filter(function(x){return !x.startsWith('—');});
+    if(_nobj.length) p.push('with '+_nobj.join(', '));
+  }
   const envs=[...(S.environment?[`in ${S.environment}`]:[]),...(S.nsfw?S.nsfwEnv.map(e=>`in ${e}`):[])];
   if(envs.length)p.push(envs.join(', '));
   if(S.era)p.push(`${S.era} style`);
@@ -2347,7 +2417,13 @@ function buildPosGroups(){
   const wearG=[];
   if(S.clothing) wearG.push(S.clothing);
   else { if(S.clothingTop) wearG.push(S.clothingTop); if(S.clothingBottom) wearG.push(S.clothingBottom); }
-  if(S.nsfw){ if(S.nsfwTop) wearG.push(S.nsfwTop); if(S.nsfwBottom) wearG.push(S.nsfwBottom); wearG.push(...S.nsfwClothing); }
+  if(S.nsfw){
+    if(S.nsfwTop) wearG.push(S.nsfwTop);
+    if(S.nsfwBottom) wearG.push(S.nsfwBottom);
+    S.nsfwClothing.forEach(function(c){
+      wearG.push(NSFW_CLOTHING_PROMPTS[c.toLowerCase()] || c);
+    });
+  }
   if(wearG.length) ot.push('wearing '+wearG.join(', '));
   if(S.clothingAcc.length) ot.push(S.clothingAcc.join(', '));
   if(S.nsfw&&S.bodyParts.length) ot.push(...S.bodyParts);

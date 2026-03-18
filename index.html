@@ -125,6 +125,7 @@
       <button class="tab" data-c="outfit"><i class="fas fa-shirt"></i> <span data-i18n="tab_outfit">Outfit</span></button>
       <button class="tab" data-c="layers"><i class="fas fa-layer-group"></i> <span>Layers</span></button>
       <button class="tab" data-c="look"><i class="fas fa-glasses"></i> <span>Look</span></button>
+      <button class="tab" data-c="action"><i class="fas fa-person-running"></i> <span>Action</span></button>
       <button class="tab" data-c="objects"><i class="fas fa-box-open"></i> <span data-i18n="tab_tools">Objects</span></button>
       <button class="tab" data-c="mood"><i class="fas fa-face-smile"></i> <span data-i18n="tab_mood">Mood</span></button>
     </div>
@@ -309,6 +310,24 @@
       <div class="sec-hd"><div class="sec-ico"><i class="fas fa-droplet"></i></div><span class="sec-title" data-i18n="sec_liquids">Liquids & Materials</span></div>
       <div class="og c3" id="liquidsGrid"></div>
       <div class="og c3" id="nsfwFluidGrid"></div>
+      <div class="og c3" id="nsfwIndicatorGrid" style="display:none"></div>
+      <div class="og c3" id="nsfwObjectsGrid" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── ACTION ── -->
+  <div class="cat" id="cat-action">
+  <div class="sfc-wrap" id="actionFilterRow">
+    <button class="sfc-card on" data-sf="all"><span class="sfc-icon"><i class="fas fa-grip"></i></span><span class="sfc-label">All</span></button>
+    <button class="sfc-card" data-sf="daily"><span class="sfc-icon"><i class="fas fa-mug-hot"></i></span><span class="sfc-label">Daily</span></button>
+    <button class="sfc-card" data-sf="sports"><span class="sfc-icon"><i class="fas fa-futbol"></i></span><span class="sfc-label">Sports</span></button>
+    <button class="sfc-card" data-sf="social"><span class="sfc-icon"><i class="fas fa-users"></i></span><span class="sfc-label">Social</span></button>
+    <button class="sfc-card" data-sf="combat"><span class="sfc-icon"><i class="fas fa-sword"></i></span><span class="sfc-label">Combat</span></button>
+    <button class="sfc-card" data-sf="other"><span class="sfc-icon"><i class="fas fa-ellipsis"></i></span><span class="sfc-label">Other</span></button>
+  </div>
+    <div class="sec" id="secActionAll">
+      <div class="sec-hd"><div class="sec-ico"><i class="fas fa-person-running"></i></div><span class="sec-title">Activity &amp; Action</span><span class="sec-max">max 3</span></div>
+      <div class="og c3" id="actionsGrid"></div>
     </div>
   </div>
 
@@ -456,7 +475,7 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <span class="footer-logo" data-i18n="footer_copy">Anime Prompt Studio © 2026. All rights reserved.</span>
-    <span class="footer-ver">v2.1.0</span>
+    <span class="footer-ver">v1.0.0</span>
   </div>
 </footer>
 
@@ -510,7 +529,7 @@
 
         <div class="cl-version">
           <div class="cl-ver-header">
-            <span class="cl-ver-tag">v2.1.0</span>
+            <span class="cl-ver-tag">v1.0.0</span>
             <span class="cl-ver-date">9 Mar 2026 — Initial Release</span>
           </div>
           <ul class="cl-list">
