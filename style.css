@@ -471,7 +471,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   border-radius:12px;
   margin-bottom:.6rem;
   position:relative;
-  overflow:hidden;
+  overflow:visible;
   flex-shrink:0;
 }
 /* ── RADAR CANVAS BACKGROUND ── */
@@ -484,6 +484,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   z-index:0;
   opacity:.18;
   display:block;
+  clip-path:inset(0);
 }
 /* Everything inside blueprint above the radar */
 .blueprint-ttl,.bp-grid,#bpGrid{position:relative;z-index:1;}
@@ -503,9 +504,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 }
 .bp-grid{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:repeat(3,auto);
   gap:5px;
-  perspective:1000px;
 }
 .bp-cell{
   display:flex;

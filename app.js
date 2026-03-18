@@ -527,29 +527,37 @@ function _keyToGridIds(key){
 
 function buildBlueprint(){
   const g=document.getElementById('bpGrid');
-  const gridWrapper = document.createElement('div');
+  if(!g) return;
+  g.innerHTML='';
+  const gridWrapper=document.createElement('div');
   gridWrapper.className='bp-grid';
-  
-  BP_CELLS.forEach(c=>{
+  const CELLS12=[
+    {id:'bp-char',   icon:'fa-users',          lbl:'Character'},
+    {id:'bp-look',   icon:'fa-glasses',        lbl:'Look'},
+    {id:'bp-outfit', icon:'fa-shirt',          lbl:'Outfit'},
+    {id:'bp-layers', icon:'fa-layer-group',    lbl:'Layers'},
+    {id:'bp-pose',   icon:'fa-person-running', lbl:'Pose'},
+    {id:'bp-mood',   icon:'fa-face-smile',     lbl:'Mood'},
+    {id:'bp-tools',  icon:'fa-box-open',       lbl:'Objects'},
+    {id:'bp-style',  icon:'fa-paintbrush',     lbl:'Style'},
+    {id:'bp-scene',  icon:'fa-mountain-sun',   lbl:'Scene'},
+    {id:'bp-camera', icon:'fa-camera',         lbl:'Camera'},
+    {id:'bp-quality',icon:'fa-sparkles',       lbl:'Quality'},
+    {id:'bp-neg',    icon:'fa-ban',            lbl:'Avoid'}
+  ];
+  CELLS12.forEach(function(c){
     const cell=document.createElement('div');
     cell.className='bp-cell'; cell.id=c.id;
-    cell.innerHTML=`<i class="fas ${c.icon}"></i><span class="bp-lbl">${c.lbl}</span><span class="bp-tick">✓</span><i class="fas fa-lock bp-lock" title="Locked — click to unlock" style="display:none"></i>`;
-
-    /* Long-press or double-click → toggle lock */
+    cell.innerHTML='<i class="fas '+c.icon+'"></i><span class="bp-lbl">'+c.lbl+'</span><span class="bp-tick">✓</span><i class="fas fa-lock bp-lock" style="display:none"></i>';
     var pressTimer=null;
-    cell.addEventListener('mousedown', function(){
-      pressTimer = setTimeout(function(){ toggleLock(c.id); }, 500);
-    });
-    cell.addEventListener('mouseup',   function(){ clearTimeout(pressTimer); });
-    cell.addEventListener('mouseleave',function(){ clearTimeout(pressTimer); });
-    cell.addEventListener('dblclick',  function(e){ e.preventDefault(); toggleLock(c.id); });
-    /* Touch support */
-    cell.addEventListener('touchstart',function(){ pressTimer=setTimeout(function(){ toggleLock(c.id); },500); },{passive:true});
-    cell.addEventListener('touchend',  function(){ clearTimeout(pressTimer); },{passive:true});
-
+    cell.addEventListener('mousedown',function(){pressTimer=setTimeout(function(){if(typeof toggleLock==='function')toggleLock(c.id);},500);});
+    cell.addEventListener('mouseup',  function(){clearTimeout(pressTimer);});
+    cell.addEventListener('mouseleave',function(){clearTimeout(pressTimer);});
+    cell.addEventListener('dblclick', function(e){e.preventDefault();if(typeof toggleLock==='function')toggleLock(c.id);});
+    cell.addEventListener('touchstart',function(){pressTimer=setTimeout(function(){if(typeof toggleLock==='function')toggleLock(c.id);},500);},{passive:true});
+    cell.addEventListener('touchend',  function(){clearTimeout(pressTimer);},{passive:true});
     gridWrapper.appendChild(cell);
   });
-  
   g.appendChild(gridWrapper);
 }
 /* ═══════════════════════════════════
