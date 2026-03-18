@@ -683,7 +683,6 @@ function initPoseActionFilter(){
   var row = document.getElementById('poseActionFilterRow');
   if(!row) return;
 
-  // Action category map (label → cat)
   var ACTION_CATS = {
     'daily':  ['Eating food','Drinking coffee','Reading a book','Typing on laptop','Talking on phone',
                'Listening to music','Cooking','Shopping','Studying','Playing video games','Watching TV'],
@@ -698,28 +697,29 @@ function initPoseActionFilter(){
   };
 
   function applyPAF(cat){
-    row.querySelectorAll('.paf-btn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-paf')===cat); });
-    var poseGrid = document.getElementById('poseGrid');
-    var nsfwPoseGrid = document.getElementById('nsfwPoseGrid');
+    row.querySelectorAll('[data-paf]').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-paf')===cat);
+    });
+    var poseGrid    = document.getElementById('poseGrid');
+    var nsfwPoseGrid= document.getElementById('nsfwPoseGrid');
     var actionsGrid = document.getElementById('actionsGrid');
     if(!actionsGrid) return;
 
     if(cat === 'all'){
-      if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
-      if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      if(poseGrid)     poseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='';});
+      if(nsfwPoseGrid && S.nsfw) nsfwPoseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='';});
       actionsGrid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='';});
       return;
     }
     if(cat === 'pose'){
-      // Show only pose grids, hide actions
-      if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
-      if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='';});
+      if(poseGrid)     poseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='';});
+      if(nsfwPoseGrid && S.nsfw) nsfwPoseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='';});
       actionsGrid.querySelectorAll('.ob,.og-sep').forEach(function(el){el.style.display='none';});
       return;
     }
-    // Action category: hide pose, show only matching actions
-    if(poseGrid) poseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='none';});
-    if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob').forEach(function(b){b.style.display='none';});
+    // Action category
+    if(poseGrid)     poseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='none';});
+    if(nsfwPoseGrid) nsfwPoseGrid.querySelectorAll('.ob,.og-sep').forEach(function(b){b.style.display='none';});
     var allowed = ACTION_CATS[cat] || [];
     actionsGrid.querySelectorAll('.og-sep').forEach(function(el){el.style.display='none';});
     actionsGrid.querySelectorAll('.ob').forEach(function(b){
@@ -728,10 +728,12 @@ function initPoseActionFilter(){
     });
   }
 
-  row.querySelectorAll('.paf-btn').forEach(function(btn){
+  row.querySelectorAll('[data-paf]').forEach(function(btn){
     btn.addEventListener('click', function(){ applyPAF(btn.getAttribute('data-paf')); });
   });
+  window._applyPAF = applyPAF;
 }
+
 
 
 function makeSingle(gid,lbl,val,k,nsfw=false){
@@ -1432,7 +1434,13 @@ function toggleNSFW(on){
     if(el) el.style.display=on?'grid':'none';
   });
   document.getElementById('leftPanel').classList.toggle('nsfw-active',on);
-  if(on) setTimeout(function(){ if(typeof attachAllTriggers==='function') attachAllTriggers(); },80);
+  if(on) setTimeout(function(){
+    if(typeof attachAllTriggers==='function') attachAllTriggers();
+    if(typeof window._applyPAF==='function'){
+      var activePaf=document.querySelector('#poseActionFilterRow [data-paf].on');
+      window._applyPAF(activePaf?activePaf.getAttribute('data-paf'):'all');
+    }
+  },80);
 }
 
 /* ═══════════════════════════════════
@@ -1984,12 +1992,10 @@ function init(){
   buildClothingGrid();
   _initClothingMutualExclusion();
   initClothingFilter();
-  makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
   makeMulti('clothingConditionGrid',D.clothingCondition.lbl,'clothingCondition');
   initNsfwStainsVisibility();
   (function(){var f=[],m=[],s=[];CLOTHING_ITEMS.forEach(function(it){if(it.nsfw)return;if(it.gender==='f')f.push(it.label);else if(it.gender==='m')m.push(it.label);else s.push(it.label);});D.clothing.female=f;D.clothing.male=m;D.clothing.shared=s;})();
   makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
-  makeMulti('clothingConditionGrid', D.clothingCondition.lbl, 'clothingCondition');
   makeMulti('bodyPartsGrid',   D.bodyParts.lbl,   'bodyParts',   true, true);
   makeMulti('clothingAccGrid', D.clothingAcc.lbl, 'clothingAcc');
   makeSingle('sockLengthGrid', D.sockLength.lbl,  null,'sockLength');
