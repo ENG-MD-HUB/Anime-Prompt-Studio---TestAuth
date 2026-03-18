@@ -20,7 +20,7 @@ const S={
   stroke:null,shadow:null,quality:[],lights:[],glow:null,smooth:null,
   angle:null,shot:null,look:null,lens:null,lensEffect:null,
   negatives:[],negBody:[],negQuality:[],
-  nsfwBody:[],nsfwTop:null,nsfwBottom:null,nsfwClothing:[],nsfwPose:[],nsfwFluid:[],nsfwObjects:[],
+  nsfwBody:[],nsfwTop:null,nsfwBottom:null,nsfwClothing:[],nsfwCondition:[],nsfwPose:[],nsfwFluid:[],nsfwObjects:[],
   nsfwEnv:[],nsfwIndicator:[],nsfwShot:[],
   nsfw:false,
   weights:{},
@@ -105,7 +105,7 @@ const SKINS=[
 ═══════════════════════════════════ */
 const BP_CELLS=[
   {id:'bp-char',   icon:'fa-users',      lbl:'Character', keys:['characters','age','skin','body','hairColor1','hairstyle','eyeColor','eyeShape','nsfwBody']},
-  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
+  {id:'bp-outfit', icon:'fa-shirt',      lbl:'Outfit',    keys:['clothing','clothingTop','clothingBottom','clothingAcc','clothingCondition','nsfwCondition','shoes','sockLength','sockColor','shoeColor','faceAcc','nsfwTop','nsfwBottom','nsfwClothing']},
   {id:'bp-mood',   icon:'fa-face-smile', lbl:'Mood',      keys:['expression','poses','actions','effects','liquids','nsfwPose','nsfwFluid','nsfwIndicator']},
   {id:'bp-tools',  icon:'fa-box-open',   lbl:'Objects',   keys:['weapons','props','electronics','otherItems','nsfwObjects']},
   {id:'bp-style',  icon:'fa-paintbrush', lbl:'Style',     keys:['style','animeStudio','colorGrade','era','stroke','shadow','glow','smooth']},
@@ -381,7 +381,8 @@ const D={
   negQuality:{lbl:['Blurry','Low Quality','JPEG Artifacts','Artifacts','Noise/Grain','Overexposed','Underexposed','Watermark/Text','Cropped','Out of Frame','Flat Colors','Washed Out'],arr:'negQuality'},
   /* NSFW — inline with SFW, hidden until nsfw active */
   nsfwBody:{lbl:['Large Breasts','Small Breasts','Huge Breasts','Big Butt','Slim Waist','Thick Thighs','Curvy Hips','Topless','Nude','Naked','Visible Areolas','Erect Nipples'],arr:'nsfwBody',nsfw:true},
-  clothingCondition:{lbl:['— Damage —','Torn','Ripped','Burned','Battle-Damaged','— Dirty —','Dirty','Muddy','Sandy','Blood-Stained','— Wet —','Wet','Soaked','Rain-Drenched','Sweat-Drenched','— NSFW Stains —','Semen-Stained','Cum-Covered','Urine-Stained','Fecal-Stained','— Other —','Wrinkled','Disheveled','Loosened'],arr:'clothingCondition'},
+  clothingCondition:{lbl:['— Damage —','Torn','Ripped','Burned','Battle-Damaged','— Dirty —','Dirty','Muddy','Sandy','Blood-Stained','Paint-Splattered','— Wet —','Wet','Soaked','Rain-Drenched','Sweat-Drenched','— Other —','Wrinkled','Disheveled','Loosened','Partially Removed'],arr:'clothingCondition'},
+  nsfwCondition:{lbl:['Semen-Stained','Cum-Covered','Cum Dripping','Urine-Stained','Fecal-Stained','Feces-Covered','Defecating','Sweat-Soaked','Milk-Stained'],arr:'nsfwCondition',nsfw:true},
   nsfwClothing:{lbl:[
     '— Role-Play —',
     'Bunny Suit','Nurse Outfit','Police Costume','French Maid','Cheerleader',
@@ -1485,7 +1486,7 @@ function toggleNSFW(on){
   document.querySelectorAll('.nsfw-stain').forEach(b=>b.style.display=on?'':'none');
   if(!on&&window._applyClothingFilter)window._applyClothingFilter('all');
   // Show/hide NSFW grids
-  ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwPoseGrid',
+  ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwConditionGrid','nsfwPoseGrid',
    'nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display=on?'grid':'none';
@@ -1844,7 +1845,7 @@ function renderCharCards(){
         poses:S.poses||[], effects:S.effects||[], liquids:S.liquids||[],
         nsfwTop:S.nsfwTop, nsfwTopColor:S.nsfwTopColor,
         nsfwBottom:S.nsfwBottom, nsfwBottomColor:S.nsfwBottomColor,
-        nsfwClothing:S.nsfwClothing||[], nsfwPose:S.nsfwPose||[], nsfwFluid:S.nsfwFluid||[],
+        nsfwClothing:S.nsfwClothing||[], nsfwCondition:S.nsfwCondition||[], nsfwPose:S.nsfwPose||[], nsfwFluid:S.nsfwFluid||[],
         weapons:S.weapons||[], props:S.props||[], electronics:S.electronics||[], otherItems:S.otherItems||[],
         _name:S._name, _age:S._age
       };
@@ -2050,6 +2051,7 @@ function init(){
   _initClothingMutualExclusion();
   initClothingFilter();
   makeMulti('clothingConditionGrid',D.clothingCondition.lbl,'clothingCondition');
+  makeMulti('nsfwConditionGrid',D.nsfwCondition.lbl,'nsfwCondition',true,false);
   initNsfwStainsVisibility();
   (function(){var f=[],m=[],s=[];CLOTHING_ITEMS.forEach(function(it){if(it.nsfw)return;if(it.gender==='f')f.push(it.label);else if(it.gender==='m')m.push(it.label);else s.push(it.label);});D.clothing.female=f;D.clothing.male=m;D.clothing.shared=s;})();
   makeMulti('nsfwClothingGrid',D.nsfwClothing.lbl,'nsfwClothing',true,false);
@@ -2106,7 +2108,7 @@ function init(){
   renderFavList();
   // Hide all NSFW items and grids initially
   document.querySelectorAll('.nsfw-item').forEach(b=>b.style.display='none');
-  ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','bodyPartsGrid','nsfwPoseGrid',
+  ['nsfwBodyGrid','nsfwTopGrid','nsfwBottomGrid','nsfwClothingGrid','nsfwConditionGrid','bodyPartsGrid','nsfwPoseGrid',
    'nsfwFluidGrid','nsfwIndicatorGrid','nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='none';
@@ -2436,6 +2438,7 @@ function buildPosText(){
   }
   if(wearParts.length)p.push('wearing '+wearParts.join(', '));
   if(S.clothingCondition.length){var _rc=S.clothingCondition.filter(c=>!c.startsWith('—')&&c.trim());if(_rc.length)p.push(_rc.join(', ')+' clothing');}
+  if(S.nsfw&&(S.nsfwCondition||[]).length)p.push(S.nsfwCondition.join(', ')+' stained clothing');
   if(S.clothingAcc.length)p.push(S.clothingAcc.join(', '));
   if(S.nsfw&&S.bodyParts.length)p.push(S.bodyParts.join(', '));
   if(S.sockColor&&S.sockLength)p.push(`${S.sockColor} ${S.sockLength} socks`);
@@ -4201,7 +4204,7 @@ const UI = {
     random:'Random', nsfw:'NSFW', saved:'Saved', ms_characters:'Characters', ms_scene:'Scene',
     tab_style:'Style', tab_mood:'Mood', tab_scene:'Scene', tab_look:'Look', tab_outfit:'Outfit',
     tab_camera:'Camera', tab_quality:'Quality', tab_character:'Character',
-    tab_tools:'Objects', tab_avoid:'Avoid',
+    tab_tools:'Objects', tab_avoid:'Avoid', tab_layers:'Layers', tab_pose:'Pose',
     /* ── Prompts ── */
     positive_prompt:'Positive Prompt', negative_prompt:'Negative Prompt',
     copy_full:'Copy Full Prompt', copy_pos:'Positive', copy_neg:'Negative',
@@ -4307,7 +4310,7 @@ const UI = {
     random:'عشوائي', nsfw:'محتوى ناضج', saved:'المحفوظات', ms_characters:'الشخصيات', ms_scene:'المشهد',
     tab_style:'الأسلوب', tab_mood:'المزاج', tab_scene:'المشهد', tab_look:'المظهر', tab_outfit:'الزي',
     tab_camera:'الكاميرا', tab_quality:'الجودة', tab_character:'الشخصية',
-    tab_tools:'الأدوات', tab_avoid:'تجنب',
+    tab_tools:'الأشياء', tab_avoid:'تجنب', tab_layers:'الطبقات', tab_pose:'الوضعية',
     /* ── Prompts ── */
     positive_prompt:'البرومبت الإيجابي', negative_prompt:'البرومبت السلبي',
     copy_full:'نسخ البرومبت كاملاً', copy_pos:'إيجابي', copy_neg:'سلبي',
@@ -4356,7 +4359,7 @@ const UI = {
     body_parts_note:'تركيز الكاميرا على أجزاء محددة — يتطلب تفعيل وضع المحتوى الناضج.',
     /* ── Blueprint labels ── */
     bp_char:'الشخصية', bp_outfit:'الزي',
-    bp_mood:'المزاج', bp_tools:'الأدوات', bp_style:'الأسلوب',
+    bp_mood:'المزاج', bp_tools:'الأشياء', bp_style:'الأسلوب',
     bp_scene:'المشهد', bp_camera:'الكاميرا', bp_quality:'الجودة',
     /* ── About modal ── */
     about_p1:'Anime Prompt Studio أداة مجانية تعمل في المتصفح، مصممة لمساعدة الفنانين والمهتمين على صياغة برومبتات تفصيلية عالية الجودة لتوليد الصور بالذكاء الاصطناعي.',
@@ -4689,6 +4692,96 @@ const OPT_AR = {
   "Bird's Eye":'منظر علوي',
   // ── Camera Angles ──
   "Bird's Eye":'عين الطير','Side Profile':'بروفايل جانبي','Over Shoulder':'فوق الكتف',
+  // ── New Tabs ──
+  'Layers':'الطبقات','Pose':'الوضعية','Socks':'الجوارب','Action':'الحركة',
+  // ── New Sections ──
+  'Clothing Condition':'حالة الملابس','Clothing Accessories':'إكسسوارات الملابس',
+  'Socks & Shoes':'الجوارب والأحذية','Sock Length':'طول الجارب','Footwear':'الأحذية',
+  'Activity & Action':'النشاط والحركة','Pose & Action':'الوضعية والحركة',
+  'NSFW Objects':'أشياء ناضجة','NSFW Stains':'بقع ناضجة',
+  // ── Clothing Condition items ──
+  'Torn':'ممزق','Ripped':'مقطوع','Burned':'محروق','Battle-Damaged':'تالف بالمعركة',
+  'Dirty':'متسخ','Muddy':'موحل','Sandy':'رملي','Blood-Stained':'ملطخ بالدم','Paint-Splattered':'ملطخ بالطلاء',
+  'Wet':'مبلل','Soaked':'منقوع','Rain-Drenched':'مبلل بالمطر','Sweat-Drenched':'مبلل بالعرق',
+  'Wrinkled':'مجعد','Disheveled':'فوضوي','Loosened':'مرخي','Partially Removed':'مزال جزئياً',
+  // ── NSFW Condition ──
+  'Semen-Stained':'ملطخ بالسائل المنوي','Cum-Covered':'مغطى بالسائل','Cum Dripping':'تقطر منه السائل',
+  'Urine-Stained':'ملطخ بالبول','Fecal-Stained':'ملطخ بالبراز',
+  'Feces-Covered':'مغطى بالبراز','Defecating':'خروج براز',
+  'Sweat-Soaked':'مبلل بالعرق','Milk-Stained':'ملطخ بالحليب',
+  // ── CLOTHING_ITEMS new ──
+  'Shirt Dress':'فستان قميص','Wrap Dress':'فستان ملفوف','Punk Outfit':'زي بانك',
+  'Tank Top & Shorts':'قميص وشورت','Corporate Blazer Set':'بليزر رسمي',
+  'Bank Teller Uniform':'زي موظف بنك','Postal Worker Uniform':'زي موظف بريد',
+  'Hotel Staff Uniform':'زي موظف فندق','Cocktail Dress':'فستان كوكتيل',
+  'Prom Dress':'فستان حفلة','Bridesmaid Dress':'فستان وصيفة',
+  'Dress Shirt & Tie':'قميص ورابطة عنق','Red Carpet Gown':'فستان السجادة الحمراء',
+  'Diplomatic Attire':'لباس دبلوماسي','Wedding Guest Outfit':'ملابس حفل زفاف',
+  'Classic Lolita':'لوليتا كلاسيكية','Furisode Kimono':'كيمونو فوريسودي','Haori':'هاوري',
+  'Elven Outfit':'زي إلف','Dog Girl Outfit':'زي فتاة كلب','Horse Girl Outfit':'زي فتاة حصان',
+  'Cow Girl Costume':'زي فتاة بقرة','Rabbit Kigurumi':'كيغورومي أرنب',
+  'Wolf Costume':'زي ذئب','Dirndl (German)':'درنديل ألماني',
+  'High-Cut Swimsuit':'مايوه بقطع عالٍ','Rash Guard':'قميص واقٍ','Schoolgirl Costume':'زي طالبة',
+  'Stewardess Costume':'زي مضيفة','Secretary Outfit':'زي سكرتيرة','Cat Maid':'خادمة قطة',
+  'Brazilian Bikini':'بيكيني برازيلي','Thong Bikini':'بيكيني ثونغ','Wet Bikini':'بيكيني مبلل',
+  'Babydoll':'بيبي دول','Lace Lingerie':'لانجري دانتيل','Corset & Stockings':'كورسيه وجوارب',
+  'Body Stocking':'جوارب كاملة','No Bra':'بلا حمالة','Panties Visible':'ملابس داخلية ظاهرة',
+  'Crotchless Outfit':'زي مفتوح','Latex Bodysuit':'بدلة لاتكس','PVC Outfit':'زي PVC',
+  'Harness':'حزام تقييد','Bondage Outfit':'زي بوندج','Catsuit':'بدلة قطة',
+  // ── Actions ──
+  'Eating food':'يأكل طعاماً','Drinking coffee':'يشرب قهوة','Reading a book':'يقرأ كتاباً',
+  'Typing on laptop':'يكتب على الحاسوب','Talking on phone':'يتحدث بالهاتف',
+  'Listening to music':'يستمع للموسيقى','Cooking':'يطبخ','Shopping':'يتسوق',
+  'Studying':'يدرس','Playing video games':'يلعب ألعاب فيديو','Watching TV':'يشاهد التلفاز',
+  'Running':'يركض','Jumping':'يقفز','Kicking a ball':'يركل كرة','Riding a bicycle':'يركب دراجة',
+  'Skateboarding':'يركب سكيت بورد','Swimming':'يسبح','Stretching':'يتمدد',
+  'Doing yoga':'يمارس اليوغا','Training at gym':'يتدرب في الجيم','Playing tennis':'يلعب تنس',
+  'Walking a dog':'يمشي مع كلب','Taking a selfie':'يلتقط سيلفي','Dancing':'يرقص',
+  'Singing':'يغني','Playing guitar':'يعزف غيتار','Painting':'يرسم',
+  'Writing in journal':'يكتب في مفكرة','Hugging':'يحتضن','Waving hello':'يلوح بالتحية',
+  'Having a picnic':'يتنزه في نزهة','Drawing a sword':'يسحب سيفاً','Casting a spell':'يصنع تعويذة',
+  'Aiming a bow':'يسدد قوساً','Throwing a shuriken':'يرمي شوريكن',
+  'Blocking an attack':'يصد هجوماً','Leaping into battle':'يقفز للمعركة',
+  'Firing a gun':'يطلق نار','Running from danger':'يهرب من خطر',
+  'Injecting with syringe':'حقن بالإبرة','Holding umbrella in rain':'يمسك مظلة تحت المطر',
+  'Picking flowers':'يقطف الزهور','Sitting by window':'يجلس بجوار النافذة',
+  'Looking at the sky':'ينظر للسماء','Sleeping':'نائم','Waking up':'يستيقظ','Bathing':'يستحم',
+  // ── NSFW Pose new ──
+  'Mating Press':'ضغط تزاوج','Prone Bone':'وضعية بطنية','Against Wall':'على الجدار',
+  'Lotus Position':'وضعية اللوتس','Spoon Position':'وضعية الملعقة','Pile Driver':'حفار',
+  'Leg Lock':'قفل الساق','Suspended Congress':'معلق','Blowjob':'فموي',
+  'Cunnilingus':'تلسيق','Double Penetration':'اختراق مزدوج','Threesome':'ثلاثي',
+  'Facial':'قذف على الوجه','Creampie':'قذف داخلي','Spread Eagle':'أرجل مفتوحة كلياً',
+  'Legs Up':'أرجل لأعلى','Bent Over':'منحنٍ','Sitting On Face':'جلوس على الوجه',
+  'Squatting':'جلسة منخفضة','On Back Legs Open':'على الظهر وأرجل مفتوحة',
+  'Tied Spread Eagle':'مقيد وأرجل مفتوحة','Suspended':'معلق','Collared & Leashed':'بطوق وسلسلة',
+  'Blindfolded':'معصوب العينين','Gagged':'كمامة','Spanked':'مضروب',
+  'Masturbating':'استمناء','Inserting Toy':'إدخال لعبة','Using Vibrator':'استخدام مدلك',
+  // ── NSFW Objects ──
+  'Finger':'إصبع','Two Fingers':'إصبعان','Three Fingers':'ثلاثة أصابع',
+  'Whole Hand':'يد كاملة','Fist':'قبضة','Strap-On':'سحاب','Wand Vibrator':'عصا مدلكة',
+  'Cock Ring':'خاتم','Rope / Bondage Rope':'حبل تقييد','Spreader Bar':'عارضة فصل',
+  'Nipple Clamps':'مشابك حلمات','Gag Ball':'كرة فم','Enema':'حقنة شرجية',
+  'Condom':'واقٍ ذكري','Lube Bottle':'زجاجة مزلق','Whipped Cream':'كريمة مخفوقة',
+  'Honey':'عسل',
+  // ── Hair Gender Filter ──
+  'All':'الكل','Female':'أنثى','Male':'ذكر','Shared':'مشترك',
+  // ── Filter cards ──
+  'Casual':'كاجوال','School':'مدرسي','Uniform':'زي رسمي','Formal':'رسمي',
+  'Japanese':'ياباني','Animal':'حيوانات','Fantasy':'خيالي','Swim':'سباحة','Cultural':'تراثي',
+  'Condition':'الحالة','Accessories':'إكسسوارات','Socks':'جوارب','Shoes':'أحذية',
+  'Eyes':'عيون','Face Acc':'إكسسوارات وجه','Direction':'الاتجاه',
+  'Expression':'تعبير','Pose':'وضعية','Effects':'تأثيرات','Liquids':'سوائل',
+  'Weapons':'أسلحة','Props':'أدوات','Electronics':'إلكترونيات','Other':'أخرى',
+  'Art Style':'أسلوب رسم','Studio':'استوديو','Color':'ألوان','Lines':'خطوط',
+  'Quality':'جودة','Lighting':'إضاءة','Environment':'بيئة',
+  'Angle':'زاوية','Shot':'لقطة','Lens':'عدسة','Body':'جسم','Hair':'شعر',
+  'Daily':'يومي','Sports':'رياضة','Social':'اجتماعي','Combat':'قتال',
+  // ── Clothing separator labels ──
+  'Role-Play':'تمثيل أدوار','Swimwear':'ملابس سباحة','Lingerie':'لانجري',
+  'Revealing':'كاشفة','Fetish':'فيتيش','Positions':'وضعيات','Acts':'أفعال',
+  'Poses':'أوضاع','BDSM':'BDSM','Self':'ذاتي',
+  'Damage':'أضرار','Dirty':'متسخ','Stains':'بقع',
 };
 
 const OPT_LABELS = { ar: OPT_AR };
@@ -4734,15 +4827,16 @@ UI.ja = {
   sec_shot_range:'ショット範囲', sec_camera_angle:'カメラアングル',
   sec_looking:'視線方向', sec_lens_type:'レンズタイプ',
   sec_lens_effect:'レンズ効果', sec_body_parts:'ボディフォーカス',
-  sec_neg_prompt:'ネガティブ', sec_tools:'道具', sec_look:'外見', sec_outfit:'衣装',
+  sec_neg_prompt:'ネガティブ', sec_tools:'オブジェクト', sec_look:'外見', sec_outfit:'衣装',
   what_to_avoid:'除外項目',
   avoid_desc:'最終画像から除外したいものを選択してください。',
   neg_body_anatomy:'ボディ＆解剖', neg_image_quality:'画像品質',
   body_parts_note:'特定のボディパーツにカメラをフォーカス — NSFWモード限定。',
   bp_char:'キャラ', bp_age:'年齢', bp_skin:'肌・体型',
   bp_hair:'髪', bp_eyes:'目', bp_outfit:'衣装',
-  bp_mood:'ムード', bp_tools:'道具', bp_scene:'シーン',
+  bp_mood:'ムード', bp_tools:'オブジェクト', bp_scene:'シーン',
   bp_camera:'カメラ', bp_quality:'品質',
+  tab_tools:'オブジェクト', tab_layers:'レイヤー', tab_pose:'ポーズ',
   about_p1:'Anime Prompt Studioは、AIイメージ生成のための詳細で高品質なプロンプトを作成するための無料ブラウザツールです。',
   about_p2:'アニメとイラストスタイルに特化して構築され、キャラクターの外見、衣装、ムード、シーン、ライティング、カメラなどを完全にコントロールできます。',
   about_p3:'アカウント不要。データ収集なし。すべてブラウザ内でローカルに動作します。',
