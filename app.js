@@ -2208,6 +2208,15 @@ function attachEvents(){
       var activeCard=document.querySelector('#clothingFilterRow .cfc-card.on');
       window._applyClothingFilter(activeCard?activeCard.dataset.cf:'all');
     }
+    // Restore NSFW grids that clothing filter may have hidden
+    if(S.nsfw){
+      ['nsfwClothingGrid','nsfwConditionGrid','nsfwTopGrid','nsfwBottomGrid',
+       'nsfwBodyGrid','nsfwPoseGrid','nsfwFluidGrid','nsfwIndicatorGrid',
+       'nsfwObjectsGrid','nsfwEnvGrid','nsfwShotGrid'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el) el.style.display='grid';
+      });
+    }
   }));
 
   /* theme */
@@ -2238,6 +2247,10 @@ function attachEvents(){
       toggleNSFW(false);
       rebuild();
     } else {
+      if(!window._currentUser){
+        toast('🔒 Sign in to unlock NSFW','warn');
+        return;
+      }
       if(sessionStorage.getItem('aps_age_confirmed') === '1'){
         S.nsfw = true;
         document.getElementById('nsfwBtn').classList.add('on');
@@ -5280,6 +5293,7 @@ attachHairEyePopups();
     window._fbAuth.onAuth(user => {
       _uid = user ? user.uid : null;
       window._currentUser = user || null; // always up to date
+      const nsfwBtn = document.getElementById('nsfwBtn');
       if(user){
         _firstAuthCall = false;
         // Show avatar button instead of login
@@ -5288,10 +5302,20 @@ attachHairEyePopups();
         authAvatar.src   = user.photoURL || '';
         authName.textContent  = user.displayName || '';
         authEmail.textContent = user.email || '';
+        // Show NSFW button
+        if(nsfwBtn) nsfwBtn.style.display = '';
         // Load favs from Firestore
         loadFavsFromCloud(_uid);
         loadCharLibFromCloud(_uid);
       } else {
+        // Hide NSFW button and disable NSFW if active
+        if(nsfwBtn){ nsfwBtn.style.display = 'none'; }
+        if(S && S.nsfw){
+          S.nsfw = false;
+          if(nsfwBtn) nsfwBtn.classList.remove('on');
+          if(typeof toggleNSFW === 'function') toggleNSFW(false);
+          if(typeof rebuild === 'function') rebuild();
+        }
         // Skip — page reload on logout handles cleanup
         if(_firstAuthCall){ _firstAuthCall = false; return; }
       }
