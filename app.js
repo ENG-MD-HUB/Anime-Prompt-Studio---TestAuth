@@ -2150,10 +2150,6 @@ function attachEvents(){
 
   /* NSFW */
   document.getElementById('nsfwBtn').addEventListener('click',()=>{
-    if(!window._currentUser){
-      toast('🔒 Sign in to unlock NSFW','warn');
-      return;
-    }
     if(S.nsfw){
       S.nsfw = false;
       document.getElementById('nsfwBtn').classList.remove('on');
